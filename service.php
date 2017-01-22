@@ -1,143 +1,129 @@
 <?php
 
-class RequestTypes
-{
-
-}
-
-
-// use Goutte\Client; // UNCOMMENT TO USE THE CRAWLER OR DELETE
-
 class Escuela extends Service
 {
 	/**
 	 * Function executed when the service is called
 	 * 
+         * @example ESCUELA
 	 * @param Request
 	 * @return Response
-	 * */
+	 */
 	public function _main(Request $request)
 	{
-		$responseContent = NULL;
-		$template = NULL;
-		$query = $request->query;
-		$available_courses = $this->courses_request();
-
-		$query = empty($query) ? 'lista' : strtolower($query);
-
-		if (empty($query) OR (strtolower($query)=='lista'))
-		{
-			$query = 'lista';
-		}
-		else
-		{
-			$data = explode(' ', $query);
-			$course = isset($data[0]) ? $data[0] : NULL;
-			$query = 'course';
-		}
-
-		// Logic to set response given the query params
-		switch ($query)
-		{
-			case 'lista':
-				$responseContent = $available_courses;
-				$template = "course_list.tpl";
-				break;
-
-			case 'course':
-				if (isset($course) && in_array($course, $available_courses['courses']))
-				{
-					$template = "course_details.tpl";
-					$responseContent = $this->course_request($course);
-				}
-				break;
-
-			default:
-				break;
-		}
-
-		if (!$responseContent)
-		{
-			// TODO: error handling.
-			die;
-		}
-
-		$response = new Response();
-		$response->setResponseSubject("ESCUELA");
-		$response->createFromTemplate($template, $responseContent);
-		return $response;
+            $connection = new Connection();
+            $courses = [];
+            $sql =
+            "SELECT *, 
+                (SELECT COUNT(*) FROM _escuela_chapter WHERE _escuela_chapter.course = _escuela_course.id AND _escuela_chapter.xtype = 'CAPITULO') as chapters,
+                (SELECT COUNT(*) FROM _escuela_chapter WHERE _escuela_chapter.course = _escuela_course.id AND _escuela_chapter.xtype = 'PRUEBA') as tests
+            FROM _escuela_course WHERE active = 1;";
+            
+            $r = $connection->deepQuery($sql);
+            
+            if ($r !== false)
+                $courses = $r;
+            
+            $response = new Response();
+            $response->setResponseSubject("Cursos activos");
+            $response->createFromTemplate('basic.tpl', [
+                'courses' => $courses
+            ]);
+            
+            return $response;
 	}
+        
+        /**
+         * Retrieve a course
+         * 
+         * @example ESCUELA CURSO 2
+         * @param Request $request
+         */
+        public function _curso(Request $request)
+        {
+            $id = intval($request->query);
+            $connection = new Connection();
+            
+            $r = $connection->deepQuery("SELECT * FROM _escuela_course WHERE id = '$id';");
+            
+            if ($r !== false)
+            {
+                $course = $r[0];
+                $r = $connection->deepQuery("SELECT * FROM _escuela_chapter WHERE course = '$id' ORDER BY xorder;");
+                
+                $course->chapters = [];
+                if ($r !== false)
+                    $course->chapters = $r;
+                
+                $response = new Response();
+                $response->setResponseSubject("Curso: {$course->title}");
+                $response->createFromTemplate('course.tpl', [
+                    'course' => $course
+                ]);
 
-	/**
-	 * Parses the courses list to pass to template.
-	 *
-	 * @return array
-     */
-	private function courses_request()
-	{
-		$courses = $this->get_courses();
-		$available_courses = array();
+                return $response;
+            }
+        }
+        
+        /**
+         * 
+         * @example ESCUELA CAPITULO 3
+         * @param Request $request
+         */
+        public function _capitulo(Request $request)
+        {
+            $id = intval($request->query);
+            $connection = new Connection();
+            $di = \Phalcon\DI\FactoryDefault::getDefault();
+            $wwwroot = $di->get('path')['root'];
+            $r = $connection->deepQuery("SELECT * FROM _escuela_chapter WHERE id = '$id';");
+            
+            if ($r !== false)
+            {
+                $chapter = $r[0];
+                
+                $imgs = $connection->deepQuery("SELECT * FROM _escuela_images WHERE chapter = '$id';");
+                if ($imgs === false)
+                    $imgs = [];
+                
+                $images = [];
+                foreach($imgs as $img)
+                {
+                    $images[] = $wwwroot."/courses/{$img->course}/{$img->chapter}/{$img->id}";
+                }
+                    
+                $response = new Response();
+                $response->setResponseSubject("{$chapter->title}");
+                $response->createFromTemplate('chapter.tpl', [
+                    'chapter' => $chapter
+                ], $images);
 
-		foreach ($courses as $course)
-		{
-			$available_courses[] = $course->label;
-		}
-		$response['courses'] = $available_courses;
-		return $response;
-	}
-
-	/**
-	 * Gets all available courses.
-	 *
-	 * @param $published
-	 * @return Array
-     */
-	private function get_courses($published=1)
-	{
-		$connection = new Connection();
-		$query_str = "SELECT courses.label FROM courses";
-		$query_str = $published ? $query_str. " WHERE `published` = 1" : $query_str;
-		$courses = $connection->deepQuery($query_str);
-		return $courses;
-	}
-
-	/**
-	 * Gets specific course giving its label.
-	 *
-	 * @param $course_label string
-	 * @return array
-	 */
-	private function course_request($course_label)
-	{
-		$topics = $this->get_course($course_label);
-		if (!$topics) { return FALSE; }
-		$topic_list = array();
-		foreach ($topics as $topic)
-		{
-			$topic_list[$topic->order] = $topic->title;
-		}
-		print_r($topic_list);die;
-		return $topic_list;
-	}
-
-	/**
-	 * Gets specific course giving its label.
-	 *
-	 * @param $course_label string
-	 * @return array
-	 */
-	private function get_course($course_label)
-	{
-		$connection = new Connection();
-		$query_str = "SELECT courses.id FROM courses WHERE `label` = '$course_label'";
-		$course = $connection->deepQuery($query_str);
-		$topics = NULL;
-		if (!empty($course))
-		{
-			$course_id = $course[0]->id;
-			$query_str = "SELECT * FROM topics WHERE `course_id` = '$course_id'";
-			$topics = $connection->deepQuery($query_str);
-		}
-		return $topics;
-	}
+                return $response;
+            }
+        }
+        
+        /**
+         * @example ESCUELA PRUEBA 2
+         */
+        public function _prueba(Request $request)
+        {
+            
+        }
+        
+        
+        /**
+         * @example ESCUELA PREGUNTA 12
+         */
+        public function _pregunta(Request $request)
+        {
+            
+        }
+        
+        /**
+         * @example ESCUELA RESPONDER 4
+         */
+        public function _responder(Request $request)
+        {
+            
+        }
 }
