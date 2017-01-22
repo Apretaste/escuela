@@ -1,4 +1,12 @@
+DROP TABLE IF EXISTS _escuela_chapter_viewed;
+DROP TABLE IF EXISTS _escuela_answer_choosen;
+DROP TABLE IF EXISTS _escuela_images;
+DROP TABLE IF EXISTS _escuela_answer;
+DROP TABLE IF EXISTS _escuela_question;
+DROP TABLE IF EXISTS _escuela_chapter;
+DROP TABLE IF EXISTS _escuela_course;
 DROP TABLE IF EXISTS _escuela_teacher;
+
 CREATE TABLE _escuela_teacher(
 	`id` int(11) NOT NULL AUTO_INCREMENT,
 	`name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -7,7 +15,6 @@ CREATE TABLE _escuela_teacher(
         PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS _escuela_course;
 CREATE TABLE _escuela_course(
 	`id` int(11) NOT NULL AUTO_INCREMENT,
 	`title` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -19,7 +26,6 @@ CREATE TABLE _escuela_course(
 	 PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS _escuela_chapter;
 CREATE TABLE _escuela_chapter(
 	`id` int(11) NOT NULL AUTO_INCREMENT,
 	`title`  varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -31,7 +37,6 @@ CREATE TABLE _escuela_chapter(
 	 FOREIGN KEY (`course`) REFERENCES `_escuela_course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-DROP TABLE IF EXISTS _escuela_question;
 CREATE TABLE _escuela_question(
 	`id` int(11) NOT NULL AUTO_INCREMENT,
 	`title`  varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -44,7 +49,6 @@ CREATE TABLE _escuela_question(
         FOREIGN KEY (`course`) REFERENCES `_escuela_course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-DROP TABLE IF EXISTS _escuela_answer;
 CREATE TABLE _escuela_answer(
 	`id` int(11) NOT NULL AUTO_INCREMENT,
 	`title` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -59,19 +63,22 @@ CREATE TABLE _escuela_answer(
         FOREIGN KEY (`course`) REFERENCES `_escuela_course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-DROP TABLE IF EXISTS _escuela_answer_choosen;
 CREATE TABLE _escuela_answer_choosen(
-  `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `answer` int(11) NOT NULL,
-  `date_choosen` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `chapter` int(11) NOT NULL,
-  `question` int(11) NOT NULL,
-   PRIMARY KEY (`email`,`answer`),
-   FOREIGN KEY (`chapter`) REFERENCES `_escuela_chapter` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-   FOREIGN KEY (`question`) REFERENCES `_escuela_question` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+   `id` int(11) NOT NULL AUTO_INCREMENT,
+   `date_choosen` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+   `answer` int(11) NOT NULL,
+   `question` int(11) NOT NULL,
+   `chapter` int(11),
+   `course` int(11),
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`answer`) REFERENCES `_escuela_answer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`question`) REFERENCES `_escuela_question` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`chapter`) REFERENCES `_escuela_chapter` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`course`) REFERENCES `_escuela_course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE (`email`,`question`)
 );
 
-DROP TABLE IF EXISTS _escuela_images;
 CREATE TABLE _escuela_images(
    id varchar(50) NOT NULL,
    filename varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -82,3 +89,13 @@ CREATE TABLE _escuela_images(
    FOREIGN KEY (`chapter`) REFERENCES `_escuela_chapter` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
    FOREIGN KEY (`course`) REFERENCES `_escuela_course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ); 
+
+CREATE TABLE _escuela_chapter_viewed(
+   `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+   `chapter` int(11),
+   `course` int(11) NOT NULL,
+   `date_viewed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   FOREIGN KEY (`chapter`) REFERENCES `_escuela_chapter` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+   FOREIGN KEY (`course`) REFERENCES `_escuela_course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+   PRIMARY KEY (email, chapter)
+);
