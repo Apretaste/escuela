@@ -275,7 +275,7 @@ class Escuela extends Service
         $images = [];
 
         foreach($imgs as $img)
-            $images[] = $wwwroot."/courses/{$img->course}/{$img->chapter}/{$img->id}";
+            $images[] = $wwwroot."/public/courses/{$img->course}/{$img->chapter}/{$img->id}.jpg";
         
         return $images;
     }
