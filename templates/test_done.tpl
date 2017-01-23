@@ -1,6 +1,6 @@
 <h1>Prueba terminada</h1>
 <p>Has terminado de responder todas las preguntas de la prueba <b>{$test->title}</b>. Tu calificaci&oacute;n fue de
-    {$calification} puntos.</p>
+    {$test->calification} puntos.</p>
 
 <center>
     {if $before !== false}

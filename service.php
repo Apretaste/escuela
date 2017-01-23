@@ -1,7 +1,44 @@
 <?php
 
+/**
+ * Apretaste
+ * 
+ * ESCUELA service
+ */
 class Escuela extends Service
 {
+    private $connection = null;
+    
+    /**
+     * Singleton connection to db
+     * 
+     * @author kuma
+     * @return Connection 
+     */
+    private function connection()
+    {
+        if (is_null($this->connection))
+        {
+            $this->connection = new Connection();
+        }
+        
+        return $this->connection;
+    }
+    
+    /**
+     * Query assistant 
+     * 
+     * @author kuma
+     * @example 
+     *      $this->q("SELECT * FROM TABLE"); // (more readable / SQL is autodescriptive)
+     * @param string $sql
+     * @return array
+     */
+    private function q($sql)
+    {
+        return $this->connection()->deepQuery($sql);
+    }
+    
     /**
      * Function executed when the service is called
      * 
@@ -11,17 +48,18 @@ class Escuela extends Service
      */
     public function _main(Request $request)
     {
-        $connection = new Connection();
         $courses = [];
         $sql =
         "SELECT *, 
             (SELECT COUNT(*) FROM _escuela_chapter WHERE _escuela_chapter.course = _escuela_course.id AND _escuela_chapter.xtype = 'CAPITULO') as chapters,
             (SELECT COUNT(*) FROM _escuela_chapter WHERE _escuela_chapter.course = _escuela_course.id AND _escuela_chapter.xtype = 'PRUEBA') as tests,
             (SELECT COUNT(*) FROM _escuela_question WHERE _escuela_question.course = _escuela_course.id) as questions,
-            (SELECT COUNT(*) FROM _escuela_answer_choosen WHERE _escuela_answer_choosen.course = _escuela_course.id) as responses
+            (SELECT COUNT(*) FROM _escuela_answer_choosen WHERE _escuela_answer_choosen.course = _escuela_course.id) as responses,
+            (SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_name,
+            (SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_title
         FROM _escuela_course WHERE active = 1;";
 
-        $r = $connection->deepQuery($sql);
+        $r = $this->q($sql);
 
         if ($r !== false)
             $courses = $r;
@@ -44,14 +82,12 @@ class Escuela extends Service
     public function _curso(Request $request)
     {
         $id = intval($request->query);
-        $connection = new Connection();
-
-        $r = $connection->deepQuery("SELECT * FROM _escuela_course WHERE id = '$id';");
+        $r = $this->q("SELECT * FROM _escuela_course WHERE id = '$id';");
 
         if (isset($r[0]))
         {
             $course = $r[0];
-            $r = $connection->deepQuery("SELECT * FROM _escuela_chapter WHERE course = '$id' ORDER BY xorder;");
+            $r = $this->q("SELECT * FROM _escuela_chapter WHERE course = '$id' ORDER BY xorder;");
 
             $course->chapters = [];
             if ($r !== false)
@@ -73,73 +109,42 @@ class Escuela extends Service
     }
 
     /**
+     * Subservice "capitulo"
      * 
+     * @author kuma
      * @example ESCUELA CAPITULO 3
      * @param Request $request
+     * @return Response
      */
     public function _capitulo(Request $request)
     {
         $id = intval($request->query);
-        $connection = new Connection();
-        $di = \Phalcon\DI\FactoryDefault::getDefault();
-        $wwwroot = $di->get('path')['root'];
-        $r = $connection->deepQuery("SELECT * FROM _escuela_chapter WHERE id = '$id';");
+        $chapter = $this->getChapter($id, $request->email);
 
-        if ($r !== false)
+        if ($chapter !== false)
         {
-            $chapter = $r[0];
-            $before = false;
-            $after = false;
-
-            $r = $connection->deepQuery("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = ".($chapter->xorder - 1).";");
-            if (isset($r[0]))
-            {
-                $before = $r[0];
-            }
-
-            $r = $connection->deepQuery("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = ".($chapter->xorder + 1).";");
-            if (isset($r[0]))
-            {
-                $after = $r[0];
-            }
-
-            $imgs = $connection->deepQuery("SELECT * FROM _escuela_images WHERE chapter = '$id';");
-            if ($imgs === false)
-                $imgs = [];
-
-            $images = [];
-            foreach($imgs as $img)
-            {
-                $images[] = $wwwroot."/courses/{$img->course}/{$img->chapter}/{$img->id}";
-            }
-
-            $r = $connection->deepQuery("SELECT * FROM _escuela_question WHERE chapter = '$id' ORDER BY xorder;");
-            if ( $r !== false)
-            {
-                $chapter->questions = $r;
-
-                foreach ($chapter->questions as $i => $q)
-                {
-                    $r = $connection->deepQuery("SELECT * FROM _escuela_answer WHERE question = '{$q->id}}' ORDER BY rand();");
-                    if ($r == false) $r = [];
-                    $chapter->questions[$i]->answers = $r;
-                }
-            }
-
+            $beforeAfter = $this->getBeforeAfter($chapter);
+            $images = $this->getChapterImages($id);
+            
             // Log the visit to this chapter
-            $sql = "INSERT IGNORE INTO _escuela_chapter_viewed (email, chapter, course) VALUES ('{$request->email}', '{$id}', '{$chapter->course}');";
-            $connection->deepQuery($sql);
+            $this->q("INSERT IGNORE INTO _escuela_chapter_viewed (email, chapter, course) "
+                    . "VALUES ('{$request->email}', '{$id}', '{$chapter->course}');");
 
             $response = new Response();
             $response->setResponseSubject("{$chapter->title}");
             $response->createFromTemplate('chapter.tpl', [
                 'chapter' => $chapter,
-                'before' => $before,
-                'after' => $after
+                'before' => $beforeAfter['before'],
+                'after' => $beforeAfter['after']
             ], $images);
 
             return $response;
         }
+        
+        $response = new Response();
+        $response->setResponseSubject("Capitulo no encontrado");
+        $response->createFromText("Capitulo no encontrado");
+        return $response;
     }
 
     /**
@@ -165,8 +170,7 @@ class Escuela extends Service
     {
         $id = intval($request->query);
         $email = $request->email;
-        $connection = new Connection();
-        $r = $connection->deepQuery("SELECT * FROM _escuela_answer WHERE id = '$id';");
+        $r = $this->q("SELECT * FROM _escuela_answer WHERE id = '$id';");
 
         if ($r !== false)
         {
@@ -177,23 +181,19 @@ class Escuela extends Service
                 $sql = "INSERT IGNORE INTO _escuela_answer_choosen (email, answer, date_choosen, chapter, question, course) "
                     . "VALUES ('$email','$id', CURRENT_DATE, '{$answer->chapter}', '{$answer->question}', '{$answer->course}');";
 
-                $connection->deepQuery($sql);
-
+                $this->q($sql);
+                
+                $test = $this->getChapter($answer->chapter, $request->email);
+        
                 // check if test was completed
-
-                $sql = "SELECT (SELECT count(*) from _escuela_question WHERE chapter = '{$answer->chapter}')"
-                        . " - (SELECT count(*) from _escuela_answer_choosen WHERE chapter = '{$answer->chapter}') as d;";
-
-                $r = $connection->deepQuery($sql);
-                $d = intval($r[0]->d);
-
-                if ($d == 0)
+                if ($test->terminated)
                 {
                     $response = new Response();
                     $response->setResponseSubject("Prueba completada");
 
+                    /*
                     $sql = "SELECT * FROM _escuela_chapter WHERE id = '{$answer->chapter}';";
-                    $r = $connection->deepQuery($sql);
+                    $r = $this->q($sql);
                     $test = $r[0];
 
                     // calculate calification
@@ -216,33 +216,20 @@ class Escuela extends Service
                     ) q1";
 
                     $sql = "SELECT sum(is_right) as c FROM ($sql_view) q2;";
-                    $r = $connection->deepQuery($sql);
+                    $r = $this->q($sql);
                     $right_answers = intval($r[0]->c);
 
                     $sql = "SELECT count(*) as c FROM ($sql_view) q2;";
-                    $r = $connection->deepQuery($sql);
+                    $r = $this->q($sql);
                     $total_answers = $r[0]->c;
-
-                    $before = false;
-                    $after = false;
-
-                    $r = $connection->deepQuery("SELECT * FROM _escuela_chapter WHERE course = {$test->course} AND xorder = ".($test->xorder - 1).";");
-                    if (isset($r[0]))
-                    {
-                        $before = $r[0];
-                    }
-
-                    $r = $connection->deepQuery("SELECT * FROM _escuela_chapter WHERE course = {$test->course} AND xorder = ".($test->xorder + 1).";");
-                    if (isset($r[0]))
-                    {
-                        $after = $r[0];
-                    }
+                    */
+                    $beforeAfter = $this->getBeforeAfter($test);
 
                     $response->createFromTemplate("test_done.tpl", [
-                        'test' => $test,
-                        'calification' => intval($right_answers / $total_answers * 100),
-                        'before' => $before,
-                        'after' => $after
+                        'test' => $test, /*
+                        'calification' => intval($right_answers / $total_answers * 100),*/
+                        'before' => $beforeAfter['before'],
+                        'after' => $beforeAfter['after']
                     ]);
 
                     return $response;
@@ -250,5 +237,152 @@ class Escuela extends Service
             }
         }
         return new Response();
+    }
+    
+    private function getBeforeAfter($chapter)
+    {
+        $before = false;
+        $after = false;
+
+        $r = $this->q("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = ".($chapter->xorder - 1).";");
+        if (isset($r[0])) $before = $r[0];
+
+        $r = $this->q("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = ".($chapter->xorder + 1).";");
+        if (isset($r[0])) $after = $r[0];
+        
+        return [
+            'before' => $before,
+            'after' => $after
+        ];
+    }
+    
+    /**
+     * Return a list of chapter's images paths
+     * 
+     * @param integer $chapter_id
+     * @return array
+     */
+    private function getChapterImages($chapter_id)
+    {
+        $di = \Phalcon\DI\FactoryDefault::getDefault();
+        $wwwroot = $di->get('path')['root'];
+        
+        $imgs = $this->q("SELECT * FROM _escuela_images WHERE chapter = '$chapter_id';");
+        
+        if ($imgs === false)
+            $imgs = [];
+
+        $images = [];
+
+        foreach($imgs as $img)
+            $images[] = $wwwroot."/courses/{$img->course}/{$img->chapter}/{$img->id}";
+        
+        return $images;
+    }
+    
+    /**
+     * Get chapter entity
+     * 
+     * @param integer $id
+     * @return object
+     */
+    private function getChapter($id, $email = '', $answer_order = 'rand()')
+    {
+        $chapter = false;
+        
+        $r = $this->q("SELECT * FROM _escuela_chapter WHERE id = '$id';");
+        
+        if (isset($r[0]))
+            $chapter = $r[0];
+        
+        $chapter->questions = $this->getChapterQuestions($id, $email, $answer_order);
+        
+        $total_questions = count($chapter->questions);
+        $total_right = 0;
+        foreach($chapter->questions as $i => $q)
+            if ($q->is_right) $total_right++;
+        
+        $chapter->calification = 0;
+        if ($total_questions > 0)
+            $chapter->calification = intval($total_right / $total_questions * 100);
+        
+        $chapter->terminated = $this->isTestTerminated($email, $id) && $chapter->xtype == 'PRUEBA';
+        
+        return $chapter;
+    }
+    
+    private function getChapterQuestions($test_id, $email = '', $answer_order = 'rand()')
+    {
+        $questions = [];
+        $rows = $this->q("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;");
+        if (!is_array($questions)) $questions = [];
+        
+        foreach ($rows as $i => $q)
+        {
+           $questions[] = $this->getQuestion($q->id, $email, $answer_order);
+        }
+        
+        return $questions;
+    }
+    
+    private function getQuestion($question_id, $email = '', $answer_order = 'rand()')
+    {
+        $row = $this->q("SELECT * FROM _escuela_question WHERE id = '$question_id';");
+        if (isset($row[0]))
+        {
+            $q = $row[0];
+            $q->answers = $this->getAnswers($question_id, $answer_order);
+            $t = $this->isQuestionTerminated($email, $question_id);
+            $q->terminated = $t;
+            
+            $q->answer_choosen = -1;
+            $a = $this->q("SELECT answer FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id'");
+            if (isset($a[0]))
+                $q->answer_choosen = intval($a[0]->answer);
+            
+            $q->is_right = $q->answer_choosen == $q->answer;
+            return $q;
+        }
+        
+        return false;            
+    }
+    
+    private function getAnswers($question_id, $orderby = 'rand()')
+    {  
+        $answers = $this->q("SELECT * FROM _escuela_answer WHERE question = '{$question_id}' ORDER BY $orderby;");
+        if (!is_array($answers)) $answers = [];
+        return $answers;
+    }
+           
+    private function getTotalQuestionsOf($chapter_id)
+    {
+        $r = $this->q("SELECT count(*) as t FROm _escuela_question WHERE chapter = '$chapter_id';");
+        return intval($r[0]->t);
+    }
+    
+    private function getTotalResponsesOf($email, $chapter_id)
+    {
+        $r = $this->q("SELECT count(*) as t FROM _escuela_answer_choosen WHERE email = '$email' AND chapter = '$chapter_id';");
+        return intval($r[0]->t);
+    }
+    
+    /**
+     * Check if user finish the test
+     * 
+     * @param string $email
+     * @param integer $test_id
+     * @return type
+     */
+    private function isTestTerminated($email, $test_id)
+    {
+        $total_questions = $this->getTotalQuestionsOf($test_id);
+        $total_responses = $this->getTotalResponsesOf($email, $test_id);
+        return $total_questions == $total_responses;
+    }
+    
+    private function isQuestionTerminated($email, $question_id)
+    {
+        $r = $this->q("SELECT count(*) as t FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id';");
+        return intval($r[0]->t) > 0;
     }
 }
