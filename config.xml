@@ -1,8 +1,7 @@
 <service>
 	<serviceName>escuela</serviceName>
 	<serviceDescription>Cursos disponibles</serviceDescription>
-	<creatorEmail>maurovilla.2010@gmail.com</creatorEmail>
-	<!--serviceCategory: negocios,ocio,academico,social,comunicaciones,informativo,adulto,otros-->
+	<creatorEmail>kumahavana@gmail.com</creatorEmail>
 	<serviceCategory>academico</serviceCategory>
 	<serviceUsage>
 		<![CDATA[
