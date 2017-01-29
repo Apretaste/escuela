@@ -49,21 +49,13 @@ class Escuela extends Service
     public function _main(Request $request)
     {
         $courses = [];
-        $sql =
-        "SELECT *, 
-            (SELECT COUNT(*) FROM _escuela_chapter WHERE _escuela_chapter.course = _escuela_course.id AND _escuela_chapter.xtype = 'CAPITULO') as chapters,
-            (SELECT COUNT(*) FROM _escuela_chapter WHERE _escuela_chapter.course = _escuela_course.id AND _escuela_chapter.xtype = 'PRUEBA') as tests,
-            (SELECT COUNT(*) FROM _escuela_question WHERE _escuela_question.course = _escuela_course.id) as questions,
-            (SELECT COUNT(*) FROM _escuela_answer_choosen WHERE _escuela_answer_choosen.course = _escuela_course.id) as responses,
-            (SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_name,
-            (SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_title
-        FROM _escuela_course WHERE active = 1;";
+        $sql = "SELECT id FROM _escuela_course WHERE active = 1;";
 
         $r = $this->q($sql);
-
-        if ($r !== false)
-            $courses = $r;
-
+        if (isset($r[0]))
+			foreach($r as $course)
+				$courses[] = $this->getCourse($course->id, $request->email);
+		
         $response = new Response();
         $response->setResponseSubject("Cursos activos");
         $response->createFromTemplate('basic.tpl', [
@@ -82,23 +74,15 @@ class Escuela extends Service
     public function _curso(Request $request)
     {
         $id = intval($request->query);
-        $r = $this->q("SELECT * FROM _escuela_course WHERE id = '$id';");
-
-        if (isset($r[0]))
+		$course = $this->getCourse($id, $request->email);
+		
+        if ($course !== false)
         {
-            $course = $r[0];
-            $r = $this->q("SELECT * FROM _escuela_chapter WHERE course = '$id' ORDER BY xorder;");
-
-            $course->chapters = [];
-            if ($r !== false)
-                $course->chapters = $r;
-
             $response = new Response();
             $response->setResponseSubject("Curso: {$course->title}");
             $response->createFromTemplate('course.tpl', [
                 'course' => $course
             ]);
-
             return $response;
         } 
 
@@ -127,7 +111,8 @@ class Escuela extends Service
             $images = $this->getChapterImages($id);
             
             // Log the visit to this chapter
-            $this->q("INSERT IGNORE INTO _escuela_chapter_viewed (email, chapter, course) "
+            if ($chapter->xtype == 'CAPITULO')
+			$this->q("INSERT IGNORE INTO _escuela_chapter_viewed (email, chapter, course) "
                     . "VALUES ('{$request->email}', '{$id}', '{$chapter->course}');");
 
             $response = new Response();
@@ -255,7 +240,62 @@ class Escuela extends Service
             'after' => $after
         ];
     }
-    
+   
+   /**
+     * Get course
+     * 
+     * @param integer $id
+	 * @param string $email
+     * @return object
+     */
+	private function getCourse($id, $email = '')
+	{
+		$r = $this->q("SELECT *,
+            (SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_name,
+            (SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_title
+		FROM _escuela_course WHERE id = '$id' AND active = '1';");
+
+        if (isset($r[0]))
+        {
+			$course = $r[0];
+			$course->chapters = $this->getChapters($id, $email);
+			
+			$calification = 0;
+			$course->total_tests = 0;
+			$course->total_seen = 0;
+			$course->total_answered = 0;
+			$course->total_terminated = 0;
+			$course->total_questions = 0;
+			$course->total_childs = count($course->chapters);
+			$course->total_right = 0;
+			foreach ($course->chapters as $chapter)
+			{
+				if ($chapter->seen) $course->total_seen++;
+				if ($chapter->answered) $course->total_answered++;
+				if ($chapter->terminated) $course->total_terminated++;
+				if ($chapter->xtype == 'PRUEBA') $course->total_tests++;
+				$course->total_right += $chapter->total_right;
+				$course->total_questions += $chapter->total_questions;
+				$calification += $chapter->calification;
+			}
+			
+			$course->total_chapters = $course->total_childs - $course->total_tests;
+			$course->terminated = $course->total_terminated == $course->total_childs;
+			
+			$course->calification = 0;
+			if ($course->total_tests > 0)
+				$course->calification = number_format($calification / $course->total_tests, 2 ) * 1;
+			
+			$course->progress = 0;
+			if ($course->total_childs > 0)
+				$course->progress = number_format($course->total_terminated  / $course->total_childs * 100, 2) * 1;
+			
+			return $course;
+		}
+		
+		return false;
+	}
+	
     /**
      * Return a list of chapter's images paths
      * 
@@ -302,15 +342,42 @@ class Escuela extends Service
         foreach($chapter->questions as $i => $q)
             if ($q->is_right) $total_right++;
         
+		$chapter->total_right = $total_right;
+		$chapter->total_questions = $total_questions;
         $chapter->calification = 0;
         if ($total_questions > 0)
             $chapter->calification = intval($total_right / $total_questions * 100);
         
-        $chapter->terminated = $this->isTestTerminated($email, $id) && $chapter->xtype == 'PRUEBA';
+		$chapter->seen = $this->isChapterSeen($email, $id);
+		$chapter->answered = $this->isTestTerminated($email, $id) && $chapter->xtype == 'PRUEBA';
+        $chapter->terminated =  $chapter->answered || $chapter->seen;
         
         return $chapter;
     }
-    
+	
+	 /**
+     * Get list of chapters
+     * 
+     * @param integer $course
+	 * @param string $email
+	 * @param bool $terminated
+     * @return array
+     */
+    private function getChapters($course, $email = '', $terminated = null)
+    {
+        $r = $this->q("SELECT id FROM _escuela_chapter WHERE course = '$course' ORDER BY xorder;");
+
+        $chapters = [];
+        if ($r !== false)
+			foreach ($r as $row)
+			{
+				$c = $this->getChapter($row->id, $email);
+				if ($c->terminated == $terminated || is_null($terminated))
+					$chapters[] = $c;
+			}
+		return $chapters;
+    }
+	
     private function getChapterQuestions($test_id, $email = '', $answer_order = 'rand()')
     {
         $questions = [];
@@ -380,6 +447,12 @@ class Escuela extends Service
         return $total_questions == $total_responses;
     }
     
+	private function isChapterSeen($email, $chapter_id)
+	{
+		$r = $this->q("SELECT count(*) as t FROM _escuela_chapter_viewed WHERE email ='$email' AND chapter = '$chapter_id';");
+		return $r[0]->t * 1 > 0;
+	}
+	
     private function isQuestionTerminated($email, $question_id)
     {
         $r = $this->q("SELECT count(*) as t FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id';");
