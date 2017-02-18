@@ -6,6 +6,8 @@ DROP TABLE IF EXISTS _escuela_question;
 DROP TABLE IF EXISTS _escuela_chapter;
 DROP TABLE IF EXISTS _escuela_course;
 DROP TABLE IF EXISTS _escuela_teacher;
+DROP TABLE IF EXISTS _escuela_feedback;
+DROP TABLE IF EXISTS _escuela_feedback_received;
 
 CREATE TABLE _escuela_teacher(
 	`id` int(11) NOT NULL AUTO_INCREMENT,
@@ -99,3 +101,32 @@ CREATE TABLE _escuela_chapter_viewed(
    FOREIGN KEY (`course`) REFERENCES `_escuela_course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
    PRIMARY KEY (email, chapter)
 );
+
+drop table if exists _escuela_feedback;
+create table _escuela_feedback(
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+	 text varchar(255) NOT NULL,
+	 answers varchar(255) NOT NULL, -- comma separated phrases, first = 1, last = N
+	 PRIMARY KEY (id)
+);
+
+drop table if exists _escuela_feedback_received;
+create table _escuela_feedback_received(
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+	`feedback` int(11) NOT NULL,
+	`course` int(11) NOT NULL,
+	`email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+	`date_choosen` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	 answer varchar(255),
+	 FOREIGN KEY (`feedback`) REFERENCES `_escuela_feedback` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	 FOREIGN KEY (`course`) REFERENCES `_escuela_course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	 PRIMARY KEY (id)
+);
+
+ALTER TABLE _escuela_course ADD COLUMN popularity float; --?
+
+DELETE FROM _escuela_feedback;
+INSERT INTO _escuela_feedback (id,text,answers) VALUES (1,'C&oacute;mo eval&uacute;a en general este curso?','malo,regular,bueno,excelente');
+INSERT INTO _escuela_feedback (id,text,answers) VALUES (2,'Cu&aacute;nto ha aprendido de este curso?','nada,algo,mucho,cantidad');
+INSERT INTO _escuela_feedback (id,text,answers) VALUES (3,'Cuan f&aacute;cil de entender es el contenido?','enredado,complejo,le&iacute;ble,simple');
+INSERT INTO _escuela_feedback (id,text,answers) VALUES (4,'Recomendar&iacute;a este curso a otros?','nunca,tal vez,seguro');

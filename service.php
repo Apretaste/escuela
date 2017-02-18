@@ -141,14 +141,6 @@ class Escuela extends Service
     }
 
     /**
-     * @example ESCUELA PREGUNTA 12
-     */
-    public function _pregunta(Request $request)
-    {
-
-    }
-
-    /**
      * @example ESCUELA RESPONDER 4
      */
     public function _responder(Request $request)
@@ -175,39 +167,6 @@ class Escuela extends Service
                 {
                     $response = new Response();
                     $response->setResponseSubject("Prueba completada");
-
-                    /*
-                    $sql = "SELECT * FROM _escuela_chapter WHERE id = '{$answer->chapter}';";
-                    $r = $this->q($sql);
-                    $test = $r[0];
-
-                    // calculate calification
-
-                    $sql_view = 
-                    "SELECT question, 
-                            chapter, 
-                            course, 
-                            answer AS answer_choosen, 
-                            right_answer, 
-                            answer = right_answer AS is_right 
-                    FROM (
-                        SELECT *, 
-                            (SELECT _escuela_question.answer 
-                             FROM _escuela_question
-                             WHERE _escuela_question.id = _escuela_answer_choosen.question) AS right_answer 
-                        FROM _escuela_answer_choosen 
-                        WHERE email = '{$request->email}'
-                            AND chapter = '{$answer->chapter}'
-                    ) q1";
-
-                    $sql = "SELECT sum(is_right) as c FROM ($sql_view) q2;";
-                    $r = $this->q($sql);
-                    $right_answers = intval($r[0]->c);
-
-                    $sql = "SELECT count(*) as c FROM ($sql_view) q2;";
-                    $r = $this->q($sql);
-                    $total_answers = $r[0]->c;
-                    */
                     $beforeAfter = $this->getBeforeAfter($test);
 
                     $response->createFromTemplate("test_done.tpl", [
@@ -217,13 +176,182 @@ class Escuela extends Service
                         'after' => $beforeAfter['after']
                     ]);
 
-                    return $response;
+                    $responses = [$response];
+                    $course = $this->getCourse($test->course, $request->email);
+
+                    $feedback = $this->q("SELECT id, text, answers FROM _escuela_feedback;");
+                    foreach ($feedback as $k => $fb)
+                    {
+                        $fb->answers = explode(',', $fb->answers);
+
+                        $newanswers = [];
+                        foreach($fb->answers as $ans)
+                        {
+                            $newanswers[] = trim(ucfirst(strtolower($ans)));
+                        }
+                        $feedback[$k]->answers = $newanswers;
+                    }
+                    
+                    if ($course->terminated)
+                    {
+                        $popular_courses = [];
+                        $response2 = new Response();
+                        $response2->setResponseSubject("Curso terminado");
+                        $response->createFromTemplate("course_done.tpl", [
+                            'course' => $course,
+                            'popular_courses' => $popular_courses,
+                            'feedback' => $feedback
+                        ]);
+                        $responses[] = $response2;
+                    }
+                    return $responses;
                 }
             }
         }
         return new Response();
     }
     
+	/**
+	 * Subservice CERTIFICADO
+	 */
+	public function _certificado(Request $request)
+	{
+            $di = \Phalcon\DI\FactoryDefault::getDefault();
+            $wwwroot = $di->get('path')['root'];
+            $person = $this->utils->getPerson($request->email);
+            $course_id = intval($request->query);
+
+            if ($course_id > 0)
+            {
+                $course = $this->getCourse($course_id, $request->email);
+
+                if ($course->terminated)
+                {
+                    if ($course->calification >= 80)
+                    {
+                        $html = '<html><body><table width="600" align="center"><tr><td style="border: 1px solid black;">'
+                        .'<table width="600" align="center"><tr><td style="border: 5px solid black;">'
+                        .'<table width="600" align="center"><tr><td style="border: 1px solid black;">'
+                        .'<table width="560" align="center" cellpadding="5" style="margin: 20px;">'
+                        .'<tr><td colspan="2" style="font-family: Arial Black; padding: 5px; border: none; font-size: 34px;" align="center">'
+                        .'<img height="150" src="'.$wwwroot.'/public/images/sello.jpg"><br/>'
+                        .'<strong>CERTIFICACI&Oacute;N<br/> DE CURSO TERMINADO</strong>'
+                        .'</td></tr><tr><td colspan="2" style="font-family: Arial; padding: 5px; border: none;" align="center">'
+                        .'<br/>Esto certifica que<br/></td></tr><tr>'
+                        .'<td colspan="2" style="font-size: 23px; padding: 5px; border: none;" align="center">'
+                        .'{$person}'
+                        .'<hr/></td></tr><tr>'
+                        .'<td colspan="2" style="font-family: Arial; padding: 5px; border: none;" align="center">'
+                        .'<br/>ha terminado con &eacute;xito el curso</td></tr><tr>'
+                        .'<td colspan="2" align="center" style="font-size: 23px; font-family: Arial; padding: 5px; border: none;">'
+                        .'<br/>{$course}<hr/></td></tr><tr>'
+                        .'<td width="50%" style="font-size: 20px; padding: 5px; border: none; border: none;" align="center">'
+                        .'<br/></td><td style="font-size: 20px; padding: 5px; border: none; border: none;" align="center">'
+                        .'<br/>{$teacher_title} {$teacher_name}<hr/></td></tr><tr>'
+                        .'<td style="padding: 5px; border: none;" align="center"></td>'
+                        .'<td style="font-family: Arial; padding: 5px; border: none;" align="center">Profesor</td>'
+                        .'</tr><tr><td colspan="2" align="center" style="padding: 5px; border: none; text-decoration:none;"><i>{$date}</i></td>'
+                        .'</tr></table></td></tr></table></td></tr></table></td></tr></table></body></html>';
+
+                        $html = str_replace('{$person}', $person->full_name, $html);
+                        $html = str_replace('{$course}', $course->title, $html);
+                        $html = str_replace('{$teacher_name}', $course->teacher_name, $html);
+                        $html = str_replace('{$teacher_title}', $course->teacher_title, $html);
+                        $html = str_replace('{$date}', date("d M Y"), $html);
+
+                        $mpdf = new mPDF('','A4', 0, '', 10, 10, 10, 10, 1, 1, 'P');
+                        $mpdf->WriteHTML(trim($html));
+                        $cid = uniqid();
+                        $fileName = "certificado_{$cid}.pdf";
+                        $filePath = $wwwroot."/temp/$fileName";
+                        $mpdf->Output($filePath, 'F');
+
+                        $response = new Response();
+                        $response->setResponseSubject("Certificacion de Curso Terminado");
+                        $response->createFromTemplate("certificate.tpl",["course" => $course],[],[$fileName => $filePath]);
+                        return $response;
+                    }
+
+                    $response = new Response();
+                    $response->setResponseSubject("Tu calificacion es insuficiente");
+                    $response->createFromText("El certificado que pediste no lo puedes obtener pues obtuviste menos de 80 puntos.");
+                    return $response;
+                }
+
+                $response = new Response();
+                $response->setResponseSubject("No has terminado el curso");
+                $response->createFromText("El certificado que pediste no lo puedes obtener hasta que no termines el curso.");
+                return $response;
+            }
+
+            $response = new Response();
+            $response->setResponseSubject("Curso no encontrado");
+            $response->createFromText("El n&uacute;mero del curso que nos enviaste no fue encontrado. Verifica que lo est&eacute;s escribiendo bien. Si el problema persiste contacte al soporte t&eacute;cnico.");
+            return $response;
+	}
+
+    public function _opinar(Request $request)
+    {
+        // expecting: course_id feedback_id answer
+        $q = trim($request->query);
+
+        $this->utils->clearStr($q);
+        $feed = explode(' ', $q);
+
+        if ( ! isset($feed[0]) || ! isset($feed[1]) || ! isset($feed[2]))
+            return new Response();
+
+        $course_id = intval($feed[0]);
+        $feedback_id = intval($feed[1]);
+        $answer = strtolower(($feed[2]));
+
+        $course = $this->getCourse($course_id);
+
+        if (is_object($course))
+        {
+            $feedback = $this->q("SELECT id, text, answers FROM _escuela_feedback WHERE id = $feedback_id;");
+            if (isset($feedback[0]))
+            {
+                $feedback = $feedback[0];
+                $answers = explode(',', $feedback->answers);
+
+                foreach($answers as $ans)
+                    if (trim(strtolower(($ans))) == $answer)
+                    {
+                        $this->q("DELETE FROM _escuela_feedback_received WHERE email = '{$request->email}' AND feedback = $feedback_id AND course = $course_id;");
+                        $this->q("INSERT INTO _escuela_feedback_received (feedback, course, email, answer) VALUES ($feedback_id, $course_id, '{$request->email}', '$answer');");
+                        break;
+                    }
+            }
+        }
+        return new Response();
+    }
+    
+    public function _repetir(Request $request)
+    {
+        $course_id = $request->query;
+        
+        $course = $this->getCourse($course_id, $request->email);
+        
+        if ($course === false)
+        {
+            return new Response();
+        }
+        
+        $this->q("DELETE FROM _escuela_chapter_viewed WHERE course = $course_id AND email = '{$request->email}'");
+        $this->q("DELETE FROM _escuela_answer_choosen WHERE course = $course_id AND email = '{$request->email}'");
+        
+        $response = new Response();
+        $response->setResponseSubject("Curso reiniciado");
+        $response->createFromText("Hemos reiniciado para ti el curso <b>{$course->title}</b> que solicitaste repetir. Ahora deber&aacute;s leer nuevamente los cap&iacute;tulos y responder las pruebas del mismo.");
+        
+        $responses = [];
+        $responses[] = $response;
+        $responses[] = $this->_curso($request);
+        
+        return $responses;
+    }
+	
     private function getBeforeAfter($chapter)
     {
         $before = false;
@@ -248,53 +376,53 @@ class Escuela extends Service
 	 * @param string $email
      * @return object
      */
-	private function getCourse($id, $email = '')
-	{
-		$r = $this->q("SELECT *,
-            (SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_name,
-            (SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_title
-		FROM _escuela_course WHERE id = '$id' AND active = '1';");
+    private function getCourse($id, $email = '')
+    {
+        $r = $this->q("SELECT *,
+        (SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_name,
+        (SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_title
+        FROM _escuela_course WHERE id = '$id' AND active = '1';");
 
         if (isset($r[0]))
         {
-			$course = $r[0];
-			$course->chapters = $this->getChapters($id, $email);
-			
-			$calification = 0;
-			$course->total_tests = 0;
-			$course->total_seen = 0;
-			$course->total_answered = 0;
-			$course->total_terminated = 0;
-			$course->total_questions = 0;
-			$course->total_childs = count($course->chapters);
-			$course->total_right = 0;
-			foreach ($course->chapters as $chapter)
-			{
-				if ($chapter->seen) $course->total_seen++;
-				if ($chapter->answered) $course->total_answered++;
-				if ($chapter->terminated) $course->total_terminated++;
-				if ($chapter->xtype == 'PRUEBA') $course->total_tests++;
-				$course->total_right += $chapter->total_right;
-				$course->total_questions += $chapter->total_questions;
-				$calification += $chapter->calification;
-			}
-			
-			$course->total_chapters = $course->total_childs - $course->total_tests;
-			$course->terminated = $course->total_terminated == $course->total_childs;
-			
-			$course->calification = 0;
-			if ($course->total_tests > 0)
-				$course->calification = number_format($calification / $course->total_tests, 2 ) * 1;
-			
-			$course->progress = 0;
-			if ($course->total_childs > 0)
-				$course->progress = number_format($course->total_terminated  / $course->total_childs * 100, 2) * 1;
-			
-			return $course;
-		}
-		
-		return false;
-	}
+            $course = $r[0];
+            $course->chapters = $this->getChapters($id, $email);
+
+            $calification = 0;
+            $course->total_tests = 0;
+            $course->total_seen = 0;
+            $course->total_answered = 0;
+            $course->total_terminated = 0;
+            $course->total_questions = 0;
+            $course->total_childs = count($course->chapters);
+            $course->total_right = 0;
+            foreach ($course->chapters as $chapter)
+            {
+                    if ($chapter->seen) $course->total_seen++;
+                    if ($chapter->answered) $course->total_answered++;
+                    if ($chapter->terminated) $course->total_terminated++;
+                    if ($chapter->xtype == 'PRUEBA') $course->total_tests++;
+                    $course->total_right += $chapter->total_right;
+                    $course->total_questions += $chapter->total_questions;
+                    $calification += $chapter->calification;
+            }
+
+            $course->total_chapters = $course->total_childs - $course->total_tests;
+            $course->terminated = $course->total_terminated == $course->total_childs;
+
+            $course->calification = 0;
+            if ($course->total_tests > 0)
+                    $course->calification = number_format($calification / $course->total_tests, 2 ) * 1;
+
+            $course->progress = 0;
+            if ($course->total_childs > 0)
+                    $course->progress = number_format($course->total_terminated  / $course->total_childs * 100, 2) * 1;
+
+            return $course;
+        }
+
+        return false;
+    }
 	
     /**
      * Return a list of chapter's images paths
@@ -339,17 +467,19 @@ class Escuela extends Service
         
         $total_questions = count($chapter->questions);
         $total_right = 0;
+        
         foreach($chapter->questions as $i => $q)
             if ($q->is_right) $total_right++;
         
-		$chapter->total_right = $total_right;
-		$chapter->total_questions = $total_questions;
+        $chapter->total_right = $total_right;
+        $chapter->total_questions = $total_questions;
         $chapter->calification = 0;
+        
         if ($total_questions > 0)
             $chapter->calification = intval($total_right / $total_questions * 100);
         
-		$chapter->seen = $this->isChapterSeen($email, $id);
-		$chapter->answered = $this->isTestTerminated($email, $id) && $chapter->xtype == 'PRUEBA';
+        $chapter->seen = $this->isChapterSeen($email, $id);
+        $chapter->answered = $this->isTestTerminated($email, $id) && $chapter->xtype == 'PRUEBA';
         $chapter->terminated =  $chapter->answered || $chapter->seen;
         
         return $chapter;
@@ -423,13 +553,13 @@ class Escuela extends Service
            
     private function getTotalQuestionsOf($chapter_id)
     {
-        $r = $this->q("SELECT count(*) as t FROm _escuela_question WHERE chapter = '$chapter_id';");
+        $r = $this->q("SELECT count(id) as t FROm _escuela_question WHERE chapter = '$chapter_id';");
         return intval($r[0]->t);
     }
     
     private function getTotalResponsesOf($email, $chapter_id)
     {
-        $r = $this->q("SELECT count(*) as t FROM _escuela_answer_choosen WHERE email = '$email' AND chapter = '$chapter_id';");
+        $r = $this->q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND chapter = '$chapter_id';");
         return intval($r[0]->t);
     }
     
@@ -449,13 +579,13 @@ class Escuela extends Service
     
 	private function isChapterSeen($email, $chapter_id)
 	{
-		$r = $this->q("SELECT count(*) as t FROM _escuela_chapter_viewed WHERE email ='$email' AND chapter = '$chapter_id';");
+		$r = $this->q("SELECT count(email) as t FROM _escuela_chapter_viewed WHERE email ='$email' AND chapter = '$chapter_id';");
 		return $r[0]->t * 1 > 0;
 	}
 	
     private function isQuestionTerminated($email, $question_id)
     {
-        $r = $this->q("SELECT count(*) as t FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id';");
+        $r = $this->q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id';");
         return intval($r[0]->t) > 0;
     }
 }
