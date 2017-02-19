@@ -184,11 +184,14 @@ class Escuela extends Service
                     {
                         $rows = $this->q("SELECT id, title, content FROM _escuela_course WHERE active = 1 ORDER BY popularity DESC LIMIT 5;");
                         $popular_courses = [];
+                        
                         foreach ($rows as $row)
                         {
                         	$row->content = substr(strip_tags($row->content),0,300);
                         	$popular_courses[] = $row;
                         }
+                        
+                        $feedback = $this->getFeedbacks();
                         
                         $response2 = new Response();
                         $response2->setResponseSubject("Curso terminado");
@@ -218,7 +221,6 @@ class Escuela extends Service
     		{
     			$value = $ans;
     			$caption = trim(ucfirst(strtolower($ans)));
-    			 
     			if (strpos($ans, ":") !== false)
     			{
     				$arr = explode(":", $ans);
@@ -331,38 +333,66 @@ class Escuela extends Service
 
         $course = $this->getCourse($course_id);
 
-        if (is_object($course))
+        if ($course !== false)
         {
             $feedback = $this->q("SELECT id, text, answers FROM _escuela_feedback WHERE id = $feedback_id;");
             if (isset($feedback[0]))
             {
                 $feedback = $feedback[0];
-                $answers = explode(',', $feedback->answers);
-
-                $increase_popularity = 0;
-                foreach($answers as $ans)
+                $answers = $feedback->answers;
+                $fwhere = " email = '{$request->email}' AND feedback = $feedback_id AND course = $course_id;";
+                
+                // get last answer, and decrease popularity of the course
+                $last_answer = false;
+                $r = $this->q("SELECT answer FROM _escuela_feedback_received WHERE $fwhere;");
+                if (isset($r[0])) $last_answer = $r[0]->answer;
+                
+                if ($last_answer !== false)
                 {
-                	$increase_popularity++;
+                	$popularity = $this->getAnswerValue($answers, $last_answer);
+                	$this->q("DELETE FROM _escuela_feedback_received WHERE $fwhere");
                 	
-                	$value = $ans;
-                	
-                	if (strpos($ans, ":") !== false)
-                	{
-                		$arr = explode(":", $ans);
-                		$value = trim($arr[0]);
-                	}
-                	
-                    if ($value == $answer)
-                    {
-                        $this->q("DELETE FROM _escuela_feedback_received WHERE email = '{$request->email}' AND feedback = $feedback_id AND course = $course_id;");
-                        $this->q("INSERT INTO _escuela_feedback_received (feedback, course, email, answer) VALUES ($feedback_id, $course_id, '{$request->email}', '$answer');");
-                        $this->q("UPDATE _escuela_course SET popularity = popularity + $increase_popularity WHERE id = $course_id;");
-                        break;
-                    }
+                	if ($popularity !== false)
+                		$this->q("UPDATE _escuela_course SET popularity = popularity - $popularity WHERE id = $course_id;");
+                }
+                
+                // analyze current answer && increase popularity of the course
+                $popularity = $this->getAnswerValue($answers, $answer);
+                if ($popularity !== false)
+                {
+                	$this->q("INSERT INTO _escuela_feedback_received (feedback, course, email, answer) VALUES ($feedback_id, $course_id, '{$request->email}', '$answer');");
+                	$this->q("UPDATE _escuela_course SET popularity = popularity + $popularity WHERE id = $course_id;");
                 }
             }
         }
         return new Response();
+    }
+    
+    private function getAnswerValue($answers, $answer)
+    {
+    	$answers = explode(",", $answers);
+    	
+    	$i = 0;
+    	foreach($answers as $ans)
+    	{
+    		$ans = trim($ans);
+    		$i++;
+    		 
+    		$value = $ans;
+    		 
+    		if (strpos($ans, ":") !== false)
+    		{
+    			$arr = explode(":", $ans);
+    			$value = trim($arr[0]);
+    		}
+    		 
+    		if ($value == $answer)
+    		{
+    			return $i;
+    		}
+    	}
+    	
+    	return false;
     }
     
     public function _repetir(Request $request)
