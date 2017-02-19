@@ -24,6 +24,7 @@ CREATE TABLE _escuela_course(
 	`teacher` int(11),
 	 email varchar(255),
 	 active tinyint(1) NOT NULL DEFAULT 0,
+	 popularity int(11) NOT NULL DEFAULT 0,
 	 FOREIGN KEY (`teacher`) REFERENCES `_escuela_teacher` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	 PRIMARY KEY (`id`)
 );
@@ -123,7 +124,7 @@ create table _escuela_feedback_received(
 	 PRIMARY KEY (id)
 );
 
-ALTER TABLE _escuela_course ADD COLUMN popularity float; --?
+ALTER TABLE _escuela_course ADD COLUMN popularity int(11) NOT NULL DEFAULT 0; --?
 
 DELETE FROM _escuela_feedback;
 INSERT INTO _escuela_feedback (id,text,answers) VALUES (1,'C&oacute;mo eval&uacute;a en general este curso?','malo,regular,bueno,excelente');

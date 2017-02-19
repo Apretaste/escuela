@@ -315,13 +315,19 @@ class Escuela extends Service
                 $feedback = $feedback[0];
                 $answers = explode(',', $feedback->answers);
 
+                $increase_popularity = 0;
                 foreach($answers as $ans)
+                {
+                	$increase_popularity++;
                     if (trim(strtolower(($ans))) == $answer)
                     {
                         $this->q("DELETE FROM _escuela_feedback_received WHERE email = '{$request->email}' AND feedback = $feedback_id AND course = $course_id;");
                         $this->q("INSERT INTO _escuela_feedback_received (feedback, course, email, answer) VALUES ($feedback_id, $course_id, '{$request->email}', '$answer');");
+                        $this->q("UPDATE _escuela_course SET popularity = popularity + $increase_popularity WHERE id = $course_id;");
+                        echo "UPDATE _escuela_course SET popularity = popularity + $increase_popularity WHERE id = $course_id;";
                         break;
                     }
+                }
             }
         }
         return new Response();
