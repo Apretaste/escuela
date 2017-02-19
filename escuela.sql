@@ -129,5 +129,5 @@ ALTER TABLE _escuela_course ADD COLUMN popularity int(11) NOT NULL DEFAULT 0; --
 DELETE FROM _escuela_feedback;
 INSERT INTO _escuela_feedback (id,text,answers) VALUES (1,'C&oacute;mo eval&uacute;a en general este curso?','malo,regular,bueno,excelente');
 INSERT INTO _escuela_feedback (id,text,answers) VALUES (2,'Cu&aacute;nto ha aprendido de este curso?','nada,algo,mucho,cantidad');
-INSERT INTO _escuela_feedback (id,text,answers) VALUES (3,'Cuan f&aacute;cil de entender es el contenido?','enredado,complejo,le&iacute;ble,simple');
+INSERT INTO _escuela_feedback (id,text,answers) VALUES (3,'Cuan f&aacute;cil de entender es el contenido?','enredado,complejo,leible:Le&iacute;ble,simple');
 INSERT INTO _escuela_feedback (id,text,answers) VALUES (4,'Recomendar&iacute;a este curso a otros?','nunca,tal vez,seguro');

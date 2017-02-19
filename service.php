@@ -179,22 +179,17 @@ class Escuela extends Service
                     $responses = [$response];
                     $course = $this->getCourse($test->course, $request->email);
 
-                    $feedback = $this->q("SELECT id, text, answers FROM _escuela_feedback;");
-                    foreach ($feedback as $k => $fb)
-                    {
-                        $fb->answers = explode(',', $fb->answers);
-
-                        $newanswers = [];
-                        foreach($fb->answers as $ans)
-                        {
-                            $newanswers[] = trim(ucfirst(strtolower($ans)));
-                        }
-                        $feedback[$k]->answers = $newanswers;
-                    }
                     
                     if ($course->terminated)
                     {
+                        $rows = $this->q("SELECT id, title, content FROM _escuela_course WHERE active = 1 ORDER BY popularity DESC LIMIT 5;");
                         $popular_courses = [];
+                        foreach ($rows as $row)
+                        {
+                        	$row->content = substr(strip_tags($row->content),0,300);
+                        	$popular_courses[] = $row;
+                        }
+                        
                         $response2 = new Response();
                         $response2->setResponseSubject("Curso terminado");
                         $response->createFromTemplate("course_done.tpl", [
@@ -209,6 +204,35 @@ class Escuela extends Service
             }
         }
         return new Response();
+    }
+    
+    private function getFeedbacks()
+    {
+    	$feedback = $this->q("SELECT id, text, answers FROM _escuela_feedback;");
+    	foreach ($feedback as $k => $fb)
+    	{
+    		$fb->answers = explode(',', $fb->answers);
+    	
+    		$newanswers = [];
+    		foreach($fb->answers as $ans)
+    		{
+    			$value = $ans;
+    			$caption = trim(ucfirst(strtolower($ans)));
+    			 
+    			if (strpos($ans, ":") !== false)
+    			{
+    				$arr = explode(":", $ans);
+    				$value = trim($arr[0]);
+    				$caption = trim($arr[1]);
+    			}
+    			 
+    			$newanswers[] = ['value' => $value, 'caption' => $caption];
+    		}
+    		
+    		$feedback[$k]->answers = $newanswers;
+    	}
+    	
+    	return $feedback;
     }
     
 	/**
@@ -303,7 +327,7 @@ class Escuela extends Service
 
         $course_id = intval($feed[0]);
         $feedback_id = intval($feed[1]);
-        $answer = strtolower(($feed[2]));
+        $answer = trim(strtolower(($feed[2])));
 
         $course = $this->getCourse($course_id);
 
@@ -319,12 +343,20 @@ class Escuela extends Service
                 foreach($answers as $ans)
                 {
                 	$increase_popularity++;
-                    if (trim(strtolower(($ans))) == $answer)
+                	
+                	$value = $ans;
+                	
+                	if (strpos($ans, ":") !== false)
+                	{
+                		$arr = explode(":", $ans);
+                		$value = trim($arr[0]);
+                	}
+                	
+                    if ($value == $answer)
                     {
                         $this->q("DELETE FROM _escuela_feedback_received WHERE email = '{$request->email}' AND feedback = $feedback_id AND course = $course_id;");
                         $this->q("INSERT INTO _escuela_feedback_received (feedback, course, email, answer) VALUES ($feedback_id, $course_id, '{$request->email}', '$answer');");
                         $this->q("UPDATE _escuela_course SET popularity = popularity + $increase_popularity WHERE id = $course_id;");
-                        echo "UPDATE _escuela_course SET popularity = popularity + $increase_popularity WHERE id = $course_id;";
                         break;
                     }
                 }
