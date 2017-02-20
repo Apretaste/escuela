@@ -49,7 +49,7 @@ class Escuela extends Service
     public function _main(Request $request)
     {
         $courses = [];
-        $sql = "SELECT id FROM _escuela_course WHERE active = 1;";
+        $sql = "SELECT id FROM _escuela_course WHERE active = 1 ORDER BY popularity DESC;";
 
         $r = $this->q($sql);
         if (isset($r[0]))

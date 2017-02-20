@@ -3,17 +3,22 @@
 <p align="justify">Felicidades! Has pasado el curso <strong>{link href="ESCUELA CURSO {$course->id}" caption="{$course->title}"}</strong> 
 con una nota de <strong>{$course->calification}/100 puntos</strong>, lo cual indica
 que tienes el conocimiento y est&aacute;s listo para poner estas ense&ntilde;anzas en la pr&aacute;ctica. </p>
+    <center>{button href="ESCUELA CURSO {$course->id}" caption ="Resumen del curso"}</center>
 {else}
 <p align="justify">Usted ha sacado {$course->calification}/100 en el curso {$course->title} y no es suficiente para pasarlo, pero no se preocupe, 
 eso no es un problema. Estudie nuevamente y vuelva a presentarse para las pruebas.</p>
 
-<center>{button href="ESCUELA REPETIR {$course->id}" caption ="REPETIR CURSO"}</center>
+<center>
+    {button href="ESCUELA REPETIR {$course->id}" caption ="Repetir curso" color="red"}
+    {button href="ESCUELA CURSO {$course->id}" caption ="Resumen curso"}
+</center>
 {/if}
 
-<p align="justify">Como prueba de que has pasado este curso en nuestra escuela, adjuntamos nuestro certificado de terminaci&oacute;n.
-Por favor nota que nuestra escuela no est&aacute; aprovada para expedir certificados oficiales, as&iacute; que
+<p align="justify">Como prueba de que has pasado este curso en nuestra escuela, puedes obtener nuestro certificado de terminaci&oacute;n.
+Por favor, nota que nuestra escuela no est&aacute; aprobada para expedir certificados oficiales, as&iacute; que
 aunque este certificado es prueba de tus conocimientos, puede no ser aceptado por empleadores
     ni ser cambiado por cr&eacute;ditos universitarios.</p>
+<center>{button href="ESCUELA CERTIFICADO {$course->id}" caption="Certificado" color="blue"}</center>
 
 <h1>Ayudenos evaluando nuestro curso</h1>
 
