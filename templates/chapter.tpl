@@ -1,12 +1,17 @@
 <h1>{$chapter->title}</h1>
+{strip}
 {$chapter->content}
+{/strip}
 {space10}
 {if isset($chapter->questions)}
-    {if $chapter->terminated}
-        <p align="right"><b>TERMINADA</b> con {$chapter->calification} puntos de 100</p>
+    {if $chapter->xtype == 'PRUEBA'}
+        {if $chapter->terminated}
+            <p align="center" style="color:red;"><font color="red"><b>TERMINADA con {$chapter->calification} puntos de 100</b></font></p>
+        {/if}
     {/if}
+    <br/>
     {foreach from=$chapter->questions item=$question}
-        <h2 {if $question->answer == $question->answer_choosen} style="color:blue;" {else} style="color:red;" {/if}>{$question->title}</h2>
+        <b>{$question->title}</b><br/>
         <ol>
              {foreach from = $question->answers item=$answer}
                  <li>

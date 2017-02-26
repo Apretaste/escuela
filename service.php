@@ -55,11 +55,34 @@ class Escuela extends Service
         if (isset($r[0]))
 			foreach($r as $course)
 				$courses[] = $this->getCourse($course->id, $request->email);
-		
+
+        $currentcourses = [];
+        $newcourses = [];
+        $oldcourses = [];
+        foreach ($courses as $course)
+        {
+            if ($course->progress == 100)
+                $oldcourses[] = $course;
+            elseif ($course->progress == 0)
+                $currentcourses[] = $course;
+            else
+                $newcourses[] = $course;
+        }
+
+        $l = count($currentcourses);
+        for($i = 0; $i < $l - 1; $i++)
+            for ($j = $i + 1; $$j < $l; $j++)
+                if ($currentcourses[$i]->progress < $currentcourses[$j]->progress)
+                {
+                    $temp = $currentcourses[$i];
+                    $currentcourses[$i] = $currentcourses[$j];
+                    $currentcourses[$j] = $temp;
+                }
+
         $response = new Response();
         $response->setResponseSubject("Cursos activos");
         $response->createFromTemplate('basic.tpl', [
-            'courses' => $courses
+            'courses' => array_merge($currentcourses, $newcourses, $oldcourses)
         ]);
 
         return $response;
@@ -93,7 +116,7 @@ class Escuela extends Service
     }
 
     /**
-     * Subservice "capitulo"
+     * Subservice CAPITULO
      * 
      * @author kuma
      * @example ESCUELA CAPITULO 3
@@ -107,6 +130,9 @@ class Escuela extends Service
 
         if ($chapter !== false)
         {
+            $responses = [];
+
+
             $beforeAfter = $this->getBeforeAfter($chapter);
             $images = $this->getChapterImages($id);
             
@@ -114,6 +140,14 @@ class Escuela extends Service
             if ($chapter->xtype == 'CAPITULO')
 			$this->q("INSERT IGNORE INTO _escuela_chapter_viewed (email, chapter, course) "
                     . "VALUES ('{$request->email}', '{$id}', '{$chapter->course}');");
+
+            // $chapter->seen was not updated by last SQL query, then we can ask the fallow...
+            if ($chapter->seen == false)
+            {
+                $course = $this->getCourse($chapter->course);
+                if ($course->terminated)
+                    $responses[] = $this->getTerminatedResponse($course, $request->email);
+            }
 
             $response = new Response();
             $response->setResponseSubject("{$chapter->title}");
@@ -123,7 +157,8 @@ class Escuela extends Service
                 'after' => $beforeAfter['after']
             ], $images);
 
-            return $response;
+            $responses[] = $response;
+            return $responses;
         }
         
         $response = new Response();
@@ -133,6 +168,8 @@ class Escuela extends Service
     }
 
     /**
+     * Subservice PRUEBA
+     *
      * @example ESCUELA PRUEBA 2
      */
     public function _prueba(Request $request)
@@ -141,6 +178,8 @@ class Escuela extends Service
     }
 
     /**
+     * Subservice RESPONDER
+     *
      * @example ESCUELA RESPONDER 4
      */
     public function _responder(Request $request)
@@ -149,66 +188,89 @@ class Escuela extends Service
         $email = $request->email;
         $r = $this->q("SELECT * FROM _escuela_answer WHERE id = '$id';");
 
-        if ($r !== false)
+        if (isset($r[0]))
         {
             $answer = $r[0];
 
-            if ($answer->id == $id)
+            $sql = "INSERT IGNORE INTO _escuela_answer_choosen (email, answer, date_choosen, chapter, question, course) "
+                . "VALUES ('$email','$id', CURRENT_DATE, '{$answer->chapter}', '{$answer->question}', '{$answer->course}');";
+
+            $this->q($sql);
+
+            $test = $this->getChapter($answer->chapter, $request->email);
+
+            // check if test was completed
+            if ($test->terminated)
             {
-                $sql = "INSERT IGNORE INTO _escuela_answer_choosen (email, answer, date_choosen, chapter, question, course) "
-                    . "VALUES ('$email','$id', CURRENT_DATE, '{$answer->chapter}', '{$answer->question}', '{$answer->course}');";
+                $response = new Response();
+                $response->setResponseSubject("Prueba completada");
+                $beforeAfter = $this->getBeforeAfter($test);
 
-                $this->q($sql);
-                
-                $test = $this->getChapter($answer->chapter, $request->email);
-        
-                // check if test was completed
-                if ($test->terminated)
-                {
-                    $response = new Response();
-                    $response->setResponseSubject("Prueba completada");
-                    $beforeAfter = $this->getBeforeAfter($test);
+                $response->createFromTemplate("test_done.tpl", [
+                    'test' => $test, /*
+                    'calification' => intval($right_answers / $total_answers * 100),*/
+                    'before' => $beforeAfter['before'],
+                    'after' => $beforeAfter['after']
+                ]);
 
-                    $response->createFromTemplate("test_done.tpl", [
-                        'test' => $test, /*
-                        'calification' => intval($right_answers / $total_answers * 100),*/
-                        'before' => $beforeAfter['before'],
-                        'after' => $beforeAfter['after']
-                    ]);
+                $responses = [$response];
+                $course = $this->getCourse($test->course, $request->email);
 
-                    $responses = [$response];
-                    $course = $this->getCourse($test->course, $request->email);
+                $response2 = $this->getTerminatedResponse($course, $request->email);
 
-                    
-                    if ($course->terminated)
-                    {
-                        $rows = $this->q("SELECT id, title, content FROM _escuela_course WHERE active = 1 ORDER BY popularity DESC LIMIT 5;");
-                        $popular_courses = [];
-                        
-                        foreach ($rows as $row)
-                        {
-                        	$row->content = substr(strip_tags($row->content),0,300);
-                        	$popular_courses[] = $row;
-                        }
-                        
-                        $feedback = $this->getFeedbacks();
-                        
-                        $response2 = new Response();
-                        $response2->setResponseSubject("Curso terminado");
-                        $response->createFromTemplate("course_done.tpl", [
-                            'course' => $course,
-                            'popular_courses' => $popular_courses,
-                            'feedback' => $feedback
-                        ]);
-                        $responses[] = $response2;
-                    }
-                    return $responses;
-                }
+                if ($response2 !== false)
+                    $responses[] = $response2;
+
+                return $responses;
             }
         }
         return new Response();
     }
-    
+
+    /**
+     * Common response for terminated course
+     *
+     * @param $course
+     * @param $email
+     * @return bool|Response
+     */
+    private function getTerminatedResponse($course, $email)
+    {
+        if ($course->terminated)
+        {
+            $rows = $this->q("SELECT id FROM _escuela_course WHERE active = 1 ORDER BY popularity;");
+            $popular_courses = [];
+
+            $i = 0;
+            foreach ($rows as $row)
+            {
+                $course = $this->getCourse($row->id, $email);
+                if ($course->terminated == false)
+                {
+                    $course->content = substr(trim(strip_tags($course->content)), 0, 300);
+                    $popular_courses[] = $course;
+                }
+
+                $i++;
+
+                if ($i == 5)
+                    break;
+            }
+
+            $feedback = $this->getFeedbacks();
+
+            $response = new Response();
+            $response->setResponseSubject("Curso terminado");
+            $response->createFromTemplate("course_done.tpl", [
+                'course' => $course,
+                'popular_courses' => $popular_courses,
+                'feedback' => $feedback
+            ]);
+            return $response;
+        }
+        return false;
+    }
+
     private function getFeedbacks()
     {
     	$feedback = $this->q("SELECT id, text, answers FROM _escuela_feedback;");
@@ -401,23 +463,16 @@ class Escuela extends Service
         
         $course = $this->getCourse($course_id, $request->email);
         
-        if ($course === false)
-        {
+        if ($course == false)
             return new Response();
-        }
-        
-        $this->q("DELETE FROM _escuela_chapter_viewed WHERE course = $course_id AND email = '{$request->email}'");
+
         $this->q("DELETE FROM _escuela_answer_choosen WHERE course = $course_id AND email = '{$request->email}'");
-        
-        $response = new Response();
+
+        $response = $this->_curso($request);
         $response->setResponseSubject("Curso reiniciado");
-        $response->createFromText("Hemos reiniciado para ti el curso <b>{$course->title}</b> que solicitaste repetir. Ahora deber&aacute;s leer nuevamente los cap&iacute;tulos y responder las pruebas del mismo.");
-        
-        $responses = [];
-        $responses[] = $response;
-        $responses[] = $this->_curso($request);
-        
-        return $responses;
+        $response->content['course']->repeated = true;
+
+        return $response;
     }
 	
     private function getBeforeAfter($chapter)
@@ -464,6 +519,7 @@ class Escuela extends Service
             $course->total_questions = 0;
             $course->total_childs = count($course->chapters);
             $course->total_right = 0;
+            $course->repeated = false;
             foreach ($course->chapters as $chapter)
             {
                     if ($chapter->seen) $course->total_seen++;
@@ -549,7 +605,8 @@ class Escuela extends Service
         $chapter->seen = $this->isChapterSeen($email, $id);
         $chapter->answered = $this->isTestTerminated($email, $id) && $chapter->xtype == 'PRUEBA';
         $chapter->terminated =  $chapter->answered || $chapter->seen;
-        
+
+        $chapter->content = $this->clearHtml($chapter->content);
         return $chapter;
     }
 	
@@ -656,4 +713,16 @@ class Escuela extends Service
         $r = $this->q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id';");
         return intval($r[0]->t) > 0;
     }
+
+    private function clearHtml($html) {
+        $html = str_replace('&nbsp;',' ',$html);
+
+        do {
+            $tmp = $html;
+            $html = preg_replace('#<([^ >]+)[^>]*>[[:space:]]*</\1>#', '', $html );
+        } while ( $html !== $tmp );
+
+        return $html;
+    }
+
 }
