@@ -64,15 +64,15 @@ class Escuela extends Service
             if ($course->progress == 100)
                 $oldcourses[] = $course;
             elseif ($course->progress == 0)
-                $currentcourses[] = $course;
-            else
                 $newcourses[] = $course;
+            else
+                $currentcourses[] = $course;
         }
 
         $l = count($currentcourses);
         for($i = 0; $i < $l - 1; $i++)
             for ($j = $i + 1; $j < $l; $j++)
-                if ($currentcourses[$i]->progress < $currentcourses[$j]->progress)
+                if ($currentcourses[$i]->progress > $currentcourses[$j]->progress)
                 {
                     $temp = $currentcourses[$i];
                     $currentcourses[$i] = $currentcourses[$j];
