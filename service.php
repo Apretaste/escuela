@@ -243,11 +243,11 @@ class Escuela extends Service
             $i = 0;
             foreach ($rows as $row)
             {
-                $course = $this->getCourse($row->id, $email);
-                if ($course->terminated == false)
+                $xcourse = $this->getCourse($row->id, $email);
+                if ($xcourse->terminated == false)
                 {
-                    $course->content = substr(trim(strip_tags($course->content)), 0, 300);
-                    $popular_courses[] = $course;
+                    $xcourse->content = substr(trim(strip_tags($xcourse->content)), 0, 300);
+                    $popular_courses[] = $xcourse;
                 }
 
                 $i++;
