@@ -46,7 +46,7 @@
 <table width="100%">
     <tr>
         <td style="padding:5px;">Cap&iacute;tulos</td>
-        <td style="padding:5px;" width="15%" align="right">{$course->total_seen}/{$course->total_chapters}</td>
+        <td style="padding:5px;" width="30%" align="right">{$course->total_seen}/{$course->total_chapters}</td>
     </tr>
     <tr>
         <td style="padding:5px;">Pruebas</td>
@@ -55,7 +55,7 @@
     {if $course->calification > 0}
     <tr>
         <td style="padding:5px;">Calificaci&oacute;n</td>
-        <td style="padding:5px;" align="right">{$course->calification} puntos</td>
+        <td style="padding:5px;" align="right"><nobr>{$course->calification} puntos</nobr></td>
     </tr>
     {/if}
 </table>
