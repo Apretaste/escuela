@@ -132,7 +132,6 @@ class Escuela extends Service
         {
             $responses = [];
 
-
             $beforeAfter = $this->getBeforeAfter($chapter);
             $images = $this->getChapterImages($id);
             
@@ -144,7 +143,7 @@ class Escuela extends Service
             // $chapter->seen was not updated by last SQL query, then we can ask the fallow...
             if ($chapter->seen == false)
             {
-                $course = $this->getCourse($chapter->course);
+                $course = $this->getCourse($chapter->course, $request->email);
                 if ($course->terminated)
                     $responses[] = $this->getTerminatedResponse($course, $request->email);
             }
