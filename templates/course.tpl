@@ -46,11 +46,11 @@
 <table width="100%">
     <tr>
         <td style="padding:5px;">Cap&iacute;tulos</td>
-        <td style="padding:5px;" width="30%" align="right">{$course->total_seen}/{$course->total_chapters}</td>
+        <td style="padding:5px;" align="right">{$course->total_seen}/{$course->total_chapters}</td>
     </tr>
     <tr>
         <td style="padding:5px;">Pruebas</td>
-        <td style="padding:5px;" width="15%" align="right">{$course->total_answered}/{$course->total_tests}</td>
+        <td style="padding:5px;" align="right">{$course->total_answered}/{$course->total_tests}</td>
     </tr>
     {if $course->calification > 0}
     <tr>
