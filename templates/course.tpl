@@ -38,8 +38,10 @@
 
 {if $course->terminated}
     <h2>Curso terminado</h2>
+    <p>Usted ha terminado este curso, felicidades. Descargue su certificado en el bot&oacute;n m&aacute;s abajo.</p>
 {else}
     <h2>Progreso en curso</i></h2>
+    <p>Lee todos los cap&iacute;tulos y pasa todas las pruebas para recibir tu certificado.</p>
 {/if}
 <table width="100%">
     <tr>
