@@ -47,5 +47,3 @@ sobre este curso en el cuestionario m&aacute;s abajo. Sus opiniones ser&aacute;n
     {/foreach}
     {space5}
 {/if}
-
-<p align="right"><b>Muchas Gracias!</b></p>
