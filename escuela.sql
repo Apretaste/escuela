@@ -25,6 +25,7 @@ CREATE TABLE _escuela_course(
 	 email varchar(255),
 	 active tinyint(1) NOT NULL DEFAULT 0,
 	 popularity int(11) NOT NULL DEFAULT 0,
+	 category enum('SOCIEDAD','NEGOCIOS','MEDICINA','INFORMATICA','INGENIERIA','LETRAS','ARTES','FILOSOFIA','SALUD','POLITICA','TECNICA','OTRO'),
 	 FOREIGN KEY (`teacher`) REFERENCES `_escuela_teacher` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 	 PRIMARY KEY (`id`)
 );
