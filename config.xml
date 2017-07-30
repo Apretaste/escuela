@@ -1,6 +1,6 @@
 <service>
 	<serviceName>escuela</serviceName>
-	<serviceDescription>Cursos disponibles</serviceDescription>
+	<serviceDescription>Ofrece una gama de cursos practicos de diferentes especialidades con pruebas finales y diplomas</serviceDescription>
 	<creatorEmail>kumahavana@gmail.com</creatorEmail>
 	<serviceCategory>academico</serviceCategory>
 	<serviceUsage>
