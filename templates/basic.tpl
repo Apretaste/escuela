@@ -17,4 +17,4 @@
 {/foreach}
 
 <h2>Convi&eacute;rtase en Profesor</h2>
-<p>&iquest;Le gustar&iacute;a que sus conocimientos ayuden a miles de Cubanos? Si es as&iacute; por favor considere escribir un curso para nuestra escuela. Si est&aacute; interesado {link href="SOPORTE" caption="escribanos al soporte" body="Que curso desea escribir?" popup="true"}</p>
+<p>&iquest;Le gustar&iacute;a que sus conocimientos ayuden a miles de Cubanos? Si es as&iacute; por favor considere escribir un curso para nuestra escuela. Si est&aacute; interesado {link href="SOPORTE" caption="escribanos al soporte" desc="Que curso desea escribir?" popup="true"}</p>
