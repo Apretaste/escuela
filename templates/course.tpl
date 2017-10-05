@@ -61,10 +61,10 @@
 </table>
 {space10}
 <center>
-	{button href="ESCUELA" caption="Cursos" size="small"}
+	{button href="ESCUELA" caption="Cursos" size="medium"}
 	{if $course->terminated}
 		{if $course->calification >= 80}
-			{button href="ESCUELA CERTIFICADO {$course->id}" caption="Certificado" size="small" color="blue"}
+			{button href="ESCUELA CERTIFICADO {$course->id}" caption="Certificado" size="medium" color="blue"}
 		{/if}
 	{/if}
 </center>
