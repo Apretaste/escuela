@@ -48,7 +48,9 @@
 
 <center>
 	{if $course->calification < 80}
-		{button href="ESCUELA REPETIR {$course->id}" caption="Repetir" color="red"}
+		{if $course->all_chapters_finished}
+			{button href="ESCUELA REPETIR {$course->id}" caption="Repetir" color="red"}
+		{/if}
 	{else}
 		{button href="ESCUELA CERTIFICADO {$course->id}" caption="Certificado"}
 	{/if}
