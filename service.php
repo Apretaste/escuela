@@ -216,7 +216,7 @@ class Escuela extends Service
 		if (!class_exists('mPDF'))
 			include_once $wwwroot."/lib/mpdf/mpdf.php";
 
-		$mPDF = new Mpdf\Mpdf();
+		$mPDF = new Mpdf();
 		$mPDF->WriteHTML(trim($html));
 		$mPDF->Output($filePath, 'F');
 
