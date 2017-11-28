@@ -209,6 +209,13 @@ class Escuela extends Service
 		// create the PDF of the certificate
 		$fileName = $this->utils->generateRandomHash() . ".pdf";
 		$filePath = $this->utils->getTempDir() . $fileName;
+
+		// save the PDF and download
+		$wwwroot = $di->get('path')['root'];
+
+		if (!class_exists('mPDF'))
+			include_once $wwwroot."/lib/mpdf/mpdf.php";
+
 		$mPDF = new Mpdf\Mpdf();
 		$mPDF->WriteHTML(trim($html));
 		$mPDF->Output($filePath, 'F');
