@@ -473,6 +473,12 @@ class Escuela extends Service
 		// get course and content
 		$chapterText = Connection::query("SELECT content, course FROM _escuela_chapter WHERE id=$chapter");
 		$content = $chapterText[0]->content;
+
+		$tidy = new tidy();
+		$content = $tidy->repairString($content, array(
+			'output-xhtml' => true
+		), 'utf8');
+
 		$course = $chapterText[0]->course;
 
 		// get all images from the content
