@@ -1,0 +1,55 @@
+<h1>Cursos disponibles</h1>
+
+<div class="row">
+<% courses.forEach(function(e) { %>
+	<div class="col s6 m6 l4 xl3">
+		<div class="card small blue-grey darken-1 hoverable">
+			<div class="card-content white-text">
+				<span class="card-title"><%= e.title %></span>
+				<p>Por <a href="#"><%= e.professor %></a></p>
+ 				<p class="space5">
+					<i class="material-icons">star</i>
+					<i class="material-icons">star</i>
+					<i class="material-icons">star_half</i>
+					<i class="material-icons">star_border</i>
+					<i class="material-icons">star_border</i>
+				</p>
+				<p class="space5">0% leído</p>
+			</div>
+			<div class="card-reveal">
+				<span class="card-title grey-text text-darken-4">
+					<i class="material-icons right">close</i>
+				</span>
+				<p><%= e.content %></p>
+				<p class="space5">Categoria: <a href="#"><%= e.category %></a></p>
+			</div>
+			<div class="card-action">
+				<a href="#">Empezar</a>
+				<i class="material-icons card-title right activator white-text">more_horiz</i>
+			</div>
+		</div>
+	</div>
+<% }); %>
+</div>
+
+
+<!--
+{foreach item=item from=$courses}
+	{if $item->progress == 100}
+		<strike>
+		<b>{link style="text-decoration: line-through;" href="ESCUELA CURSO {$item->id}" caption="{$item->title|capitalize|truncate:100:' ...'}"}</b>
+		</strike>
+	{else}
+		{link href="ESCUELA CURSO {$item->id}" caption="{$item->title|capitalize|truncate:100:' ...'}"}
+	{/if}
+
+	&nbsp;&nbsp;&nbsp;<font color="gray"><small><b>{$item->progress}% terminado</b></small></font>
+	<br/>
+	{$item->content}<br/>
+	<small>Profesor: <b><i>{$item->teacher_name}, {$item->teacher_title}</i></b></small>
+	{space5}
+{/foreach}
+
+<h2>Conviértase en Profesor</h2>
+<p>¿Le gustaría que sus conocimientos ayuden a miles de Cubanos? Si es así por favor considere escribir un curso para nuestra escuela. Si está interesado {link href="SOPORTE" caption="escribanos al soporte" desc="Que curso desea escribir?" popup="true"}</p>
+-->

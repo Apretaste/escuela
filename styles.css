@@ -1,0 +1,12 @@
+.space5 {
+	margin: 10px 0px !important;
+}
+
+.border {
+	border: 1px solid red;
+}
+
+.card-content {
+	padding: 16px;
+	height: 250px;
+}

@@ -112,7 +112,7 @@ create table _escuela_feedback_received(
 );
 
 DELETE FROM _escuela_feedback;
-INSERT INTO _escuela_feedback (id,text,answers) VALUES (1,'C&oacute;mo eval&uacute;a en general este curso?','malo,regular,bueno,excelente');
-INSERT INTO _escuela_feedback (id,text,answers) VALUES (2,'Cu&aacute;nto ha aprendido de este curso?','nada,algo,mucho,cantidad');
-INSERT INTO _escuela_feedback (id,text,answers) VALUES (3,'Cuan f&aacute;cil de entender es el contenido?','enredado,complejo,leible:Le&iacute;ble,simple');
-INSERT INTO _escuela_feedback (id,text,answers) VALUES (4,'Recomendar&iacute;a este curso a otros?','nunca,tal vez,seguro');
+INSERT INTO _escuela_feedback (id,text,answers) VALUES (1,'Cómo evalúa en general este curso?','malo,regular,bueno,excelente');
+INSERT INTO _escuela_feedback (id,text,answers) VALUES (2,'Cuánto ha aprendido de este curso?','nada,algo,mucho,cantidad');
+INSERT INTO _escuela_feedback (id,text,answers) VALUES (3,'Cuan fácil de entender es el contenido?','enredado,complejo,leible:Leíble,simple');
+INSERT INTO _escuela_feedback (id,text,answers) VALUES (4,'Recomendaría este curso a otros?','nunca,tal vez,seguro');

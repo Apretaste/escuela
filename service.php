@@ -1,45 +1,36 @@
 <?php
 
-class Escuela extends Service
+class Service
 {
 	/**
-	 * Function executed when the service is called
+	 * Main function
 	 *
-	 * @author kuma
-	 * @example ESCUELA
+	 * @author salvipascual
 	 * @param Request
-	 * @return Response
+	 * @param Response
 	 */
-	public function _main(Request $request)
+	public function _main(Request $request, Response $response)
 	{
-		$courses = [];
-		$r = Connection::query("SELECT id FROM _escuela_course WHERE active = 1 ORDER BY popularity DESC");
-		if(isset($r[0])) foreach($r as $course) $courses[] = $this->getCourse($course->id, $request->email);
+		// get the most popular courses
+		$courses = Connection::query("
+			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor'
+			FROM _escuela_course A
+			JOIN _escuela_teacher B
+			ON A.teacher = B.id
+			WHERE A.active = 1
+			ORDER BY popularity DESC
+			LIMIT 10");
 
-		$current_courses = [];
-		$new_courses = [];
-		$old_courses = [];
-
-		foreach($courses as $course)
-		{
-			if($course->progress == 100) $old_courses[] = $course;
-			elseif($course->progress == 0) $new_courses[] = $course;
-			else $current_courses[] = $course;
+		// remove extrange chars
+		foreach ($courses as $c) {
+			$c->title = htmlspecialchars($c->title);
+			$c->content = htmlspecialchars($c->content);
+			$c->professor = htmlspecialchars($c->professor);
 		}
 
-		$l = count($current_courses);
-		for($i = 0; $i < $l - 1; $i ++) for($j = $i + 1; $j < $l; $j ++) if($current_courses[ $i ]->progress < $current_courses[ $j ]->progress)
-		{
-			$temp  = $current_courses[ $i ];
-			$current_courses[ $i ] = $current_courses[ $j ];
-			$current_courses[ $j ] = $temp;
-		}
-
-		$response = new Response();
-		$response->setEmailLayout('layout.tpl');
-		$response->setResponseSubject("Cursos activos");
-		$response->createFromTemplate('basic.tpl', ['courses' => array_merge($current_courses, $new_courses, $old_courses)]);
-		return $response;
+		// setup response
+//		$response->setLayout('layout.tpl');
+		$response->setTemplate('home.ejs', ["courses"=>$courses]);
 	}
 
 	/**
@@ -50,7 +41,7 @@ class Escuela extends Service
 	 * @param Request $request
 	 * @return Response
 	 */
-	public function _curso(Request $request)
+	public function _curso(Request $request, Response $response)
 	{
 		// get the course details
 		$id = intval($request->query);
@@ -59,19 +50,15 @@ class Escuela extends Service
 		// if course cannot be found
 		if(empty($course))
 		{
-			$response = new Response();
-			$response->setEmailLayout('layout.tpl');
-			$response->setResponseSubject("Curso no encontrado");
+
+			$response->setLayout('layout.tpl');
 			$response->createFromText("No encontramos el curso que usted pidio");
-			return $response;
+
 		}
 
 		// display the course
-		$response = new Response();
-		$response->setEmailLayout('layout.tpl');
-		$response->setResponseSubject("Curso: {$course->title}");
-		$response->createFromTemplate('course.tpl', ['course' => $course]);
-		return $response;
+		$response->setLayout('layout.tpl');
+		$response->setTemplate('course.tpl', ['course' => $course]);
 	}
 
 	/**
@@ -82,7 +69,7 @@ class Escuela extends Service
 	 * @param Request $request
 	 * @return Response/array
 	 */
-	public function _capitulo(Request $request)
+	public function _capitulo(Request $request, Response $response)
 	{
 		$id = intval($request->query);
 		$chapter = $this->getChapter($id, $request->email);
@@ -117,10 +104,9 @@ class Escuela extends Service
 			$course = $this->getCourse($chapter->course, $request->email);
 
 			// send response to the view
-			$response = new Response();
-			$response->setEmailLayout('layout.tpl');
-			$response->setResponseSubject($chapter->title);
-			$response->createFromTemplate('chapter.tpl', [
+
+			$response->setLayout('layout.tpl');
+			$response->setTemplate('chapter.tpl', [
 				'chapter' => $chapter,
 				'course' => $course,
 				'before' => $beforeAfter['before'],
@@ -131,11 +117,8 @@ class Escuela extends Service
 			return $responses;
 		}
 
-		$response = new Response();
-		$response->setEmailLayout('layout.tpl');
-		$response->setResponseSubject("Capitulo no encontrado");
+		$response->setLayout('layout.tpl');
 		$response->createFromText("Capitulo no encontrado");
-		return $response;
 	}
 
 	/**
@@ -143,7 +126,7 @@ class Escuela extends Service
 	 *
 	 * @example ESCUELA PRUEBA 2
 	 */
-	public function _prueba(Request $request)
+	public function _prueba(Request $request, Response $response)
 	{
 		return $this->_capitulo($request);
 	}
@@ -154,7 +137,7 @@ class Escuela extends Service
 	 * @author salvipascual
 	 * @example ESCUELA RESPONDER 4
 	 */
-	public function _responder(Request $request)
+	public function _responder(Request $request, Response $response)
 	{
 		// pull the answer selected
 		$id	= intval($request->query);
@@ -177,7 +160,7 @@ class Escuela extends Service
 	 * @param Request $request
 	 * @return Response
 	 */
-	public function _certificado(Request $request)
+	public function _certificado(Request $request, Response $response)
 	{
 		// get the course details
 		$courseid = intval($request->query);
@@ -186,11 +169,10 @@ class Escuela extends Service
 		// if you failed the course
 		if(empty($course) || $course->calification < 80)
 		{
-			$response = new Response();
-			$response->setEmailLayout('layout.tpl');
-			$response->setResponseSubject("No has conseguido pasar el curso");
-			$response->createFromTemplate("failed.tpl", array("course"=>$course));
-			return $response;
+
+			$response->setLayout('layout.tpl');
+			$response->setTemplate("failed.tpl", array("course"=>$course));
+
 		}
 
 		// get the person passing
@@ -229,11 +211,8 @@ class Escuela extends Service
 		$email->send();
 
 		// send response to the view
-		$response = new Response();
-		$response->setEmailLayout('layout.tpl');
-		$response->setResponseSubject("Certificacion de curso terminado");
-		$response->createFromTemplate("certificate.tpl", array("course" => $course, "email"=>$person->email));
-		return $response;
+		$response->setLayout('layout.tpl');
+		$response->setTemplate("certificate.tpl", array("course" => $course, "email"=>$person->email));
 	}
 
 	/**
@@ -242,7 +221,7 @@ class Escuela extends Service
 	 * @param \Request $request
 	 * @return \Response
 	 */
-	public function _opinar(Request $request)
+	public function _opinar(Request $request, Response $response)
 	{
 		// expecting: course_id feedback_id answer
 		$q = trim($request->query);
@@ -300,16 +279,15 @@ class Escuela extends Service
 	 * @param Request $request
 	 * @return Response
 	 */
-	public function _repetir(Request $request)
+	public function _repetir(Request $request, Response $response)
 	{
 		// remove the previous answers
 		Connection::query("DELETE FROM _escuela_answer_choosen WHERE course='{$request->query}' AND email='{$request->email}'");
 
 		// load the test again
 		$response = $this->_curso($request);
-		$response->setEmailLayout('layout.tpl');
+		$response->setLayout('layout.tpl');
 		$response->content['course']->repeated = true;
-		return $response;
 	}
 
 	/**
@@ -415,8 +393,8 @@ class Escuela extends Service
 		// get the full course
 		$res = Connection::query("
 			SELECT *,
-				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_name,
-				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) as teacher_title
+				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
+				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title
 			FROM _escuela_course
 			WHERE id='$id'
 			AND active=1");

@@ -29,7 +29,7 @@
 
 <table width="100%">
 	<tr>
-		<td>Cap&iacute;tulos</td>
+		<td>Capítulos</td>
 		<td align="right">{$course->total_seen}/{$course->total_chapters}</td>
 	</tr>
 	<tr>
@@ -38,7 +38,7 @@
 	</tr>
 	{if $course->calification > 0}
 	<tr>
-		<td>Calificaci&oacute;n</td>
+		<td>Calificación</td>
 		<td align="right"><nobr>{$course->calification} puntos</nobr></td>
 	</tr>
 	{/if}
