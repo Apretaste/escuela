@@ -29,7 +29,7 @@ class Service {
 		}
 
 		// setup response
-		//		$response->setLayout('layout.ejs');
+		$response->setLayout('escuela.ejs');
 		$response->setTemplate('home.ejs', ["courses" => $courses]);
 	}
 
@@ -51,7 +51,7 @@ class Service {
 		// if course cannot be found
 		if (empty($course)) {
 
-			//$response->setLayout('layout.ejs');
+			$response->setLayout('escuela.ejs');
 			$response->setTemplate('text.ejs', [
 				"title" => "Curso no encontrado",
 				"body"  => "No encontramos el curso que usted pidio",
@@ -61,7 +61,7 @@ class Service {
 		}
 
 		// display the course
-		//$response->setLayout('layout.ejs');
+		$response->setLayout('escuela.ejs');
 		$response->setTemplate('course.ejs', ['course' => $course]);
 	}
 
@@ -111,7 +111,7 @@ class Service {
 
 			// send response to the view
 
-			$response->setLayout('layout.ejs');
+			$response->setLayout('escuela.ejs');
 			$response->setTemplate('chapter.ejs', [
 				'chapter' => $chapter,
 				'course'  => $course,
@@ -123,7 +123,7 @@ class Service {
 			return $responses;
 		}
 
-		$response->setLayout('layout.ejs');
+		$response->setLayout('escuela.ejs');
 		$response->createFromText("Capitulo no encontrado");
 	}
 
@@ -176,7 +176,7 @@ class Service {
 		// if you failed the course
 		if (empty($course) || $course->calification < 80) {
 
-			$response->setLayout('layout.ejs');
+			$response->setLayout('escuela.ejs');
 			$response->setTemplate("failed.ejs", ["course" => $course]);
 
 		}
@@ -218,7 +218,7 @@ class Service {
 		$email->send();
 
 		// send response to the view
-		$response->setLayout('layout.ejs');
+		$response->setLayout('escuela.ejs');
 		$response->setTemplate("certificate.ejs", [
 			"course" => $course,
 			"email"  => $person->email,
