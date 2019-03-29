@@ -28,7 +28,7 @@
 
         <h2>&Iacute;ndice del curso</h2>
 
-        <table width="100%">
+        <table class="table" width="100%">
             <% course.chapters.forEach(function(chapter){ %>
             <tr>
                 <td>
@@ -57,7 +57,7 @@
 
         <h2>Progreso del curso</h2>
 
-        <table width="100%">
+        <table class="striped">
             <tr>
                 <td>Capítulos</td>
                 <td align="right"><%= course.total_seen %>/<%= course.total_chapters %></td>
@@ -83,11 +83,11 @@
     <div class="col col-md-12">
         <% if (course.calification < 80) { %>
         <% if (course.all_chapters_finished) { %>
-        <a href="#!" class="link link-simple" data-command="ESCUELA REPETIR" data-query="<%= course.id %>">Repetir</a>
+        <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA REPETIR" data-query="<%= course.id %>">Repetir</a>
         <% } %>
         <% } else { %>
-        <a href="#!" class="link link-simple" data-command="ESCUELA CERTIFICADO" data-query="<%= course.id %>">Certificado</a>
+        <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA CERTIFICADO" data-query="<%= course.id %>">Certificado</a>
         <% } %>
-        <a href="#!" class="link link-simple" data-command="ESCUELA">Cursos</a>
+        <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA">Cursos</a>
     </div>
 </div>
