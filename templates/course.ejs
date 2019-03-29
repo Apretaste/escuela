@@ -1,0 +1,93 @@
+<div class="row">
+    <div class="col col-md-12">
+        <% if (course.repeated) { %>
+        <table width="100%">
+            <tr>
+                <td align="center" bgcolor="#F6CED8">
+                    <p>
+                        <small>Hemos creado nuevas pruebas para que retomes este curso. Pasa todas las
+                            pruebas nuevamente; puedes leerte de nuevo el contenido de ser necesario.
+                        </small>
+                    </p>
+                </td>
+            </tr>
+        </table>
+        <% } %>
+    </div>
+</div>
+<div class="row">
+    <div class="col col-md-12">
+
+        <h1><%= course.title %></h1>
+        <p><%= course.content %></p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col col-md-12">
+
+        <h2>&Iacute;ndice del curso</h2>
+
+        <table width="100%">
+            <% course.chapters.forEach(function(chapter){ %>
+            <tr>
+                <td>
+                    <a href="#!" class="link link-simple" data-command="ESCUELA <%= chapter.xtype %>"
+                       data-query="<%= chapter.id %>"><%= chapter.title %></a>
+                </td>
+                <td align="right">
+                    <% if (chapter.xtype == 'CAPITULO') { %>
+                    <% if (chapter.terminated) { %>
+                    LEIDO
+                    <% } else { %>
+                    PENDIENTE
+                    <% } %>
+                    <% } else { %>
+                    <%= chapter.calification %> puntos
+                    <% } %>
+                </td>
+            </tr>
+            <% }) %>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col col-md-12">
+
+        <h2>Progreso del curso</h2>
+
+        <table width="100%">
+            <tr>
+                <td>Capítulos</td>
+                <td align="right"><%= course.total_seen %>/<%= course.total_chapters %></td>
+            </tr>
+            <tr>
+                <td>Pruebas</td>
+                <td align="right"><%= course.total_answered %>/<%= course.total_tests %></td>
+            </tr>
+            <% if (course.calification > 0) { %>
+            <tr>
+                <td>Calificación</td>
+                <td align="right">
+                    <nobr><%= course.calification %> puntos</nobr>
+                </td>
+            </tr>
+            <% } %>
+        </table>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col col-md-12">
+        <% if (course.calification < 80) { %>
+        <% if (course.all_chapters_finished) { %>
+        <a href="#!" class="link link-simple" data-command="ESCUELA REPETIR" data-query="<%= course.id %>">Repetir</a>
+        <% } %>
+        <% } else { %>
+        <a href="#!" class="link link-simple" data-command="ESCUELA CERTIFICADO" data-query="<%= course.id %>">Certificado</a>
+        <% } %>
+        <a href="#!" class="link link-simple" data-command="ESCUELA">Cursos</a>
+    </div>
+</div>

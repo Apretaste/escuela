@@ -1,0 +1,63 @@
+<div class="row">
+    <div class="col col-md-12">
+        <h1><%= chapter.title %></h1>
+
+        <%= chapter.content %>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col col-md-12">
+
+        <% if (chapter.xtype == 'PRUEBA') { %>
+            <% if (chapter.terminated) { %>
+            <p align="center" style="background-color:#C11414; color:white; padding:5px;">
+                <b>Terminada con <%= chapter.calification %> puntos de 100</b>
+            </p>
+            <% } %>
+
+            <% chapter.questions.forEach(function(question) { %>
+                <b><% question.title %></b>
+                <br/>
+                <ol>
+                    <% question.answers.forEach(function(answer){ %>
+                    <li>
+                        <% if (question.terminated) { %>
+                            <% if (question.answer_choosen == answer.id) { %>
+                                <b><%= answer.title %></b>
+                            <% } else { %>
+                                <%= $answer.title %>
+                            <% } %>
+                            <% if (question.answer == answer.id) { %>
+                                <span style="color:gray;">&#10004;</span>
+                            <% } %>
+                        <% } else { %>
+                            <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER"
+                               data-query="<%= answer.id %>"><%= answer.title %></a>
+                        <% } %>
+                    </li>
+                    <% }); %>
+                </ol>
+            <% }); %>
+        <% } %>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col col-md-12">
+
+    <% if (chapter.xtype == 'PRUEBA' && course.all_chapters_finished) { %>
+    <a href="#!" class="link link-simple" data-command = "ESCUELA CERTIFICADO" data-query = "<%= chapter.course %>">Evaluar</a>
+    <a href="#!" class="link link-simple" data-command = "ESCUELA CURSO" data-query = "<%= chapter.course %>">&Iacute;ndice</a>
+    <% } else { %>
+        <% if (before) { %>
+        <a href="#!" class="link link-simple" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>">&laquo; Anterior</a>
+        <% } %>
+        <a href="#!" class="link link-simple" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>">&Iacute;ndice</a>
+
+        <% if (after) {%>
+            <a href="#!" class="link link-simple" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>">Siguente &raquo; </a>
+        <% } %>
+    <% } %>
+    </div>
+</div>

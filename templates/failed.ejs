@@ -1,0 +1,13 @@
+<div class="row">
+    <div class="col col-md-12">
+
+        <h1>No has conseguido pasar el curso</h1>
+
+        <p>Solo has alcanzado <%= course.calification %> de 80 puntos necesarios, y por lo tanto
+            aun no puedes pasar este curso. Puedes volver a estudiar y tomar la prueba nuevamente.</p>
+
+        <a href="#!" class="link link-simple" data-command="ESCUELA REPETIR" data-query="<%= course.id %>">Repetir</a>
+        <a href="#!" class="link link-simple" data-command="ESCUELA CURSO"
+           data-query="<%= course.id %>">&Iacute;ndice</a>
+    </div>
+</div>
