@@ -1,4 +1,10 @@
-<h1>Cursos disponibles</h1>
+<h1>Bienvenido <%= name %></h1>
+<div class="row">
+	<div class="col col-lg-12 col-sm-12">
+		<p>Usted ha completado <%= completed %> cursos y tiene <b><%= level %></b></p>
+		<p>A continuaci&oacute;n sus cursos empezados.</p>
+	</div>
+</div>
 
 <div class="row">
 <% courses.forEach(function(e) { %>
