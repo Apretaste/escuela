@@ -1,0 +1,89 @@
+
+<div class="row">
+    <div class="col s12 m12 l12 xl12">
+        <h1>Buscar</h1>
+
+        <div class="row">
+            <div class="input-field col s6 m6 l6 xl6">
+                <select id="category" class="input">
+                    <option value="ALL">Todas</option>
+                    <% for (var value in categories) { %>
+                    <option value="<%= value %>"><%= categories[value] %></option>
+                    <% }%>
+                </select>
+                <label for="category">Categor&iacute;a</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s6 m6 l6 xl6">
+                <select id="author">
+                    <option value="ALL">Todos</option>
+                    <% authors.forEach(function(author){ %>
+                    <option value="<%= author.id %>"><%= author.name %></option>
+                    <% });%>
+                </select>
+                <label for="author">Autor:</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s6 m6 l6 xl6">
+                <select id="raiting">
+                    <option value="0">Todos</option>
+                    <option value="1">1 o m&aacute;s</option>
+                    <option value="2">2 o m&aacute;s</option>
+                    <option value="3">3 o m&aacute;s</option>
+                    <option value="4">4 o m&aacute;s</option>
+                </select>
+                <label for="raiting">Popularidad:</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s6 m6 l6 xl6">
+                <label for="title">T&iacute;tulo:</label>
+                <input id="title" type="text" class="validate" >
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s6 m6 l6 xl6">
+                <button id="btnSearch" class="btn btn-circle">Buscar</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="row">
+    <% courses.forEach(function(e, i) { %>
+    <div class="col s12 m6 l4 xl4">
+        <div class="card small blue-grey darken-1 hoverable">
+            <div class="card-content white-text">
+                <span class="card-title"><%= e.title %></span>
+                <p>Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{filters: [{author: courses[<%= i %>].professor}]}"><%= e.professor %></a></p>
+                <p class="space5">
+                    <i class="material-icons">star</i>
+                    <i class="material-icons">star</i>
+                    <i class="material-icons">star_half</i>
+                    <i class="material-icons">star_border</i>
+                    <i class="material-icons">star_border</i>
+                </p>
+                <p class="space5">0% leído</p>
+            </div>
+            <div class="card-reveal">
+				<span class="card-title grey-text text-darken-4">
+					<i class="material-icons right">close</i>
+				</span>
+                <p><%= e.content %></p>
+                <p class="space5">Categoria: <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{filters: [{category: courses[<%= i %>].category}]}"><%= e.category %></a></p>
+            </div>
+            <div class="card-action">
+                <a href="#!" class="link link-simple" data-command="ESCUELA CURSO" data-query="<%= e.id %>">Empezar</a>
+                <i class="material-icons card-title right activator white-text">more_horiz</i>
+            </div>
+        </div>
+    </div>
+    <% }); %>
+</div>

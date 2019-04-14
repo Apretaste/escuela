@@ -1,18 +1,24 @@
-<h1>Bienvenido <%= name %></h1>
+<h1 style="font-size: 1.5rem; text-align:center;">Bienvenido <%= name %></h1>
 <div class="row">
 	<div class="col col-lg-12 col-sm-12">
+        <% if (completed == 0) {%> <!-- si no esta registrado en ningun curso debe decir ... -->
+        <p>Usted no tiene cursos empezados. Escoja un curso para empezar a estudiar y ganar nivel.</p>
+        <% } else { %>
 		<p>Usted ha completado <%= completed %> cursos y tiene <b><%= level %></b></p>
 		<p>A continuaci&oacute;n sus cursos empezados.</p>
+        <% }%>
 	</div>
 </div>
-
+<% if (noResults) {%>
+    <
+<% }%>
 <div class="row">
-<% courses.forEach(function(e) { %>
-	<div class="col s6 m6 l3 xl2">
+<% courses.forEach(function(e, i) { %>
+	<div class="col s12 m6 l4 xl4">
 		<div class="card small blue-grey darken-1 hoverable">
 			<div class="card-content white-text">
 				<span class="card-title"><%= e.title %></span>
-				<p>Por <a href="#"><%= e.professor %></a></p>
+				<p>Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{author: courses[<%= i %>].professor}"><%= e.professor %></a></p>
  				<p class="space5">
 					<i class="material-icons">star</i>
 					<i class="material-icons">star</i>
@@ -27,7 +33,7 @@
 					<i class="material-icons right">close</i>
 				</span>
 				<p><%= e.content %></p>
-				<p class="space5">Categoria: <a href="#"><%= e.category %></a></p>
+				<p class="space5">Categoria: <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{category: courses[<%= i %>].category}"><%= e.category %></a></p>
 			</div>
 			<div class="card-action">
 				<a href="#!" class="link link-simple" data-command="ESCUELA CURSO" data-query="<%= e.id %>">Empezar</a>
