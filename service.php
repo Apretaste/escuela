@@ -504,7 +504,7 @@ class Service
 		// get the full course
 		$res = Connection::query("
 			SELECT *,
-				(SELECT name FROM  WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
+				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
 				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title
 			FROM _escuela_course
 			WHERE id='$id'
