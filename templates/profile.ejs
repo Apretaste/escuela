@@ -15,7 +15,7 @@
             <div class="input-field col s6 m6 l6 xl6">
                 <select id="raiting">
                     <% levels.forEach(function (e, i) {%>
-                    <option value="<%= e %>"><%= e.toLowerCase().firstUpper() %></option>
+                    <option value="<%= e %>"><%= jsUcfirst(e.toLowerCase())%></option>
                     <% }); %>
                 </select>
                 <label for="raiting"><Nivel></Nivel>:</label>
