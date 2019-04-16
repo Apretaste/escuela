@@ -398,7 +398,7 @@ class Service {
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("profile.ejs", [
 			"resume" => [], //$resume,
-		//	"profile" => $profile,
+		 	"profile" => ["first_name" => "Pepe"], //$profile,
 			"levels" => [] //$levels
 		]);
 	}
