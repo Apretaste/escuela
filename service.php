@@ -49,7 +49,7 @@ class Service
 	public function _buscar(Request $request, Response &$response)
 	{
 		$courses = [];
-
+		$noResults = false;
 		$data = $request->input->data;
 		if (isset($data->category)
 		|| isset($data->author)
@@ -69,6 +69,9 @@ class Service
 			".((!empty($data->title)) ? " AND A.title LIKE '%{$data->title}%'":"")."
 			ORDER BY popularity DESC
 			LIMIT 10");
+
+			$noResults = ! isset($courses);
+
 		}
 
 		// display the course
@@ -91,7 +94,8 @@ class Service
 			],
 			"authors" => $this->getTeachers(),
 			"courses" => $courses,
-			"data" => $data
+			"data" => $data,
+			"noResults" => $noResults
 		]);
 	}
 
