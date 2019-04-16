@@ -380,14 +380,14 @@ class Service {
 	 */
 	public function _perfil(Request $request, Response &$response) {
 		$resume = $this->getResume($request->person->email);
-		$profile = Utils::getPerson($request->person->email);
-		$profile->level = 'PRINCIPIANTE';
-		$r = Connection::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
+		//$profile = Utils::getPerson($request->person->email);
+		//$profile->level = 'PRINCIPIANTE';
+		/*$r = Connection::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
 		if (!isset($r[0]))
 		{
 			Connection::query("INSERT INTO _escuela_profile (person_id, `level`) VALUES ('{$request->person->id}','PRINCIPIANTE');");
-		} else
-			$profile->level = $r[0]->level;
+		} //else
+			//$profile->level = $r[0]->level;
 /*
 		$r = Connection::query("SELECT COLUMN_TYPE as result
 				FROM information_schema.`COLUMNS`
@@ -398,8 +398,8 @@ class Service {
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("profile.ejs", [
 			"resume" => $resume,
-			"profile" => $profile,
-			"levels" => $levels
+		//	"profile" => $profile,
+			"levels" => [] //$levels
 		]);
 	}
 	
