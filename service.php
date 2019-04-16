@@ -379,33 +379,33 @@ class Service {
 	 * @param \Response $response
 	 */
 	public function _perfil(Request $request, Response &$response) {
-		//$resume = $this->getResume($request->person->email);
-		//$profile = Utils::getPerson($request->person->email);
-		//$profile->level = 'PRINCIPIANTE';
-		/*$r = Connection::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
+		$resume = $this->getResume($request->person->email);
+		$profile = Utils::getPerson($request->person->email);
+		$profile->level = 'PRINCIPIANTE';
+		$r = Connection::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
 		if (!isset($r[0]))
 		{
 			Connection::query("INSERT INTO _escuela_profile (person_id, `level`) VALUES ('{$request->person->id}','PRINCIPIANTE');");
-		} //else
-			//$profile->level = $r[0]->level;
-/*
+		} else
+			$profile->level = $r[0]->level;
+
 		$r = Connection::query("SELECT COLUMN_TYPE as result
 				FROM information_schema.`COLUMNS`
 				WHERE TABLE_NAME = '_escuela_profile'
 							AND COLUMN_NAME = 'level';");
-*/
-		$levels = []; //explode(",", str_replace(["'","enum(",")"],"", $r[0]->result));
+
+		$levels = explode(",", str_replace(["'","enum(",")"],"", $r[0]->result));
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("profile.ejs", [
-			"resume" => [], //$resume,
-		 	"profile" => ["first_name" => "Pepe"], //$profile,
-			"levels" => [] //$levels
+			"resume" => $resume,
+		 	"profile" => $profile,
+			"levels" => $levels
 		]);
 	}
 	
 	private function getResume($email){
 		$r = Connection::query("
-			select * from _escuela_course inner join (
+			select * from (
 				select * from (
 					select course, 
 							count(*) as total, 
@@ -416,7 +416,7 @@ class Service {
 					from  _escuela_chapter
 					group by course
 					) subq
-				) subq2
+				) subq2 inner join _escuela_course
     		on subq2.course = _escuela_course.id");
 
 		return $r;
