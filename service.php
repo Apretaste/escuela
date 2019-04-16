@@ -154,8 +154,7 @@ class Service
 			$beforeAfter = $this->getBeforeAfter($chapter);
 			$images = $this->getChapterImages($id);
 			$chapter->content = Utils::putInlineImagesToHTML($chapter->content, $images, 'cid:', '.jpg');
-			$chapter->content = html_entity_decode($chapter->content);
-			
+
 			// Log the visit to this chapter
 			if($chapter->xtype == 'CAPITULO')
 			{
