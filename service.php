@@ -153,6 +153,7 @@ class Service
 			$responses = [];
 			$beforeAfter = $this->getBeforeAfter($chapter);
 			$images = $this->getChapterImages($id);
+			$chapter->content = Utils::putInlineImagesToHTML($chapter->content, $images, 'cid:', '.jpg');
 
 			// Log the visit to this chapter
 			if($chapter->xtype == 'CAPITULO')
@@ -161,8 +162,8 @@ class Service
 			}
 
 			// remove the cid: part from the content
-			$di = \Phalcon\DI\FactoryDefault::getDefault();
-			if($di->get('environment') == "app")
+			//$di = \Phalcon\DI\FactoryDefault::getDefault();
+			/*if($di->get('environment') == "app")
 			{
 				$chapter->content = str_replace("cid:", "", $chapter->content);
 			}
@@ -172,7 +173,7 @@ class Service
 			{
 				$http = $di->get('path')['http'];
 				$chapter->content = str_replace("cid:", "$http/courses/8/149/", $chapter->content);
-			}
+			}*/
 
 			// get the code inside the <body> tag
 			$ini = strpos($chapter->content, '<body>') + 6;
