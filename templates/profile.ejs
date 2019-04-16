@@ -3,7 +3,9 @@
         <h1>Medallas</h1>
         <p>Sus medallas recibidas por los cursos que ha pasado</p>
         <% resume.forEach(function(e, i){ %>
-        <i class="material-icons"><%= e.medal %></i>
+            <% if (e.chapters == e.viewed) { %>
+                <i class="material-icons"><%= e.medal %></i>
+            <% } %>
         <% }); %>
     </div>
 </div>
@@ -13,18 +15,23 @@
         <p>Complete su perfil para ganar nivel y recomendarle cursos</p>
         <div class="row">
             <div class="input-field col s6 m6 l6 xl6">
-                <select id="raiting">
+                <select id="level">
                     <% levels.forEach(function (e, i) {%>
                     <option value="<%= e %>"><%= jsUcfirst(e.toLowerCase())%></option>
                     <% }); %>
                 </select>
-                <label for="raiting"><Nivel></Nivel>:</label>
+                <label for="level"><Nivel></Nivel>:</label>
             </div>
         </div>
         <div class="row">
             <div class="input-field col s6 m6 l6 xl6">
                 <label for="title">Nombre:</label>
-                <input id="nombre" type="text" class="validate"  value="<%= profile.first_name %>">
+                <input id="name" type="text" class="validate"  value="<%= profile.first_name %> <%= profile.last_name %>">
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s6 m6 l6 xl6">
+                <a class="btn-floating btn-large waves-effect waves-light text-green hide-on-small-only save"><i class="material-icons">save</i></a>
             </div>
         </div>
     </div>

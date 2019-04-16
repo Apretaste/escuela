@@ -379,6 +379,17 @@ class Service {
 	 * @param \Response $response
 	 */
 	public function _perfil(Request $request, Response &$response) {
+
+		// save profile
+		if (isset($request->input->data->save))
+		{
+			$pieces = Utils::fullNameToNamePieces($request->input->data->name);
+			Connection::query("UPDATE _escuela_profile SET level = '{$request->input->data->level}' WHERE person_id = '{$request->person->id}'");
+			Connection::query("UPDATE person SET first_name = '{$pieces[0]}', middle_name = '{$pieces[1]}', last_name = '{$pieces[2]}', mother_name = '{$pieces[3]}' WHERE id = '{$request->person->id}'");
+			return;
+		}
+
+		// show profile
 		$resume = $this->getResume($request->person->email);
 		$profile = Utils::getPerson($request->person->email);
 		$profile->level = 'PRINCIPIANTE';
