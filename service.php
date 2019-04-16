@@ -397,7 +397,7 @@ class Service {
 		$levels = []; //explode(",", str_replace(["'","enum(",")"],"", $r[0]->result));
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("profile.ejs", [
-			//"resume" => $resume,
+			"resume" => [], //$resume,
 		//	"profile" => $profile,
 			"levels" => [] //$levels
 		]);
