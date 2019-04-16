@@ -396,6 +396,7 @@ class Service {
 
 		$levels = [];
 		@eval('$levels = '.str_replace('enum(','array(', $r[0]->result));
+		$response->setLayout('escuela.ejs');
 		$response->setTemplate("profile.ejs", [
 			"resume" => $resume,
 			"profile" => $profile,
