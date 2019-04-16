@@ -394,7 +394,7 @@ class Service {
 				WHERE TABLE_NAME = '_escuela_profile'
 							AND COLUMN_NAME = 'level';");
 
-		$levels = [];
+		$levels = explode(",", str_replace(["'","enum(",")"],"", $r[0]->levels));
 		//@eval('$levels = '.str_replace('enum(','array(', $r[0]->result));
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("profile.ejs", [
