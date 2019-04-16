@@ -379,7 +379,7 @@ class Service {
 	 * @param \Response $response
 	 */
 	public function _perfil(Request $request, Response &$response) {
-		$resume = $this->getResume($request->person->email);
+		//$resume = $this->getResume($request->person->email);
 		//$profile = Utils::getPerson($request->person->email);
 		//$profile->level = 'PRINCIPIANTE';
 		/*$r = Connection::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
@@ -397,7 +397,7 @@ class Service {
 		$levels = []; //explode(",", str_replace(["'","enum(",")"],"", $r[0]->result));
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("profile.ejs", [
-			"resume" => $resume,
+			//"resume" => $resume,
 		//	"profile" => $profile,
 			"levels" => [] //$levels
 		]);
