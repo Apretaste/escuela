@@ -1,6 +1,31 @@
 <div class="row">
     <div class="col">
         <h1>Medallas</h1>
+        <p>Sus medallas recibidas por los cursos que ha pasado</p>
+        <% resume.forEach(function(e, i){ %>
+        <i class="material-icons"><%= e.medal %></i>
+        <% }); %>
+    </div>
+</div>
 
+<div class="row">
+    <div class="col">
+        <p>Complete su perfil para ganar nivel y recomendarle cursos</p>
+        <div class="row">
+            <div class="input-field col s6 m6 l6 xl6">
+                <select id="raiting">
+                    <% levels.forEach(function (e, i) {%>
+                    <option value="<%= e %>"><%= e.toLowerCase().firstUpper() %></option>
+                    <% }); %>
+                </select>
+                <label for="raiting"><Nivel></Nivel>:</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s6 m6 l6 xl6">
+                <label for="title">Nombre:</label>
+                <input id="nombre" type="text" class="validate"  value="<%= profile.first_name %>">
+            </div>
+        </div>
     </div>
 </div>

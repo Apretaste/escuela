@@ -389,9 +389,17 @@ class Service {
 		} else
 			$profile->level = $r[0]->level;
 
+		$r = Connection::query("SELECT COLUMN_TYPE as result
+				FROM information_schema.`COLUMNS`
+				WHERE TABLE_NAME = '_escuela_profile'
+							AND COLUMN_NAME = 'level';");
+
+		$levels = [];
+		@eval('$levels = '.str_replace('enum(','array(', $r[0]->result));
 		$response->setTemplate("profile.ejs", [
 			"resume" => $resume,
-			"profile" => $profile
+			"profile" => $profile,
+			"levels" => $levels
 		]);
 	}
 	
