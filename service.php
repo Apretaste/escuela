@@ -176,9 +176,12 @@ class Service
 			}*/
 
 			// get the code inside the <body> tag
-			$ini = strpos($chapter->content, '<body>') + 6;
-			$end = strpos($chapter->content, '</body>');
-			$chapter->content = substr($chapter->content, $ini, $end - $ini);
+			if (stripos($chapter->content, '<body>') !== false)
+			{
+				$ini = strpos($chapter->content, '<body>') + 6;
+				$end = strpos($chapter->content, '</body>');
+				$chapter->content = substr($chapter->content, $ini, $end - $ini);
+			}
 
 			// check if the course is terminated
 			$course = $this->getCourse($chapter->course, $request->person->email);
