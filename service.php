@@ -1,7 +1,6 @@
 <?php
 
-class Service
-{
+class Service {
 
 	/**
 	 * Main function
@@ -9,10 +8,8 @@ class Service
 	 * @author salvipascual
 	 *
 	 * @param Request
-	 * @param Response
 	 */
-	public function _main(Request $request, Response $response)
-	{
+	public function _main(Request $request, Response &$response) {
 
 		$person = Utils::getPerson($request->person->email);
 
@@ -27,75 +24,77 @@ class Service
 			LIMIT 10");
 
 		// remove extrange chars
-		foreach($courses as $c)
-		{
-			$c->title = htmlspecialchars($c->title);
-			$c->content = htmlspecialchars($c->content);
+		foreach ($courses as $c) {
+			$c->title     = htmlspecialchars($c->title);
+			$c->content   = htmlspecialchars($c->content);
 			$c->professor = htmlspecialchars($c->professor);
-			$c->author = $c->professor;
+			$c->author    = $c->professor;
 		}
 
 		// setup response
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('home.ejs', [
-			"courses" => $courses,
-			"name" => $person->first_name ? $person->first_name : '',
+			"courses"   => $courses,
+			"name"      => $person->first_name ? $person->first_name : '',
 			// si no ha completado el nombre en el perfil debe decir solo Bienvenido
-			"level" => "Principiante",
-			"completed" => $this->getTotalCompletedCourses($person->email)
+			"level"     => "Principiante",
+			"completed" => $this->getTotalCompletedCourses($person->email),
 		]);
 	}
 
-	public function _buscar(Request $request, Response &$response)
-	{
-		$courses = [];
-		$noResults = false;
-		$data = $request->input->data;
+	/**
+	 * Buscar cursos
+	 *
+	 * @param \Request $request
+	 * @param \Response $response
+	 */
+	public function _buscar(Request $request, Response &$response) {
+		$courses   = [];
+		$noResults = FALSE;
+		$data      = $request->input->data;
 		if (isset($data->category)
-		|| isset($data->author)
-		    || isset($data->raiting)
-		    || isset($data->title)
-		)
-		{
+				|| isset($data->author)
+				|| isset($data->raiting)
+				|| isset($data->title)
+		) {
 			$courses = Connection::query("
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor'
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
 			WHERE A.active = 1
-			".((!empty($data->category) && $data->category != 'ALL') ? " AND A.category = '{$data->category}'":"")."
-			".((!empty($data->author) && $data->author != 'ALL') ? " AND A.author = '{$data->category}'":"")."
-			".((!empty($data->raiting) && $data->raiting * 1 != 0) ? " AND A.popularity >= {$data->raiting}":"")."
-			".((!empty($data->title)) ? " AND A.title LIKE '%{$data->title}%'":"")."
+			" . ((!empty($data->category) && $data->category != 'ALL') ? " AND A.category = '{$data->category}'" : "") . "
+			" . ((!empty($data->author) && $data->author != 'ALL') ? " AND A.author = '{$data->category}'" : "") . "
+			" . ((!empty($data->raiting) && $data->raiting * 1 != 0) ? " AND A.popularity >= {$data->raiting}" : "") . "
+			" . ((!empty($data->title)) ? " AND A.title LIKE '%{$data->title}%'" : "") . "
 			ORDER BY popularity DESC
 			LIMIT 10");
 
-			$noResults = ! isset($courses);
+			$noResults = !isset($courses);
 
 		}
 
 		// display the course
 		$response->setLayout('escuela.ejs');
-
 		$response->setTemplate('search.ejs', [
 			"categories" => [
-				'SOCIEDAD' => 'Sociedad',
-				'NEGOCIOS' => 'Negocios',
-				'MEDICINA' => 'Medicina',
+				'SOCIEDAD'    => 'Sociedad',
+				'NEGOCIOS'    => 'Negocios',
+				'MEDICINA'    => 'Medicina',
 				'INFORMATICA' => html_entity_decode('Inform&aacute;tica'),
-				'INGENIERIA' => html_entity_decode('Ingenier&iacute;a'),
-				'LETRAS' => 'Letras',
-				'ARTES' => 'Artes',
-				'FILOSOFIA' => html_entity_decode('Filosof&iacute;a'),
-				'SALUD' => 'Salud',
-				'POLITICA' => html_entity_decode('Pol&iacute;tica'),
-				'TECNICA' => html_entity_decode('T&eacute;cnica'),
-				'OTRO' => 'Otros'
+				'INGENIERIA'  => html_entity_decode('Ingenier&iacute;a'),
+				'LETRAS'      => 'Letras',
+				'ARTES'       => 'Artes',
+				'FILOSOFIA'   => html_entity_decode('Filosof&iacute;a'),
+				'SALUD'       => 'Salud',
+				'POLITICA'    => html_entity_decode('Pol&iacute;tica'),
+				'TECNICA'     => html_entity_decode('T&eacute;cnica'),
+				'OTRO'        => 'Otros',
 			],
-			"authors" => $this->getTeachers(),
-			"courses" => $courses,
-			"data" => $data,
-			"noResults" => $noResults
+			"authors"    => $this->getTeachers(),
+			"courses"    => $courses,
+			"data"       => $data,
+			"noResults"  => $noResults,
 		]);
 	}
 
@@ -109,20 +108,18 @@ class Service
 	 *
 	 * @return Response
 	 */
-	public function _curso(Request $request, Response &$response)
-	{
+	public function _curso(Request $request, Response &$response) {
 		// get the course details
-		$id = intval($request->input->data->query);
+		$id     = intval($request->input->data->query);
 		$course = $this->getCourse($id, $request->person->email);
 
 		// if course cannot be found
-		if(empty($course))
-		{
+		if (empty($course)) {
 
 			$response->setLayout('escuela.ejs');
 			$response->setTemplate('text.ejs', [
 				"title" => "Curso no encontrado",
-				"body" => "No encontramos el curso que usted pidio",
+				"body"  => "No encontramos el curso que usted pidio",
 			]);
 
 			return;
@@ -139,25 +136,22 @@ class Service
 	 * @author kuma
 	 * @example ESCUELA CAPITULO 3
 	 *
+	 * @param Response $response
 	 * @param Request $request
 	 *
-	 * @return Response/array
 	 */
-	public function _capitulo(Request $request, Response &$response)
-	{
-		$id = intval($request->input->data->query);
+	public function _capitulo(Request $request, Response &$response) {
+		$id      = intval($request->input->data->query);
 		$chapter = $this->getChapter($id, $request->person->email);
 
-		if($chapter)
-		{
-			$responses = [];
-			$beforeAfter = $this->getBeforeAfter($chapter);
-			$images = $this->getChapterImages($id);
+		if ($chapter) {
+			$responses        = [];
+			$beforeAfter      = $this->getBeforeAfter($chapter);
+			$images           = $this->getChapterImages($id);
 			$chapter->content = Utils::putInlineImagesToHTML($chapter->content, $images, 'cid:', '.jpg');
 
 			// Log the visit to this chapter
-			if($chapter->xtype == 'CAPITULO')
-			{
+			if ($chapter->xtype == 'CAPITULO') {
 				Connection::query("INSERT IGNORE INTO _escuela_chapter_viewed (email, chapter, course) VALUES ('{$request->person->email}', '{$id}', '{$chapter->course}');");
 			}
 
@@ -176,10 +170,9 @@ class Service
 			}*/
 
 			// get the code inside the <body> tag
-			if (stripos($chapter->content, '<body>') !== false)
-			{
-				$ini = strpos($chapter->content, '<body>') + 6;
-				$end = strpos($chapter->content, '</body>');
+			if (stripos($chapter->content, '<body>') !== FALSE) {
+				$ini              = strpos($chapter->content, '<body>') + 6;
+				$end              = strpos($chapter->content, '</body>');
 				$chapter->content = substr($chapter->content, $ini, $end - $ini);
 			}
 
@@ -191,9 +184,9 @@ class Service
 			$response->setLayout('escuela.ejs');
 			$response->setTemplate('chapter.ejs', [
 				'chapter' => $chapter,
-				'course' => $course,
-				'before' => $beforeAfter['before'],
-				'after' => $beforeAfter['after'],
+				'course'  => $course,
+				'before'  => $beforeAfter['before'],
+				'after'   => $beforeAfter['after'],
 			], $images);
 
 			$responses[] = $response;
@@ -210,8 +203,7 @@ class Service
 	 *
 	 * @example ESCUELA PRUEBA 2
 	 */
-	public function _prueba(Request $request, Response &$response)
-	{
+	public function _prueba(Request $request, Response &$response) {
 		$this->_capitulo($request, $response);
 	}
 
@@ -221,19 +213,16 @@ class Service
 	 * @author salvipascual
 	 * @example ESCUELA RESPONDER 4
 	 */
-	public function _responder(Request $request, Response &$response)
-	{
+	public function _responder(Request $request, Response &$response) {
 		// pull the answer selected
-		$id = intval($request->input->data->query);
+		$id  = intval($request->input->data->query);
 		$res = Connection::query("SELECT * FROM _escuela_answer WHERE id=$id");
 
 		// do not let pass invalid answers
-		if(empty($res))
-		{
+		if (empty($res)) {
 			return new Response();
 		}
-		else
-		{
+		else {
 			$answer = $res[0];
 		}
 
@@ -250,15 +239,13 @@ class Service
 	 *
 	 * @return Response
 	 */
-	public function _certificado(Request $request, Response &$response)
-	{
+	public function _certificado(Request $request, Response &$response) {
 		// get the course details
 		$courseid = intval($request->input->data->query);
-		$course = $this->getCourse($courseid, $request->person->email);
+		$course   = $this->getCourse($courseid, $request->person->email);
 
 		// if you failed the course
-		if(empty($course) || $course->calification < 80)
-		{
+		if (empty($course) || $course->calification < 80) {
 
 			$response->setLayout('escuela.ejs');
 			$response->setTemplate("failed.ejs", ["course" => $course]);
@@ -266,8 +253,8 @@ class Service
 		}
 
 		// get the person passing
-		$person = $this->utils->getPerson($request->person->email);
-		$di = \Phalcon\DI\FactoryDefault::getDefault();
+		$person   = $this->utils->getPerson($request->person->email);
+		$di       = \Phalcon\DI\FactoryDefault::getDefault();
 		$certLogo = $di->get('path')['http'] . "/images/sello.jpg";
 
 		// create HTML for the certificate
@@ -285,8 +272,7 @@ class Service
 		// save the PDF and download
 		$wwwroot = $di->get('path')['root'];
 
-		if( ! class_exists('mPDF'))
-		{
+		if (!class_exists('mPDF')) {
 			include_once $wwwroot . "/lib/mpdf/mpdf.php";
 		}
 
@@ -295,10 +281,10 @@ class Service
 		$mPDF->Output($filePath, 'F');
 
 		// send file as email attachment
-		$email = new Email();
-		$email->to = $person->email;
-		$email->subject = "Su certificado";
-		$email->body = "Su certificado se encuentra adjunto a este correo";
+		$email              = new Email();
+		$email->to          = $person->email;
+		$email->subject     = "Su certificado";
+		$email->body        = "Su certificado se encuentra adjunto a este correo";
 		$email->attachments = [$filePath];
 		$email->send();
 
@@ -306,7 +292,7 @@ class Service
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("certificate.ejs", [
 			"course" => $course,
-			"email" => $person->email,
+			"email"  => $person->email,
 		]);
 	}
 
@@ -317,57 +303,49 @@ class Service
 	 *
 	 * @return \Response
 	 */
-	public function _opinar(Request $request, Response &$response)
-	{
+	public function _opinar(Request $request, Response &$response) {
 		// expecting: course_id feedback_id answer
 		$q = trim($request->input->data->query);
 
 		$this->utils->clearStr($q);
 		$feed = explode(' ', $q);
 
-		if( ! isset($feed[0]) || ! isset($feed[1]) || ! isset($feed[2]))
-		{
+		if (!isset($feed[0]) || !isset($feed[1]) || !isset($feed[2])) {
 			return new Response();
 		}
 
-		$courseid = intval($feed[0]);
+		$courseid    = intval($feed[0]);
 		$feedback_id = intval($feed[1]);
-		$answer = trim(strtolower(($feed[2])));
+		$answer      = trim(strtolower(($feed[2])));
 
 		$course = $this->getCourse($courseid);
 
-		if($course !== false)
-		{
+		if ($course !== FALSE) {
 			$feedback = Connection::query("SELECT id, text, answers FROM _escuela_feedback WHERE id = $feedback_id;");
-			if(isset($feedback[0]))
-			{
-				$feedback = $feedback[0];
-				$answers = $feedback->answers;
+			if (isset($feedback[0])) {
+				$feedback       = $feedback[0];
+				$answers        = $feedback->answers;
 				$feedback_where = " email = '{$request->person->email}' AND feedback = $feedback_id AND course = $courseid;";
 
 				// get last answer, and decrease popularity of the course
-				$last_answer = false;
-				$r = Connection::query("SELECT answer FROM _escuela_feedback_received WHERE $feedback_where;");
-				if(isset($r[0]))
-				{
+				$last_answer = FALSE;
+				$r           = Connection::query("SELECT answer FROM _escuela_feedback_received WHERE $feedback_where;");
+				if (isset($r[0])) {
 					$last_answer = $r[0]->answer;
 				}
 
-				if($last_answer !== false)
-				{
+				if ($last_answer !== FALSE) {
 					$popularity = $this->getAnswerValue($answers, $last_answer);
 					Connection::query("DELETE FROM _escuela_feedback_received WHERE $feedback_where");
 
-					if($popularity !== false)
-					{
+					if ($popularity !== FALSE) {
 						Connection::query("UPDATE _escuela_course SET popularity = popularity - $popularity WHERE id = $courseid;");
 					}
 				}
 
 				// analyze current answer && increase popularity of the course
 				$popularity = $this->getAnswerValue($answers, $answer);
-				if($popularity !== false)
-				{
+				if ($popularity !== FALSE) {
 					Connection::query("INSERT INTO _escuela_feedback_received (feedback, course, email, answer) VALUES ($feedback_id, $courseid, '{$request->person->email}', '$answer');");
 					Connection::query("UPDATE _escuela_course SET popularity = popularity + $popularity WHERE id = $courseid;");
 				}
@@ -385,14 +363,55 @@ class Service
 	 *
 	 * @return Response
 	 */
-	public function _repetir(Request $request, Response &$response)
-	{
+	public function _repetir(Request $request, Response &$response) {
 		// remove the previous answers
 		Connection::query("DELETE FROM _escuela_answer_choosen WHERE course='{$request->input->data->query}' AND email='{$request->person->email}'");
 
 		// load the test again
 		$this->_curso($request, $response);
-		$response->content['course']->repeated = true;
+		$response->content['course']->repeated = TRUE;
+	}
+
+	/**
+	 * Perfil de escuela
+	 *
+	 * @param \Request $request
+	 * @param \Response $response
+	 */
+	public function _perfil(Request $request, Response &$response) {
+		$resume = $this->getResume($request->person->email);
+		$profile = Utils::getPerson($request->person->email);
+		$profile->level = 'PRINCIPIANTE';
+		$r = Connection::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
+		if (!isset($r[0]))
+		{
+			Connection::query("INSERT INTO _escuela_profile (person_id, level) VALUES ('{$request->person->id}','PRINCIPIANTE');");
+		} else
+			$profile->level = $r[0]->level;
+
+		$response->setTemplate("profile.ejs", [
+			"resume" => $resume,
+			"profile" => $profile
+		]);
+	}
+	
+	private function getResume($email){
+		$r = Connection::query("
+			select * from _escuela_course inner join (
+				select * from (
+					select course, 
+							count(*) as total, 
+							(select count(*) 
+							from _escuela_chapter_viewed 
+							where _escuela_chapter.course = _escuela_chapter_viewed.course 
+							and email = '$email') as viewed
+					from  _escuela_chapter
+					group by course
+					) subq
+				) subq2
+    		on subq2.course = _escuela_course.id");
+
+		return $r;
 	}
 
 	/**
@@ -400,22 +419,18 @@ class Service
 	 *
 	 * @return array
 	 */
-	private function getFeedbacks()
-	{
+	private function getFeedbacks() {
 		$feedback = Connection::query("SELECT id, text, answers FROM _escuela_feedback;");
-		foreach($feedback as $k => $fb)
-		{
+		foreach ($feedback as $k => $fb) {
 			$fb->answers = explode(',', $fb->answers);
 
 			$new_answers = [];
-			foreach($fb->answers as $ans)
-			{
-				$value = $ans;
+			foreach ($fb->answers as $ans) {
+				$value   = $ans;
 				$caption = trim(ucfirst(strtolower($ans)));
-				if(strpos($ans, ":") !== false)
-				{
-					$arr = explode(":", $ans);
-					$value = trim($arr[0]);
+				if (strpos($ans, ":") !== FALSE) {
+					$arr     = explode(":", $ans);
+					$value   = trim($arr[0]);
 					$caption = trim($arr[1]);
 				}
 
@@ -436,31 +451,27 @@ class Service
 	 *
 	 * @return bool|int
 	 */
-	private function getAnswerValue($answers, $answer)
-	{
+	private function getAnswerValue($answers, $answer) {
 		$answers = explode(",", $answers);
 
 		$i = 0;
-		foreach($answers as $ans)
-		{
+		foreach ($answers as $ans) {
 			$ans = trim($ans);
-			$i ++;
+			$i++;
 
 			$value = $ans;
 
-			if(strpos($ans, ":") !== false)
-			{
-				$arr = explode(":", $ans);
+			if (strpos($ans, ":") !== FALSE) {
+				$arr   = explode(":", $ans);
 				$value = trim($arr[0]);
 			}
 
-			if($value == $answer)
-			{
+			if ($value == $answer) {
 				return $i;
 			}
 		}
 
-		return false;
+		return FALSE;
 	}
 
 	/**
@@ -472,26 +483,23 @@ class Service
 	 *
 	 * @return array
 	 */
-	private function getBeforeAfter($chapter)
-	{
-		$before = false;
-		$after = false;
+	private function getBeforeAfter($chapter) {
+		$before = FALSE;
+		$after  = FALSE;
 
 		$r = Connection::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder - 1) . ";");
-		if(isset($r[0]))
-		{
+		if (isset($r[0])) {
 			$before = $r[0];
 		}
 
 		$r = Connection::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder + 1) . ";");
-		if(isset($r[0]))
-		{
+		if (isset($r[0])) {
 			$after = $r[0];
 		}
 
 		return [
 			'before' => $before,
-			'after' => $after,
+			'after'  => $after,
 		];
 	}
 
@@ -503,8 +511,7 @@ class Service
 	 *
 	 * @return object/boolean
 	 */
-	private function getCourse($id, $email = '')
-	{
+	private function getCourse($id, $email = '') {
 		// get the full course
 		$res = Connection::query("
 			SELECT *,
@@ -515,62 +522,53 @@ class Service
 			AND active=1");
 
 		// do not continue with empty values
-		if(empty($res))
-		{
-			return false;
+		if (empty($res)) {
+			return FALSE;
 		}
-		else
-		{
+		else {
 			$course = $res[0];
 		}
 
 		$course->chapters = $this->getChapters($id, $email);
 
-		$calification = 0;
-		$course->total_tests = 0;
-		$course->total_seen = 0;
-		$course->total_answered = 0;
+		$calification             = 0;
+		$course->total_tests      = 0;
+		$course->total_seen       = 0;
+		$course->total_answered   = 0;
 		$course->total_terminated = 0;
-		$course->total_questions = 0;
-		$course->total_childs = count($course->chapters);
-		$course->total_right = 0;
-		$course->repeated = false;
+		$course->total_questions  = 0;
+		$course->total_childs     = count($course->chapters);
+		$course->total_right      = 0;
+		$course->repeated         = FALSE;
 
-		foreach($course->chapters as $chapter)
-		{
-			if($chapter->seen)
-			{
-				$course->total_seen ++;
+		foreach ($course->chapters as $chapter) {
+			if ($chapter->seen) {
+				$course->total_seen++;
 			}
-			if($chapter->answered)
-			{
-				$course->total_answered ++;
+			if ($chapter->answered) {
+				$course->total_answered++;
 			}
-			if($chapter->terminated)
-			{
-				$course->total_terminated ++;
+			if ($chapter->terminated) {
+				$course->total_terminated++;
 			}
-			if($chapter->xtype == 'PRUEBA')
-			{
-				$course->total_tests ++;
+			if ($chapter->xtype == 'PRUEBA') {
+				$course->total_tests++;
 			}
-			$course->total_right += $chapter->total_right;
+			$course->total_right     += $chapter->total_right;
 			$course->total_questions += $chapter->total_questions;
-			$calification += $chapter->calification;
+			$calification            += $chapter->calification;
 		}
 
 		$course->total_chapters = $course->total_childs - $course->total_tests;
-		$course->terminated = $course->total_terminated == $course->total_childs;
+		$course->terminated     = $course->total_terminated == $course->total_childs;
 
 		$course->calification = 0;
-		if($course->total_tests > 0)
-		{
+		if ($course->total_tests > 0) {
 			$course->calification = number_format($calification / $course->total_tests, 2) * 1;
 		}
 
 		$course->progress = 0;
-		if($course->total_childs > 0)
-		{
+		if ($course->total_childs > 0) {
 			$course->progress = number_format($course->total_terminated / $course->total_childs * 100, 2) * 1;
 		}
 
@@ -588,15 +586,14 @@ class Service
 	 * @internal param int $chapter_id
 	 *
 	 */
-	private function getChapterImages($chapter)
-	{
+	private function getChapterImages($chapter) {
 		// get course and content
 		$chapterText = Connection::query("SELECT content, course FROM _escuela_chapter WHERE id=$chapter");
-		$content = $chapterText[0]->content;
+		$content     = $chapterText[0]->content;
 
-		$tidy = new tidy();
+		$tidy    = new tidy();
 		$content = $tidy->repairString($content, [
-			'output-xhtml' => true,
+			'output-xhtml' => TRUE,
 		], 'utf8');
 
 		$course = $chapterText[0]->course;
@@ -607,15 +604,14 @@ class Service
 		$imgs = $dom->getElementsByTagName('img');
 
 		// get path to root folder
-		$di = \Phalcon\DI\FactoryDefault::getDefault();
+		$di      = \Phalcon\DI\FactoryDefault::getDefault();
 		$wwwroot = $di->get('path')['root'];
 
 		// get full path to the image
 		$images = [];
-		foreach($imgs as $img)
-		{
-			$src = $img->getAttribute('src');
-			$filename = str_replace("cid:", "", $src);
+		foreach ($imgs as $img) {
+			$src               = $img->getAttribute('src');
+			$filename          = str_replace("cid:", "", $src);
 			$images[$filename] = "$wwwroot/public/courses/$course/$chapter/$filename";
 		}
 
@@ -629,41 +625,36 @@ class Service
 	 *
 	 * @return object
 	 */
-	private function getChapter($id, $email = '', $answer_order = 'rand()')
-	{
-		$chapter = false;
+	private function getChapter($id, $email = '', $answer_order = 'rand()') {
+		$chapter = FALSE;
 
 		$r = Connection::query("SELECT * FROM _escuela_chapter WHERE id = '$id';");
 
-		if(isset($r[0]))
-		{
+		if (isset($r[0])) {
 			$chapter = $r[0];
 		}
 
 		$chapter->questions = $this->getChapterQuestions($id, $email, $answer_order);
 
 		$total_questions = count($chapter->questions);
-		$total_right = 0;
+		$total_right     = 0;
 
-		foreach($chapter->questions as $i => $q)
-		{
-			if($q->is_right)
-			{
-				$total_right ++;
+		foreach ($chapter->questions as $i => $q) {
+			if ($q->is_right) {
+				$total_right++;
 			}
 		}
 
-		$chapter->total_right = $total_right;
+		$chapter->total_right     = $total_right;
 		$chapter->total_questions = $total_questions;
-		$chapter->calification = 0;
+		$chapter->calification    = 0;
 
-		if($total_questions > 0)
-		{
+		if ($total_questions > 0) {
 			$chapter->calification = intval($total_right / $total_questions * 100);
 		}
 
-		$chapter->seen = $this->isChapterSeen($email, $id);
-		$chapter->answered = $this->isTestTerminated($email, $id) && $chapter->xtype == 'PRUEBA';
+		$chapter->seen       = $this->isChapterSeen($email, $id);
+		$chapter->answered   = $this->isTestTerminated($email, $id) && $chapter->xtype == 'PRUEBA';
 		$chapter->terminated = $chapter->answered || $chapter->seen;
 
 		$chapter->content = $this->clearHtml($chapter->content);
@@ -680,19 +671,15 @@ class Service
 	 *
 	 * @return array
 	 */
-	private function getChapters($course, $email = '', $terminated = null)
-	{
+	private function getChapters($course, $email = '', $terminated = NULL) {
 		// get chapters
 		$r = Connection::query("SELECT id FROM _escuela_chapter WHERE course = '$course' ORDER BY xorder;");
 
 		$chapters = [];
-		if($r)
-		{
-			foreach($r as $row)
-			{
+		if ($r) {
+			foreach ($r as $row) {
 				$c = $this->getChapter($row->id, $email);
-				if($c->terminated == $terminated || is_null($terminated))
-				{
+				if ($c->terminated == $terminated || is_null($terminated)) {
 					$chapters[] = $c;
 				}
 			}
@@ -701,17 +688,14 @@ class Service
 		return $chapters;
 	}
 
-	private function getChapterQuestions($test_id, $email = '', $answer_order = 'rand()')
-	{
+	private function getChapterQuestions($test_id, $email = '', $answer_order = 'rand()') {
 		$questions = [];
-		$rows = Connection::query("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;");
-		if( ! is_array($questions))
-		{
+		$rows      = Connection::query("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;");
+		if (!is_array($questions)) {
 			$questions = [];
 		}
 
-		foreach($rows as $i => $q)
-		{
+		foreach ($rows as $i => $q) {
 			$questions[] = $this->getQuestion($q->id, $email, $answer_order);
 		}
 
@@ -727,20 +711,17 @@ class Service
 	 *
 	 * @return bool
 	 */
-	private function getQuestion($question_id, $email = '', $answer_order = 'rand()')
-	{
+	private function getQuestion($question_id, $email = '', $answer_order = 'rand()') {
 		$row = Connection::query("SELECT * FROM _escuela_question WHERE id = '$question_id';");
-		if(isset($row[0]))
-		{
-			$q = $row[0];
-			$q->answers = $this->getAnswers($question_id, $answer_order);
-			$t = $this->isQuestionTerminated($email, $question_id);
+		if (isset($row[0])) {
+			$q             = $row[0];
+			$q->answers    = $this->getAnswers($question_id, $answer_order);
+			$t             = $this->isQuestionTerminated($email, $question_id);
 			$q->terminated = $t;
 
-			$q->answer_choosen = - 1;
-			$a = Connection::query("SELECT answer FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id'");
-			if(isset($a[0]))
-			{
+			$q->answer_choosen = -1;
+			$a                 = Connection::query("SELECT answer FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id'");
+			if (isset($a[0])) {
 				$q->answer_choosen = intval($a[0]->answer);
 			}
 
@@ -749,7 +730,7 @@ class Service
 			return $q;
 		}
 
-		return false;
+		return FALSE;
 	}
 
 	/**
@@ -760,11 +741,9 @@ class Service
 	 *
 	 * @return array
 	 */
-	private function getAnswers($question_id, $orderby = 'rand()')
-	{
+	private function getAnswers($question_id, $orderby = 'rand()') {
 		$answers = Connection::query("SELECT * FROM _escuela_answer WHERE question = '{$question_id}' ORDER BY $orderby;");
-		if( ! is_array($answers))
-		{
+		if (!is_array($answers)) {
 			$answers = [];
 		}
 
@@ -778,8 +757,7 @@ class Service
 	 *
 	 * @return int
 	 */
-	private function getTotalQuestionsOf($chapter_id)
-	{
+	private function getTotalQuestionsOf($chapter_id) {
 		$r = Connection::query("SELECT count(id) as t FROm _escuela_question WHERE chapter = '$chapter_id';");
 
 		return intval($r[0]->t);
@@ -793,8 +771,7 @@ class Service
 	 *
 	 * @return int
 	 */
-	private function getTotalResponsesOf($email, $chapter_id)
-	{
+	private function getTotalResponsesOf($email, $chapter_id) {
 		$r = Connection::query("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND chapter = '$chapter_id';");
 
 		return intval($r[0]->t);
@@ -806,10 +783,9 @@ class Service
 	 * @param string $email
 	 * @param integer $test_id
 	 *
-	 * @return type
+	 * @return boolean
 	 */
-	private function isTestTerminated($email, $test_id)
-	{
+	private function isTestTerminated($email, $test_id) {
 		$total_questions = $this->getTotalQuestionsOf($test_id);
 		$total_responses = $this->getTotalResponsesOf($email, $test_id);
 
@@ -824,8 +800,7 @@ class Service
 	 *
 	 * @return bool
 	 */
-	private function isChapterSeen($email, $chapter_id)
-	{
+	private function isChapterSeen($email, $chapter_id) {
 		$r = Connection::query("SELECT count(email) as t FROM _escuela_chapter_viewed WHERE email ='$email' AND chapter = '$chapter_id';");
 
 		return $r[0]->t * 1 > 0;
@@ -839,15 +814,13 @@ class Service
 	 *
 	 * @return bool
 	 */
-	private function isQuestionTerminated($email, $question_id)
-	{
+	private function isQuestionTerminated($email, $question_id) {
 		$r = Connection::query("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id';");
 
 		return intval($r[0]->t) > 0;
 	}
 
-	private function getTotalCompletedCourses($email)
-	{
+	private function getTotalCompletedCourses($email) {
 		$r = Connection::query("
 			select count(*) as t from (
 				select course, 
@@ -864,9 +837,11 @@ class Service
 		return intval($r[0]->t);
 	}
 
-	private function getTeachers(){
+	private function getTeachers() {
 		$r = Connection::query('SELECT * FROM _escuela_teacher');
-		if (!is_array($r)) return [];
+		if (!is_array($r)) {
+			return [];
+		}
 		return $r;
 	}
 
@@ -877,19 +852,16 @@ class Service
 	 *
 	 * @return mixed
 	 */
-	private function clearHtml($html)
-	{
+	private function clearHtml($html) {
 		$html = str_replace('&nbsp;', ' ', $html);
 
-		do
-		{
-			$tmp = $html;
+		do {
+			$tmp  = $html;
 			$html = preg_replace('#<([^ >]+)[^>]*>[[:space:]]*</\1>#', '', $html);
-		} while($html !== $tmp);
+		} while ($html !== $tmp);
 
 		return $html;
 	}
-
 
 
 }
