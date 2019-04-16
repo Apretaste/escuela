@@ -405,19 +405,10 @@ class Service {
 	
 	private function getResume($email){
 		$r = Connection::query("
-			select * from (
-				select * from (
-					select course, 
-							count(*) as total, 
-							(select count(*) 
-							from _escuela_chapter_viewed 
-							where _escuela_chapter.course = _escuela_chapter_viewed.course 
-							and email = '$email') as viewed
-					from  _escuela_chapter
-					group by course
-					) subq
-				) subq2 inner join _escuela_course
-    		on subq2.course = _escuela_course.id");
+			SELECT id, medal, 
+				(select count(*) from _escuela_chapter_viewed where course.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
+				(select count(*) from _escuela_chapter where course.id = _escuela_chapter.course) as chapters
+			FROM course;");
 
 		return $r;
 	}
