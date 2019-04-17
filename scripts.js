@@ -25,7 +25,12 @@ $(function () {
   });
 
   if (typeof data != 'undefined') {
-    $('#category option[value="' + data.category + '"]').prop("selected", true);
+    if (typeof data.category != 'undefined') $('#category option[value="' + data.category + '"]').prop("selected", true);
+    if (typeof data.author != 'undefined') $('#author option[value="' + data.author + '"]').prop("selected", true);
+    if (typeof data.raiting != 'undefined') $('#author option[value="' + data.raiting + '"]').prop("selected", true);
+    if (typeof data.title != 'undefined') $('#title').val(data.title);
+    
+    $('select').formSelect();
   }
 
   $('.save').click(() => {
@@ -46,6 +51,7 @@ $(function () {
 
   if (typeof profile != 'undefined') {
     $('#level option[value="' + profile.level + '"]').prop("selected", true);
+    $('select').formSelect();
   }
 
 });
