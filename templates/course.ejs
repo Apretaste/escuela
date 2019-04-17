@@ -1,7 +1,7 @@
 <div class="row">
-    <div class="col col-md-12">
+    <div class="col s12 m12 l12 xl12">
         <% if (course.repeated) { %>
-        <table width="100%">
+        <table width="100%" class="stripped highlight">
             <tr>
                 <td align="center" bgcolor="#F6CED8">
                     <p>
@@ -16,19 +16,18 @@
     </div>
 </div>
 <div class="row">
-    <div class="col col-md-12">
-
+    <div class="col s12 m12 l12 xl12">
         <h1><%= course.title %></h1>
         <p><%= course.content %></p>
     </div>
 </div>
 
 <div class="row">
-    <div class="col col-md-12">
+    <div class="col s12 m12 l12 xl12">
 
         <h2>&Iacute;ndice del curso</h2>
 
-        <table class="table" width="100%">
+        <table class="stripped highlight" width="100%">
             <% course.chapters.forEach(function(chapter){ %>
             <tr>
                 <td>
@@ -53,7 +52,7 @@
 </div>
 
 <div class="row">
-    <div class="col col-md-12">
+    <div class="col s12 m12 l12 xl12">
 
         <h2>Progreso del curso</h2>
 
@@ -80,7 +79,7 @@
 </div>
 
 <div class="row">
-    <div class="col col-md-12">
+    <div class="col s12 m12 l12 xl12">
         <% if (course.calification < 80) { %>
         <% if (course.all_chapters_finished) { %>
         <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA REPETIR" data-query="<%= course.id %>">Repetir</a>
