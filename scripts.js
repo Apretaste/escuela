@@ -44,4 +44,8 @@ $(function () {
     })
   });
 
+  if (typeof profile != 'undefined') {
+    $('#level option[value="' + profile.level + '"]').prop("selected", true);
+  }
+
 });
