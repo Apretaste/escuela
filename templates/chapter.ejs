@@ -51,12 +51,12 @@
     <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA CURSO" data-query = "<%= chapter.course %>">&Iacute;ndice</a>
     <% } else { %>
         <% if (before) { %>
-        <a href="#!" class="link link-simple" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons circle">arrow_back</i></a>
+        <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons circle">arrow_back</i> Anterior</a>
         <% } %>
         <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>">&Iacute;ndice</a>
 
         <% if (after) {%>
-            <a href="#!" class="link link-simple" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>"><i class="material-icons circle">arrow_forward</i></a>
+            <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>">Siguiente <i class="material-icons circle">arrow_forward</i></a>
         <% } %>
     <% } %>
     </div>
