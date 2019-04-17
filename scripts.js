@@ -29,7 +29,7 @@ $(function () {
     if (typeof data.author != 'undefined') $('#author option[value="' + data.author + '"]').prop("selected", true);
     if (typeof data.raiting != 'undefined') $('#author option[value="' + data.raiting + '"]').prop("selected", true);
     if (typeof data.title != 'undefined') $('#title').val(data.title);
-    
+
     $('select').formSelect();
   }
 
