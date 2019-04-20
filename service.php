@@ -15,7 +15,8 @@ class Service {
 
 		// get the most popular courses
 		$courses = Connection::query("
-			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor'
+			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
+						 (A.popularity / (select max(popularity) from `_escuela_course`) * 100) / 20 as stars
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
@@ -29,11 +30,13 @@ class Service {
 			$c->content   = htmlspecialchars($c->content);
 			$c->professor = htmlspecialchars($c->professor);
 			$c->author    = $c->professor;
+			$c->stars     = intval($c->stars);
 		}
 
 		// setup response
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('home.ejs', [
+			"max_stars" => 5,
 			"courses"   => $courses,
 			"name"      => $person->first_name ? $person->first_name : '',
 			// si no ha completado el nombre en el perfil debe decir solo Bienvenido
