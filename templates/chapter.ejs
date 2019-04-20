@@ -19,9 +19,8 @@
             <% chapter.questions.forEach(function(question) { %>
                 <b><%= question.title %></b>
                 <br/>
-                <ol>
                     <% question.answers.forEach(function(answer){ %>
-                    <li>
+                    <p>
                         <% if (question.terminated) { %>
                             <% if (question.answer_choosen == answer.id) { %>
                                 <b><%= answer.title %></b>
@@ -40,9 +39,8 @@
 
                         <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER" data-query="<%= answer.id %>"></a>
                         <% } %>
-                    </li>
+                    </p>
                     <% }); %>
-                </ol>
             <% }); %>
         <% } %>
     </div>
