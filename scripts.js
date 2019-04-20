@@ -60,17 +60,12 @@ $(function () {
 function submitTest() {
   // variable to save the ID of the responses
   var answers = [];
-  var total = 0;
-
-  chapter.questions.forEach(function(e, i){
-    total += e.answers.length;
-  });
 
   $('input.answer:checked').each(function() {
      answers.push($(this).val());
   });
 
-  if (answers.length < total){
+  if (answers.length < chapter.questions.length){
     M.toast({html: 'Por favor responda todas las preguntas'});
     $("html, body").animate({scrollTop: $(this).offset().top - 100}, 1000);
     answers = [];
