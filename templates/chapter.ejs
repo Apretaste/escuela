@@ -32,8 +32,9 @@
                                 <span style="color:gray;">&#10004;</span>
                             <% } %>
                         <% } else { %>
-                            <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER"
-                               data-query="<%= answer.id %>"><%= answer.title %></a>
+                        <% var checked = answer.choosen ? 'checked' : '' %>
+                        <input class="with-gap anwser" name="<%= question.id %>" value="<%= answer.id %>" <%= checked %> type="radio"/>
+                        <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER" data-query="<%= answer.id %>"><%= answer.title %></a>
                         <% } %>
                     </li>
                     <% }); %>
@@ -43,6 +44,12 @@
     </div>
 </div>
 
+<% if (chapter.xtype == 'PRUEBA') { %>
+    <!-- SAVE BUTTON -->
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-large waves-effect waves-light green" href="#!" onclick="submitTest()"><i class="material-icons">send</i></a>
+    </div>
+<% } %>
 <div class="row">
     <div class="col col-md-12">
 

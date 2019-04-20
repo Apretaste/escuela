@@ -55,3 +55,64 @@ $(function () {
   }
 
 });
+
+// submit a test once completed
+function submitTest() {
+  // variable to save the ID of the responses
+  var answers = [];
+  var total = 0;
+
+  questions.forEach(function(e, i){
+    total += e.answers.length;
+  });
+
+  $('.anwser').each(function() {
+    if ($(this).attr('checked')) {
+      answers.push($(this).val());
+    }
+  });
+
+  if (answers.length < total){
+    // if no checked, scroll to it and clean the responses
+    // display a message
+    M.toast({html: 'Por favor responda todas las preguntas'});
+
+    // scroll to the question
+    $("html, body").animate({scrollTop: $(this).offset().top - 100}, 1000);
+
+    // clean the responses list to stop sending
+    answers = [];
+    return false;
+  } else {
+
+    M.toast({html: 'Enviando sus respuestas...'});
+
+    // send information to the backend
+    apretaste.send({
+      command: "ESCUELA RESPONDER",
+      data: {
+        answers: answers
+      },
+      redirect: false,
+      callback: {
+        name: "testSent",
+        data: '{}'
+      }
+    });
+  }
+}
+
+function testSent(data){
+  M.toast({html: 'Prueba enviada satisfactoriamente'});
+
+  // display the DONE message
+  $('#list').hide();
+  $('#msg').show();
+
+  apretaste.send({
+    command: "ESCUELA PRUEBA",
+    data: {
+      query: chapter.id
+    }
+  })
+}
