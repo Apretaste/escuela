@@ -66,21 +66,13 @@ function submitTest() {
     total += e.answers.length;
   });
 
-  $('.answer').each(function() {
-    if ($(this).attr('checked')) {
-      answers.push($(this).val());
-    }
+  $('input.answer:checked').each(function() {
+     answers.push($(this).val());
   });
 
   if (answers.length < total){
-    // if no checked, scroll to it and clean the responses
-    // display a message
     M.toast({html: 'Por favor responda todas las preguntas'});
-
-    // scroll to the question
     $("html, body").animate({scrollTop: $(this).offset().top - 100}, 1000);
-
-    // clean the responses list to stop sending
     answers = [];
     return false;
   } else {
