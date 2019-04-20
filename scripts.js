@@ -66,7 +66,7 @@ function submitTest() {
     total += e.answers.length;
   });
 
-  $('.anwser').each(function() {
+  $('.answer').each(function() {
     if ($(this).attr('checked')) {
       answers.push($(this).val());
     }
