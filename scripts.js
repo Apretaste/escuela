@@ -62,7 +62,7 @@ function submitTest() {
   var answers = [];
   var total = 0;
 
-  questions.forEach(function(e, i){
+  chapter.questions.forEach(function(e, i){
     total += e.answers.length;
   });
 
