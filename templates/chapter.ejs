@@ -33,8 +33,12 @@
                             <% } %>
                         <% } else { %>
                         <% var checked = answer.choosen ? 'checked' : '' %>
-                        <input class="with-gap anwser" name="<%= question.id %>" value="<%= answer.id %>" <%= checked %> type="radio"/>
-                        <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER" data-query="<%= answer.id %>"><%= answer.title %></a>
+                        <label>
+                            <input class="with-gap answer" name="<%= question.id %>" value="<%= answer.id %>" <%= checked %> type="radio"/>
+                            <span><%= answer.title %></span>
+                        </label>
+
+                        <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER" data-query="<%= answer.id %>"></a>
                         <% } %>
                     </li>
                     <% }); %>
