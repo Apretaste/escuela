@@ -212,27 +212,28 @@ class Service {
 
 	/**
 	 * Records the answer for a question and resturns an empty response
-	 *
-	 * @author salvipascual
-	 * @example ESCUELA RESPONDER 4
 	 */
 	public function _responder(Request $request, Response &$response) {
 		// pull the answer selected
-		$id  = intval($request->input->data->query);
-		$res = Connection::query("SELECT * FROM _escuela_answer WHERE id=$id");
+		$answers = $request->input->data->answers;
+		foreach ($answers as $id){
 
-		// do not let pass invalid answers
-		if (empty($res)) {
-			return new Response();
-		}
-		else {
-			$answer = $res[0];
-		}
+			$res = Connection::query("SELECT * FROM _escuela_answer WHERE id=$id");
 
-		// save the answer in the database
-		Connection::query("
+			// do not let pass invalid answers
+			if (empty($res)) {
+				continue;
+			}
+			else {
+				$answer = $res[0];
+			}
+
+			// save the answer in the database
+			Connection::query("
 			INSERT IGNORE INTO _escuela_answer_choosen (email, answer, chapter, question, course)
 			VALUES ('{$request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
+		}
+
 	}
 
 	/**
