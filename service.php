@@ -60,18 +60,19 @@ class Service {
 				|| isset($data->raiting)
 				|| isset($data->title)
 		) {
+
+			$where = ' ';
+			if (isset($data->category)) $where .= " AND A.category = '{$data->category}'";
+			if (isset($data->author)) $where .= " AND A.author = '{$data->author}'";
+			if (isset($data->raiting)) $where .= " AND A.raiting = '{$data->raiting}'";
+			if (isset($data->title)) $where .= " AND A.title LIKE '%{$data->title}%'";
+			
 			$courses = Connection::query("
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor'
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
-			WHERE A.active = 1
-			" . ((!empty($data->category) && $data->category != 'ALL') ? " AND A.category = '{$data->category}'" : "") . "
-			" . ((!empty($data->author) && $data->author != 'ALL') ? " AND A.author = '{$data->category}'" : "") . "
-			" . ((!empty($data->raiting) && $data->raiting * 1 != 0) ? " AND A.popularity >= {$data->raiting}" : "") . "
-			" . ((!empty($data->title)) ? " AND A.title LIKE '%{$data->title}%'" : "") . "
-			ORDER BY popularity DESC
-			LIMIT 10");
+			WHERE A.active = 1 $where ORDER BY popularity DESC LIMIT 10");
 
 			$noResults = !isset($courses);
 
