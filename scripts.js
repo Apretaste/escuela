@@ -171,11 +171,11 @@ $(function () {
         'usstate', 'gender', 'highest_school_level', 'occupation', 'level'
       ];
 
-      var data = {save: true, level: $('#level').val()};
+      var data = {save: true, query: {level: $('#level').val()}};
 
       names.forEach((prop) => {
         if ($('#' + prop).val() != profile[prop] && $('#' + prop).val() != null) {
-          data[prop] = $('#' + prop).val();
+          data.query[prop] = $('#' + prop).val();
         }
       });
 

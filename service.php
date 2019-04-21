@@ -63,7 +63,7 @@ class Service {
 	public function _buscar(Request $request, Response &$response) {
 		$courses   = [];
 		$noResults = FALSE;
-		$data      = $request->input->data;
+		$data      = $request->input->data->query;
 		if (isset($data->category)
 				|| isset($data->author)
 				|| isset($data->raiting)
