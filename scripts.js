@@ -168,7 +168,7 @@ $(function () {
     $('.save').click(() => {
       var names = [
         'first_name', 'last_name', 'date_of_birth', 'country', 'province',
-        'city', 'usstate', 'gender', 'highest_school_level', 'occupation', 'level'
+        'usstate', 'gender', 'highest_school_level', 'occupation', 'level'
       ];
 
       var data = {save: true};
