@@ -23,12 +23,94 @@
                 <label for="level"><Nivel></Nivel>:</label>
             </div>
         </div>
-        <div class="row">
-            <div class="input-field col s6 m6 l6 xl6">
-                <label for="title">Nombre:</label>
-                <input id="name" type="text" class="validate"  value="<%= profile.first_name %><%= profile.last_name %>">
+        <form class="center-align">
+            <div class="row">
+                <div class="input-field col s12 m6">
+                    <input id="first_name" type="text" class="validate" value="<%=profile.first_name%>">
+                    <label for="first_name">Nombre</label>
+                </div>
+                <div class="input-field col s12 m6">
+                    <input id="last_name" type="text" class="validate" value="<%=profile.last_name%>">
+                    <label for="last_name">Apellido</label>
+                </div>
             </div>
-        </div>
+            <div class="row">
+                <div class="input-field col s12 m6">
+                    <select id="gender">
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                    </select>
+                    <label>Sexo</label>
+                </div>
+                <div class="input-field col s12 m6">
+                    <input type="text" class="datepicker" id="date_of_birth">
+                    <label for="date_of_birth">Cumpleaños</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12 m4">
+                    <select id="country" class="input">
+                        <option value="" disabled selected></option>
+                        <option value="CU">Cuba</option>
+                        <option value="US">Estados Unidos</option>
+                        <option value="ES">España</option>
+                        <option value="IT">Italia</option>
+                        <option value="MX">Mexico</option>
+                        <option value="BR">Brasil</option>
+                        <option value="EC">Ecuador</option>
+                        <option value="CA">Canada</option>
+                        <option value="VE">Venezuela</option>
+                        <option value="AL">Alemania</option>
+                        <option value="CO">Colombia</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
+                    <label>País</label>
+                </div>
+                <div id="province-section" class="input-field col s12 m4">
+                    <select id="province" class="input">
+                        <option value="" disabled selected></option>
+                    </select>
+                    <label>Provincia</label>
+                </div>
+                <div id="usstate-section" class="input-field col s12 m4">
+                    <select id="usstate" class="input">
+                        <option value="" disabled selected></option>
+                    </select>
+                    <label>Estado</label>
+                </div>
+                <div class="input-field col s12 m4">
+                    <input id="city" type="text" class="validate" value="<%=profile.city%>">
+                    <label for="city">Ciudad</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12 m6">
+                    <select id="highest_school_level">
+                        <option value="" disabled selected></option>
+                        <option value="PRIMARIO">Primario</option>
+                        <option value="SECUNDARIO">Secundario</option>
+                        <option value="TECNICO">T&eacute;cnico</option>
+                        <option value="UNIVERSITARIO">Universitario</option>
+                        <option value="POSTGRADUADO">Postgraduado</option>
+                        <option value="DOCTORADO">Doctorado</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
+                    <label>Nivel educativo</label>
+                </div>
+                <div class="input-field col s12 m6">
+                    <select id="occupation">
+                        <option value="" disabled selected></option>
+                        <option value="TRABAJADOR ESTATAL">Trabajador estatal</option>
+                        <option value="CUENTAPROPISTA">Cuentapropista</option>
+                        <option value="ESTUDIANTE">Estudiante</option>
+                        <option value="AMA DE CASA">Ama de casa</option>
+                        <option value="DESEMPLEADO">Desempleado</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
+                    <label>Ocupación</label>
+                </div>
+            </div>
+        </form>
         <div class="row">
             <div class="input-field col s6 m6 l6 xl6">
                 <a class="btn-floating btn-large waves-effect waves-light text-green hide-on-small-only save"><i class="material-icons">save</i></a>

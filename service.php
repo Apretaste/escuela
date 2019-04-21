@@ -16,7 +16,7 @@ class Service {
 		// get the most popular courses
 		$courses = Connection::query("
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
-						 (A.popularity / (select max(popularity) from `_escuela_course`) * 100) / 20 as stars
+						 (A.popularity / (SELECT max(popularity) FROM `_escuela_course`) * 100) / 20 AS stars
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
@@ -216,7 +216,7 @@ class Service {
 	public function _responder(Request $request, Response &$response) {
 		// pull the answer selected
 		$answers = $request->input->data->answers;
-		foreach ($answers as $id){
+		foreach ($answers as $id) {
 
 			$res = Connection::query("SELECT * FROM _escuela_answer WHERE id=$id");
 
@@ -385,40 +385,70 @@ class Service {
 	public function _perfil(Request $request, Response &$response) {
 
 		// save profile
-		if (isset($request->input->data->save))
-		{
-			$pieces = Utils::fullNameToNamePieces($request->input->data->name);
+		if (isset($request->input->data->save)) {
+			$fields = [
+				'first_name',
+				'last_name',
+				'year_of_birth',
+				'gender',
+				'province',
+				'city',
+				'highest_school_level',
+				'occupation',
+				'country',
+				'usstate',
+			];
+
+			// get the JSON with the bulk
+			$pieces = [];
+			foreach ($request->input->data as $key => $value) {
+
+				if ($key == 'date_of_birth') {
+					$value = DateTime::createFromFormat('d/m/Y', $value)->format('Y-m-d');
+				}
+
+				if (in_array($key, $fields)) {
+					$pieces[] = "$key='$value'";
+				}
+			}
+
+			// save changes on the database
+			if (!empty($pieces)) {
+				Connection::query("UPDATE person SET " . implode(",", $pieces) . " WHERE id={$request->person->id}");
+			}
+
 			Connection::query("UPDATE _escuela_profile SET level = '{$request->input->data->level}' WHERE person_id = '{$request->person->id}'");
-			Connection::query("UPDATE person SET first_name = '{$pieces[0]}', middle_name = '{$pieces[1]}', last_name = '{$pieces[2]}', mother_name = '{$pieces[3]}' WHERE id = '{$request->person->id}'");
+
 			return;
 		}
 
 		// show profile
-		$resume = $this->getResume($request->person->email);
-		$profile = Utils::getPerson($request->person->email);
+		$resume         = $this->getResume($request->person->email);
+		$profile        = Utils::getPerson($request->person->email);
 		$profile->level = 'PRINCIPIANTE';
-		$r = Connection::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
-		if (!isset($r[0]))
-		{
+		$r              = Connection::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
+		if (!isset($r[0])) {
 			Connection::query("INSERT INTO _escuela_profile (person_id, `level`) VALUES ('{$request->person->id}','PRINCIPIANTE');");
-		} else
+		}
+		else {
 			$profile->level = $r[0]->level;
+		}
 
-		$r = Connection::query("SELECT COLUMN_TYPE as result
+		$r = Connection::query("SELECT COLUMN_TYPE AS result
 				FROM information_schema.`COLUMNS`
 				WHERE TABLE_NAME = '_escuela_profile'
 							AND COLUMN_NAME = 'level';");
 
-		$levels = explode(",", str_replace(["'","enum(",")"],"", $r[0]->result));
+		$levels = explode(",", str_replace(["'", "enum(", ")"], "", $r[0]->result));
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("profile.ejs", [
-			"resume" => $resume,
-		 	"profile" => $profile,
-			"levels" => $levels
+			"resume"  => $resume,
+			"profile" => $profile,
+			"levels"  => $levels,
 		]);
 	}
-	
-	private function getResume($email){
+
+	private function getResume($email) {
 		$r = Connection::query("
 			SELECT id, medal, 
 				(select count(*) from _escuela_chapter_viewed where _escuela_course.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
