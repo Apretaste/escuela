@@ -26,6 +26,8 @@ class Service {
 
 		// remove extrange chars
 		foreach ($courses as $c) {
+			$course       = $this->getCourse($c->id);
+			$c->progress  = $course->progress;
 			$c->title     = htmlspecialchars($c->title);
 			$c->content   = htmlspecialchars($c->content);
 			$c->professor = htmlspecialchars($c->professor);
@@ -104,6 +106,17 @@ class Service {
 
 		if (!is_array($courses)) {
 			$courses = [];
+		}
+
+		// remove extrange chars
+		foreach ($courses as $c) {
+			$course       = $this->getCourse($c->id);
+			$c->progress  = $course->progress;
+			$c->title     = htmlspecialchars($c->title);
+			$c->content   = htmlspecialchars($c->content);
+			$c->professor = htmlspecialchars($c->professor);
+			$c->author    = $c->professor;
+			$c->stars     = intval($c->stars);
 		}
 
 		// display the course
