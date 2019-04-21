@@ -200,6 +200,21 @@ $(function () {
 
     $('select').formSelect();
   }
+
+
+  // after render
+  $(".link").attr('href', '#!');
+  $(".link-simple").click(function(){
+    var q = null;
+    eval('q = ' + $(this).attr('data-query'));
+    apretaste.send({
+      command: $(this).attr('data-command'),
+      data: {
+        query: q
+      }
+    });
+  });
+
 });
 
 // submit a test once completed

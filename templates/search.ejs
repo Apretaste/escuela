@@ -65,7 +65,7 @@
                     <div class="determinate" style="width: <%= e.progress %>%"></div>
                 </div>
                 <span class="card-title"><%= e.title %></span>
-                <p>Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{filters: [{author: courses[<%= i %>].professor}]}"><%= e.professor %></a></p>
+                <p>Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{author: courses[<%= i %>].teacher}"><%= e.professor %></a></p>
                 <p class="space5">
                     <% for(var k = 0; k < e.stars; k++) {%>
                     <i class="material-icons">star</i>
@@ -81,7 +81,7 @@
 					<i class="material-icons right">close</i>
 				</span>
                 <p><%= e.content %></p>
-                <p class="space5">Categoria: <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{filters: [{category: courses[<%= i %>].category}]}"><%= e.category %></a></p>
+                <p class="space5">Categoria: <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{category: courses[<%= i %>].category}"><%= e.category %></a></p>
             </div>
             <div class="card-action">
                 <a href="#!" class="link link-simple" data-command="ESCUELA CURSO" data-query="<%= e.id %>">Empezar</a>

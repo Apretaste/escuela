@@ -18,7 +18,7 @@
 					<div class="determinate" style="width: <%= e.progress %>%"></div>
 				</div>
 				<span class="card-title"><%= e.title %></span>
-				<p>Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{author: courses[<%= i %>].professor}"><%= e.professor %></a></p>
+				<p>Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{author: courses[<%= i %>].teacher}"><%= e.professor %></a></p>
  				<p class="space5">
 					<% for(var k = 0; k < e.stars; k++) {%>
 					<i class="material-icons">star</i>
