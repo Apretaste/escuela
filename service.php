@@ -12,6 +12,7 @@ class Service {
 	public function _main(Request $request, Response &$response) {
 
 		$person = Utils::getPerson($request->person->email);
+		$this->setLevel($request);
 
 		// get the most popular courses
 		$courses = Connection::query("
@@ -277,25 +278,29 @@ class Service {
 			INSERT IGNORE INTO _escuela_answer_choosen (email, answer, chapter, question, course)
 			VALUES ('{$request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
 
-			$resume = $this->getResume($request->person->email);
-			$total = 0;
-			foreach($resume as $item){
-				if ($item->answers == $item->right_answers)
-					$total++;
-			}
-
-			$level = 'PRINCIPIANTE';
-
-			if ($total >= 1) $level = 'LITERADO';
-			if ($total >= 3) $level = 'ESTUDIOSO';
-			if ($total >= 6) $level = 'EDUCADO';
-			if ($total >= 10) $level = 'EXPERTO';
-			if ($total >= 15) $level = 'MAESTRO';
-			if ($total >= 30) $level = 'GURU';
-
-			// update user level
-			Connection::query("UPDATE _escuela_profile SET level = '$level';");
+		  $this->setLevel($request);
 		}
+	}
+
+	public function setLevel(Request $request){
+		$resume = $this->getResume($request->person->email);
+		$total = 0;
+		foreach($resume as $item){
+			if ($item->answers == $item->right_answers)
+				$total++;
+		}
+
+		$level = 'PRINCIPIANTE';
+
+		if ($total >= 1) $level = 'LITERADO';
+		if ($total >= 3) $level = 'ESTUDIOSO';
+		if ($total >= 6) $level = 'EDUCADO';
+		if ($total >= 10) $level = 'EXPERTO';
+		if ($total >= 15) $level = 'MAESTRO';
+		if ($total >= 30) $level = 'GURU';
+
+		// update user level
+		Connection::query("UPDATE _escuela_profile SET level = '$level' WHERE person_id = '{$request->person->id}';");
 	}
 
 	/**
