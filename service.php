@@ -95,7 +95,7 @@ class Service {
 			$courses = Connection::query("
 			SELECT * FROM (
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
-			A.teacher, (A.popularity / (SELECT max(popularity) FROM `_escuela_course`) * 100) / 20 AS stars
+			(A.popularity / (SELECT max(popularity) FROM `_escuela_course`) * 100) / 20 AS stars
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
