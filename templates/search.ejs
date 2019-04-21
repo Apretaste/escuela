@@ -71,11 +71,12 @@
                 <span class="card-title"><%= e.title %></span>
                 <p>Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{filters: [{author: courses[<%= i %>].professor}]}"><%= e.professor %></a></p>
                 <p class="space5">
+                    <% for(var k = 0; k < e.stars; k++) {%>
                     <i class="material-icons">star</i>
-                    <i class="material-icons">star</i>
-                    <i class="material-icons">star_half</i>
+                    <% } %>
+                    <% for(var k = 0; k < max_stars - e.stars; k++) {%>
                     <i class="material-icons">star_border</i>
-                    <i class="material-icons">star_border</i>
+                    <% } %>
                 </p>
                 <p class="space5">0% leído</p>
             </div>

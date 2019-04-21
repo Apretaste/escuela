@@ -33,14 +33,19 @@ class Service {
 			$c->stars     = intval($c->stars);
 		}
 
+		$level = 'PRINCIPIANTE';
+		$r = Connection::query("SELECT level FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
+		if (isset($r[0]))
+			$level = $r[0]->level;
+
 		// setup response
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('home.ejs', [
 			"max_stars" => 5,
 			"courses"   => $courses,
-			"name"      => $person->first_name ? $person->first_name : '',
 			// si no ha completado el nombre en el perfil debe decir solo Bienvenido
-			"level"     => "Principiante",
+			"name"      => $person->first_name ? $person->first_name : '',
+			"level"     => $level,
 			"completed" => $this->getTotalCompletedCourses($person->email),
 		]);
 	}
@@ -62,13 +67,22 @@ class Service {
 		) {
 
 			$where = ' ';
-			if (isset($data->category)) $where .= " AND A.category = '{$data->category}'";
-			if (isset($data->author)) $where .= " AND A.author = '{$data->author}'";
-			if (isset($data->raiting)) $where .= " AND A.raiting = '{$data->raiting}'";
-			if (isset($data->title)) $where .= " AND A.title LIKE '%{$data->title}%'";
+			if (isset($data->category)) {
+				$where .= " AND A.category = '{$data->category}'";
+			}
+			if (isset($data->author)) {
+				$where .= " AND A.teacher = '{$data->author}'";
+			}
+			if (isset($data->raiting)) {
+				$where .= " AND popularity = '{$data->raiting}'";
+			}
+			if (isset($data->title)) {
+				$where .= " AND A.title LIKE '%{$data->title}%'";
+			}
 
 			$courses = Connection::query("
-			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor'
+			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
+			(A.popularity / (SELECT max(popularity) FROM `_escuela_course`) * 100) / 20 AS stars
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
@@ -77,7 +91,9 @@ class Service {
 			$noResults = !isset($courses);
 		}
 
-		if (!is_array($courses)) $courses = [];
+		if (!is_array($courses)) {
+			$courses = [];
+		}
 
 		// display the course
 		$response->setLayout('escuela.ejs');
@@ -100,6 +116,7 @@ class Service {
 			"courses"    => $courses,
 			"data"       => $data,
 			"noResults"  => $noResults,
+			"max_stars"  => 5,
 		]);
 	}
 
