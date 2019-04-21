@@ -17,15 +17,23 @@
 </div>
 <div class="row">
     <div class="col s12 m12 l12 xl12">
-        <div class="progress">
-            <div class="determinate" style="width: <%= course.progress %>%"></div>
-        </div>
+
     </div>
 </div>
 
 <div class="row">
     <div class="col s12 m12 l12 xl12">
         <h1><%= course.title %></h1>
+            <div class="progress">
+                <div class="determinate" style="width: <%= course.progress %>%"> <%= course.progress %> %</div>
+            </div>
+        <p>
+            <b><%= course.total_seen %>/<%= course.total_chapters %></b> cap&iacute;tulos le&iacute;dos,
+            <b><%= course.total_answered %>/<%= course.total_tests %></b> pruebas terminadas,
+            <% if (course.calification > 0) { %>
+            <b><nobr><%= course.calification %> puntos</nobr></b> de calificaci&oacute;n
+            <% } %>
+        </p>
         <p><%= course.content %></p>
     </div>
 </div>
@@ -56,33 +64,6 @@
             </tr>
             <% }) %>
         </table>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col s12 m12 l12 xl12">
-
-        <h2>Progreso del curso</h2>
-
-        <table class="striped" width="100%">
-            <tr>
-                <td>Capítulos</td>
-                <td align="right"><%= course.total_seen %>/<%= course.total_chapters %></td>
-            </tr>
-            <tr>
-                <td>Pruebas</td>
-                <td align="right"><%= course.total_answered %>/<%= course.total_tests %></td>
-            </tr>
-            <% if (course.calification > 0) { %>
-            <tr>
-                <td>Calificación</td>
-                <td align="right">
-                    <nobr><%= course.calification %> puntos</nobr>
-                </td>
-            </tr>
-            <% } %>
-        </table>
-
     </div>
 </div>
 
