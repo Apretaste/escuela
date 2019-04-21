@@ -70,12 +70,12 @@ class Service {
 			$where = ' ';
 			if (isset($data->category)) {
 				if ($data->category !== 'ALL') {
-					$where .= " AND A.category = '{$data->category}'";
+					$where .= " AND category = '{$data->category}'";
 				}
 			}
 			if (isset($data->author)) {
 				if ($data->author !== 'ALL') {
-					$where .= " AND A.teacher = '{$data->author}'";
+					$where .= " AND teacher = '{$data->author}'";
 				}
 			}
 			if (isset($data->raiting)) {
@@ -85,7 +85,7 @@ class Service {
 			}
 			if (isset($data->title)) {
 				if ($data->title !== '') {
-					$where .= " AND A.title LIKE '%{$data->title}%'";
+					$where .= " AND title LIKE '%{$data->title}%'";
 				}
 			}
 
