@@ -66,7 +66,7 @@ class Service {
 			if (isset($data->author)) $where .= " AND A.author = '{$data->author}'";
 			if (isset($data->raiting)) $where .= " AND A.raiting = '{$data->raiting}'";
 			if (isset($data->title)) $where .= " AND A.title LIKE '%{$data->title}%'";
-			
+
 			$courses = Connection::query("
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor'
 			FROM _escuela_course A
@@ -75,8 +75,9 @@ class Service {
 			WHERE A.active = 1 $where ORDER BY popularity DESC LIMIT 10");
 
 			$noResults = !isset($courses);
-
 		}
+
+		if (!is_array($courses)) $courses = [];
 
 		// display the course
 		$response->setLayout('escuela.ejs');
