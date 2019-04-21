@@ -34,9 +34,10 @@ class Service {
 		}
 
 		$level = 'PRINCIPIANTE';
-		$r = Connection::query("SELECT level FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
-		if (isset($r[0]))
+		$r     = Connection::query("SELECT level FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
+		if (isset($r[0])) {
 			$level = $r[0]->level;
+		}
 
 		// setup response
 		$response->setLayout('escuela.ejs');
@@ -68,25 +69,35 @@ class Service {
 
 			$where = ' ';
 			if (isset($data->category)) {
-				$where .= " AND A.category = '{$data->category}'";
+				if ($data->category !== 'ALL') {
+					$where .= " AND A.category = '{$data->category}'";
+				}
 			}
 			if (isset($data->author)) {
-				$where .= " AND A.teacher = '{$data->author}'";
+				if ($data->author !== 'ALL') {
+					$where .= " AND A.teacher = '{$data->author}'";
+				}
 			}
 			if (isset($data->raiting)) {
-				$where .= " AND popularity = '{$data->raiting}'";
+				if ($data->raiting !== 'ALL') {
+					$where .= " AND stars = '{$data->raiting}'";
+				}
 			}
 			if (isset($data->title)) {
-				$where .= " AND A.title LIKE '%{$data->title}%'";
+				if ($data->title !== '') {
+					$where .= " AND A.title LIKE '%{$data->title}%'";
+				}
 			}
 
 			$courses = Connection::query("
+			SELECT * FROM (
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 			(A.popularity / (SELECT max(popularity) FROM `_escuela_course`) * 100) / 20 AS stars
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
-			WHERE A.active = 1 $where ORDER BY popularity DESC LIMIT 10");
+			WHERE A.active = 1) subq
+			WHERE TRUE $where ORDER BY popularity DESC LIMIT 10");
 
 			$noResults = !isset($courses);
 		}
@@ -127,8 +138,7 @@ class Service {
 	 * @example ESCUELA CURSO 2
 	 *
 	 * @param Request $request
-	 *
-	 * @return Response
+	 * @param Response $response
 	 */
 	public function _curso(Request $request, Response &$response) {
 		// get the course details
