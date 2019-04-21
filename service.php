@@ -282,11 +282,16 @@ class Service {
 		}
 	}
 
+	/**
+	 * Set level
+	 *
+	 * @param \Request $request
+	 */
 	public function setLevel(Request $request){
 		$resume = $this->getResume($request->person->email);
 		$total = 0;
 		foreach($resume as $item){
-			if ($item->answers == $item->right_answers)
+			if ($item->right_answers / $item->answers >= 0.8)
 				$total++;
 		}
 
