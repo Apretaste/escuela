@@ -25,7 +25,7 @@ class Service {
 			LIMIT 10");
 
 		// remove extrange chars
-		foreach ($courses as $c) {
+		foreach ($courses as $k => $c) {
 			$course       = $this->getCourse($c->id);
 			$c->progress  = $course->progress;
 			$c->title     = htmlspecialchars($c->title);
@@ -33,6 +33,7 @@ class Service {
 			$c->professor = htmlspecialchars($c->professor);
 			$c->author    = $c->professor;
 			$c->stars     = intval($c->stars);
+			$courses[$k]  = $c;
 		}
 
 		$level = 'PRINCIPIANTE';
@@ -117,6 +118,7 @@ class Service {
 			$c->professor = htmlspecialchars($c->professor);
 			$c->author    = $c->professor;
 			$c->stars     = intval($c->stars);
+			$courses[$k]  = $c;
 		}
 
 		// display the course
