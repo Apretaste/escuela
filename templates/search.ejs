@@ -61,6 +61,9 @@
     <div class="col s12 m6 l4 xl4">
         <div class="card small blue-grey darken-1 hoverable">
             <div class="card-content white-text">
+                <div class="progress">
+                    <div class="determinate" style="width: <%= e.progress %>%"></div>
+                </div>
                 <span class="card-title"><%= e.title %></span>
                 <p>Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{filters: [{author: courses[<%= i %>].professor}]}"><%= e.professor %></a></p>
                 <p class="space5">
