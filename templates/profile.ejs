@@ -15,11 +15,7 @@
         <p>Complete su perfil para ganar nivel y recomendarle cursos</p>
         <div class="row">
             <div class="input-field col s6 m6 l6 xl6">
-                <select id="level">
-                    <% levels.forEach(function (e, i) {%>
-                    <option value="<%= e %>"><%= jsUcfirst(e.toLowerCase())%></option>
-                    <% }); %>
-                </select>
+                <%= porfile.level %>
                 <label for="level">Nivel:</label>
             </div>
         </div>
