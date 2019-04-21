@@ -301,7 +301,7 @@ class Service {
 		}
 
 		// get the person passing
-		$person   = $this->utils->getPerson($request->person->email);
+		$person   = Utils::getPerson($request->person->email);
 		$di       = \Phalcon\DI\FactoryDefault::getDefault();
 		$certLogo = $di->get('path')['http'] . "/images/sello.jpg";
 
@@ -314,8 +314,8 @@ class Service {
 		$html = str_replace('{$date}', date("d M Y"), $html);
 
 		// create the PDF of the certificate
-		$fileName = $this->utils->generateRandomHash() . ".pdf";
-		$filePath = $this->utils->getTempDir() . $fileName;
+		$fileName = Utils::generateRandomHash() . ".pdf";
+		$filePath = Utils::getTempDir() . $fileName;
 
 		// save the PDF and download
 		$wwwroot = $di->get('path')['root'];
@@ -355,7 +355,7 @@ class Service {
 		// expecting: course_id feedback_id answer
 		$q = trim($request->input->data->query);
 
-		$this->utils->clearStr($q);
+		Utils::clearStr($q);
 		$feed = explode(' ', $q);
 
 		if (!isset($feed[0]) || !isset($feed[1]) || !isset($feed[2])) {
