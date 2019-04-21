@@ -245,5 +245,19 @@ function testSent(data) {
     data: {
       query: chapter.id
     }
-  })
+  });
+}
+
+function sendCertificate(){
+  apretaste.send({
+    command: "ESCUELA CERTIFICADO",
+    data: {
+      query: course.id
+    },
+    redirect: false,
+    callback: {
+      name: "showToast",
+      data: "Sus certificado ha sido enviado a su correo"
+    }
+  });
 }
