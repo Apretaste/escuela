@@ -26,7 +26,7 @@ class Service {
 
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
-			$course       = $this->getCourse($c->id);
+			$course       = $this->getCourse($c->id, $request->person->email);
 			$c->progress  = $course->progress;
 			$c->title     = htmlspecialchars($c->title);
 			$c->content   = htmlspecialchars($c->content);
@@ -110,8 +110,8 @@ class Service {
 		}
 
 		// remove extrange chars
-		foreach ($courses as $c) {
-			$course       = $this->getCourse($c->id);
+		foreach ($courses as $k => $c) {
+			$course       = $this->getCourse($c->id, $request->person->email);
 			$c->progress  = $course->progress;
 			$c->title     = htmlspecialchars($c->title);
 			$c->content   = htmlspecialchars($c->content);
