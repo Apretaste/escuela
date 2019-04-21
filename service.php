@@ -83,7 +83,7 @@ class Service {
 			}
 			if (isset($data->raiting)) {
 				if ($data->raiting !== 'ALL') {
-					$where .= " AND stars = '{$data->raiting}'";
+					$where .= " AND stars >= '{$data->raiting}'";
 				}
 			}
 			if (isset($data->title)) {
