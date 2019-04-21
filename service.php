@@ -276,72 +276,26 @@ class Service {
 			Connection::query("
 			INSERT IGNORE INTO _escuela_answer_choosen (email, answer, chapter, question, course)
 			VALUES ('{$request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
+
+			$resume = $this->getResume($request->person->email);
+			$total = 0;
+			foreach($resume as $item){
+				if ($item->answers == $item->right_answers)
+					$total++;
+			}
+
+			$level = 'PRINCIPIANTE';
+
+			if ($total >= 1) $level = 'LITERADO';
+			if ($total >= 3) $level = 'ESTUDIOSO';
+			if ($total >= 6) $level = 'EDUCADO';
+			if ($total >= 10) $level = 'EXPERTO';
+			if ($total >= 15) $level = 'MAESTRO';
+			if ($total >= 30) $level = 'GURU';
+
+			// update user level
+			Connection::query("UPDATE _escuela_profile SET level = '$level';");
 		}
-
-	}
-
-	/**
-	 * Check if you passed the course and email your certificate
-	 *
-	 * @param Request $request
-	 *
-	 * @return Response
-	 */
-	public function _certificado(Request $request, Response &$response) {
-		// get the course details
-		$courseid = intval($request->input->data->query);
-		$course   = $this->getCourse($courseid, $request->person->email);
-
-		// if you failed the course
-		if (empty($course) || $course->calification < 80) {
-
-			$response->setLayout('escuela.ejs');
-			$response->setTemplate("failed.ejs", ["course" => $course]);
-
-		}
-
-		// get the person passing
-		$person   = Utils::getPerson($request->person->email);
-		$di       = \Phalcon\DI\FactoryDefault::getDefault();
-		$certLogo = $di->get('path')['http'] . "/images/sello.jpg";
-
-		// create HTML for the certificate
-		$html = '<html><body><table width="600" align="center"><tr><td style="border: 1px solid black;"><table width="600" align="center"><tr><td style="border: 5px solid black;"><table width="600" align="center"><tr><td style="border: 1px solid black;"><table width="560" align="center" cellpadding="5" style="margin: 20px;"><tr><td colspan="2" style="font-family: Arial Black; padding: 5px; border: none; font-size: 34px;" align="center"><img height="150" src="' . $certLogo . '"><br/><strong>CERTIFICACION<br/> DE CURSO TERMINADO</strong></td></tr><tr><td colspan="2" style="font-family: Arial; padding: 5px; border: none;" align="center"><br/>El presente certifica que<br/></td></tr><tr><td colspan="2" style="font-size: 23px; padding: 5px; border: none;" align="center">{$person}<hr/></td></tr><tr><td colspan="2" style="font-family: Arial; padding: 5px; border: none;" align="center"><br/>ha terminado con exito el curso</td></tr><tr><td colspan="2" align="center" style="font-size: 23px; font-family: Arial; padding: 5px; border: none;"><br/>{$course}<hr/></td></tr><tr><td width="50%" style="font-size: 20px; padding: 5px; border: none; border: none;" align="center"><br/></td><td style="font-size: 20px; padding: 5px; border: none; border: none;" align="center"><br/>{$teacher_name}<hr/></td></tr><tr><td style="padding: 5px; border: none;" align="center"></td><td style="font-family: Arial; padding: 5px; border: none;" align="center">{$teacher_title}</td></tr><tr><td colspan="2" align="center" style="padding: 5px; border: none; text-decoration:none;"><i>{$date}</i></td></tr></table></td></tr></table></td></tr></table></td></tr></table></body></html>';
-		$html = str_replace('{$person}', $person->full_name, $html);
-		$html = str_replace('{$course}', $course->title, $html);
-		$html = str_replace('{$teacher_name}', $course->teacher_name, $html);
-		$html = str_replace('{$teacher_title}', $course->teacher_title, $html);
-		$html = str_replace('{$date}', date("d M Y"), $html);
-
-		// create the PDF of the certificate
-		$fileName = Utils::generateRandomHash() . ".pdf";
-		$filePath = Utils::getTempDir() . $fileName;
-
-		// save the PDF and download
-		$wwwroot = $di->get('path')['root'];
-
-		if (!class_exists('mPDF')) {
-			include_once $wwwroot . "/lib/mpdf/mpdf.php";
-		}
-
-		$mPDF = new Mpdf();
-		$mPDF->WriteHTML(trim($html));
-		$mPDF->Output($filePath, 'F');
-
-		// send file as email attachment
-		$email              = new Email();
-		$email->to          = $person->email;
-		$email->subject     = "Su certificado";
-		$email->body        = "Su certificado se encuentra adjunto a este correo";
-		$email->attachments = [$filePath];
-		$email->send();
-
-		// send response to the view
-		$response->setLayout('escuela.ejs');
-		$response->setTemplate("certificate.ejs", [
-			"course" => $course,
-			"email"  => $person->email,
-		]);
 	}
 
 	/**
@@ -496,7 +450,12 @@ class Service {
 		$r = Connection::query("
 			SELECT id, medal, 
 				(select count(*) from _escuela_chapter_viewed where _escuela_course.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
-				(select count(*) from _escuela_chapter where _escuela_course.id = _escuela_chapter.course) as chapters
+				(select count(*) from _escuela_chapter where _escuela_course.id = _escuela_chapter.course) as chapters,
+				(select count(*) from _escuela_question where _escuela_course.id = _escuela_question.course) as questions,
+				(select count(*) from _escuela_answer where _escuela_course.id = _escuela_answer.course) as answers,
+				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course 
+					AND _escuela_answer_choosen.email = '$email'
+					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers
 			FROM _escuela_course;");
 
 		return $r;
