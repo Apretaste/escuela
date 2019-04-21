@@ -15,15 +15,18 @@ $(function () {
     apretaste.send({
       command: 'ESCUELA BUSCAR',
       data: {
-        category: $("#category").val(),
-        author: $("#author").val(),
-        raiting: $("#raiting").val(),
-        title: $("#title").val()
+        query: {
+          category: $("#category").val(),
+          author: $("#author").val(),
+          raiting: $("#raiting").val(),
+          title: $("#title").val()
+        },
       }
     });
   });
 
   if (typeof data != 'undefined') {
+    //data = data.query;
     if (typeof data.category != 'undefined') {
       $('#category option[value="' + data.category + '"]').prop("selected", true);
     }
