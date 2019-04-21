@@ -25,9 +25,10 @@
     <div class="col s12 m12 l12 xl12">
         <h1><%= course.title %></h1>
             <div class="progress">
-                <div class="determinate" style="width: <%= course.progress %>%"> <%= course.progress %> %</div>
+                <div class="determinate" style="width: <%= course.progress %>%"></div>
             </div>
         <p>
+            <b><%= course.progress %>%</b> terminado,
             <b><%= course.total_seen %>/<%= course.total_chapters %></b> cap&iacute;tulos le&iacute;dos,
             <b><%= course.total_answered %>/<%= course.total_tests %></b> pruebas terminadas,
             <% if (course.calification > 0) { %>
