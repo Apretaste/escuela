@@ -221,7 +221,9 @@ $(function () {
 
     apretaste.send({
       command: 'ESCUELA CALIFICAR',
-      data: q,
+      data: {
+        query: q
+      },
       redirect: false,
       callback: {
         name: "showToast",

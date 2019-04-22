@@ -27,19 +27,16 @@
             <div class="progress">
                 <div class="determinate" style="width: <%= course.progress %>%"></div>
             </div>
-        <p>
+        <p align="right">
             <b><%= course.progress %>%</b> terminado,
             <b><%= course.total_seen %>/<%= course.total_chapters %></b> cap&iacute;tulos le&iacute;dos,
             <b><%= course.total_answered %>/<%= course.total_tests %></b> pruebas terminadas,
             <% if (course.calification > 0) { %>
             <b><nobr><%= course.calification %> puntos</nobr></b> de calificaci&oacute;n
             <% } %>
-        </p>
-        <p align="right">
-        <p class="space5">
-            Califique este curso:
+            | <small>Opine de este curso:</small>
             <% for(var k = 0; k < 5; k++) {%>
-            <a href="#!" class="star-link" data-query="{course: <%= course.id %>, stars: <%= k %>}"><i class="material-icons">star</i></a>
+            <a href="#!" class="star-link" data-query="{course: <%= course.id %>, stars: <%= k %>}"><i class="material-icons">star_border</i></a>
             <% } %>
         </p>
         <p><%= course.content %></p>
