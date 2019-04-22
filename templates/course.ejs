@@ -27,19 +27,17 @@
             <div class="progress">
                 <div class="determinate" style="width: <%= course.progress %>%"></div>
             </div>
-        <i class="material-icons" style="font-size: large;float:left;"> <p><%= course.medal %></i><%= course.content %></p>
-    </div>
-</div>
-<div class="row">
-    <div class="col s12 m12 l12 xl12">
-    <p align="right">
+        <i class="material-icons" style="font-size: 3em;float:left;"><%= course.medal %></i>
+        <p>
+            <%= course.content %>
+            <hr/>
             <b><%= course.progress %>%</b> terminado |
             <b><%= course.total_seen %>/<%= course.total_chapters %></b> cap&iacute;tulos le&iacute;dos |
             <b><%= course.total_answered %>/<%= course.total_tests %></b> pruebas terminadas |
             <% if (course.calification > 0) { %>
             <b><nobr><%= course.calification %> puntos</nobr></b> de calificaci&oacute;n |
             <% } %>
-    </p>
+        </p>
     </div>
 </div>
 
@@ -87,5 +85,11 @@
             <% } %>
         <% } %>
         <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA">Cursos</a>
+        <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA">Cursos</a>
+        <% course.chapters.forEach(function(chapter){ %>
+                <a href="#!" class="link link-simple waves-effect waves-light btn-small link " data-command="ESCUELA <%= chapter.xtype %>"
+                   data-query="<%= chapter.id %>Seguir al curso</a>
+            <% return; %>
+        <% }); %>
     </div>
 </div>
