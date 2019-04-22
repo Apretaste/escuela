@@ -30,7 +30,7 @@ class Service {
 				WHERE A.active = 1
 				) subq 
 				WHERE viewed < chapters and answers_choosen < answers -- no se han visto todos, no se ha respondido todas 
-				ORDER BY viewed/nullif(chapters,0),  answers_choosen/nullif(answers,0), popularity DESC
+				ORDER BY viewed/nullif(chapters,0) desc,  answers_choosen/nullif(answers,0) desc, popularity DESC
 			LIMIT 10");
 
 		// remove extrange chars
