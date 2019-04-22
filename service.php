@@ -291,8 +291,9 @@ class Service {
 		$resume = $this->getResume($request->person->email);
 		$total = 0;
 		foreach($resume as $item){
-			if ($item->right_answers / $item->answers >= 0.8)
-				$total++;
+			if ($item->answers > 0)
+				if ($item->right_answers / $item->answers >= 0.8)
+					$total++;
 		}
 
 		$level = 'PRINCIPIANTE';
