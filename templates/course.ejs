@@ -35,6 +35,13 @@
             <b><nobr><%= course.calification %> puntos</nobr></b> de calificaci&oacute;n
             <% } %>
         </p>
+        <p align="right">
+        <p class="space5">
+            Califique este curso:
+            <% for(var k = 0; k < 5; k++) {%>
+            <a href="#!" class="star-link" data-query="{course: <%= course.id %>, stars: <%= k %>}"><i class="material-icons">star</i></a>
+            <% } %>
+        </p>
         <p><%= course.content %></p>
     </div>
 </div>

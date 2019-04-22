@@ -215,6 +215,22 @@ $(function () {
     });
   });
 
+  $(".star-link").click(function(){
+    var q = null;
+    eval('q = ' + $(this).attr('data-query'));
+
+    apretaste.send({
+      command: 'ESCUELA CALIFICAR',
+      data: q,
+      redirect: false,
+      callback: {
+        name: "showToast",
+        data: "Su opinion ha sido enviada"
+      }
+    });
+
+  });
+
 });
 
 // submit a test once completed
@@ -262,20 +278,6 @@ function testSent(data) {
     command: "ESCUELA PRUEBA",
     data: {
       query: chapter.id
-    }
-  });
-}
-
-function sendCertificate(){
-  apretaste.send({
-    command: "ESCUELA CERTIFICADO",
-    data: {
-      query: course.id
-    },
-    redirect: false,
-    callback: {
-      name: "showToast",
-      data: "Sus certificado ha sido enviado a su correo"
     }
   });
 }

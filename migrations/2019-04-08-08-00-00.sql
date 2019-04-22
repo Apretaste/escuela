@@ -7,4 +7,9 @@ CREATE TABLE _escuela_profile (
 -- para guardar que medalla se adquiere por cada curso
 ALTER TABLE _escuela_course ADD COLUMN medal varchar(30);
 
-
+CREATE TABLE _escuela_stars (
+	course int(11) references _escuela_course(id) on delete cascade on update cascade,
+	person_id int(11) references person(id) on delete cascade on update cascade,
+	stars int(1) default 0,
+	primary key (course, person_id)
+);

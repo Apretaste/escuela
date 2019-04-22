@@ -17,7 +17,7 @@ class Service {
 		// get the most popular courses
 		$courses = Connection::query("
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
-			A.teacher, (A.popularity / (SELECT max(popularity) FROM `_escuela_course`) * 100) / 20 AS stars
+			A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
@@ -96,7 +96,7 @@ class Service {
 			$courses = Connection::query("
 			SELECT * FROM (
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
-			(A.popularity / (SELECT max(popularity) FROM `_escuela_course`) * 100) / 20 AS stars
+			COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
@@ -306,6 +306,18 @@ class Service {
 
 		// update user level
 		Connection::query("UPDATE _escuela_profile SET level = '$level' WHERE person_id = '{$request->person->id}';");
+	}
+
+	/**
+	 * Rate course
+	 */
+	public function _calificar(Request $request, Response &$response) {
+		$course_id = $request->input->data->query->course;
+		$stars = $request->input->data->query->stars;
+		$stars = $stars > 5 ? 5: $stars;
+
+		Connection::query("INSERT IGNORE INTO _escuela_stars (course, person_id, stars) VALUES ('$course_id', '{$request->person->id}', '$stars');");
+		Connection::query("UPDATE _escuela_stars SET stars = $stars WHERE course = $course_id AND person_id = {$request->person->id};");
 	}
 
 	/**
