@@ -15,11 +15,6 @@
         <% } %>
     </div>
 </div>
-<div class="row">
-    <div class="col s12 m12 l12 xl12">
-
-    </div>
-</div>
 
 <div class="row">
     <div class="col s12 m12 l12 xl12">
@@ -88,7 +83,7 @@
         <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA">Cursos</a>
         <% course.chapters.forEach(function(chapter){ %>
                 <a href="#!" class="link link-simple waves-effect waves-light btn-small link " data-command="ESCUELA <%= chapter.xtype %>"
-                   data-query="<%= chapter.id %>Seguir al curso</a>
+                   data-query="<%= chapter.id %>">Seguir al curso</a>
             <% return; %>
         <% }); %>
     </div>
