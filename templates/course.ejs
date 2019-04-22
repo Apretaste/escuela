@@ -27,19 +27,24 @@
             <div class="progress">
                 <div class="determinate" style="width: <%= course.progress %>%"></div>
             </div>
-        <p align="right">
-            <b><%= course.progress %>%</b> terminado,
-            <b><%= course.total_seen %>/<%= course.total_chapters %></b> cap&iacute;tulos le&iacute;dos,
-            <b><%= course.total_answered %>/<%= course.total_tests %></b> pruebas terminadas,
+        <i class="material-icons" style="font-size: large;float:left;"> <p><%= course.medal %></i><%= course.content %></p>
+    </div>
+</div>
+<div class="row">
+    <div class="col s12 m12 l12 xl12">
+    <p align="right">
+        <small>
+            <b><%= course.progress %>%</b> terminado |
+            <b><%= course.total_seen %>/<%= course.total_chapters %></b> cap&iacute;tulos le&iacute;dos |
+            <b><%= course.total_answered %>/<%= course.total_tests %></b> pruebas terminadas |
             <% if (course.calification > 0) { %>
-            <b><nobr><%= course.calification %> puntos</nobr></b> de calificaci&oacute;n
+            <b><nobr><%= course.calification %> puntos</nobr></b> de calificaci&oacute;n |
             <% } %>
-            | <small>Opine de este curso:</small>
-            <% for(var k = 0; k < 5; k++) {%>
-            <a href="#!" class="star-link" data-query="{course: <%= course.id %>, stars: <%= k %>}"><i class="material-icons">star_border</i></a>
-            <% } %>
-        </p>
-        <p><%= course.content %></p>
+        | Opine de este curso:</small>
+        <% for(var k = 0; k < 5; k++) {%>
+        <a href="#!" class="star-link" data-query="{course: <%= course.id %>, stars: <%= k %>}"><i class="material-icons">star_border</i></a>
+        <% } %>
+    </p>
     </div>
 </div>
 
