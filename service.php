@@ -452,8 +452,6 @@ class Service {
 				Connection::query("UPDATE person SET " . implode(",", $pieces) . " WHERE id={$request->person->id}");
 			}
 
-			Connection::query("UPDATE _escuela_profile SET level = '{$request->input->data->level}' WHERE person_id = '{$request->person->id}'");
-
 			return;
 		}
 
