@@ -20,6 +20,7 @@ class Service {
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
 				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
+				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen					
@@ -28,7 +29,7 @@ class Service {
 				ON A.teacher = B.id
 				WHERE A.active = 1
 				) subq 
-				WHERE viewed < chapters and answers_choosen < answers -- no se han visto todos, no se ha respondido todas 
+				WHERE viewed < chapters and answers_choosen < questions -- no se han visto todos, no se ha respondido todas 
 				ORDER BY viewed/nullif(chapters,0) desc,  answers_choosen/nullif(answers,0) desc, popularity DESC
 			LIMIT 10");
 
