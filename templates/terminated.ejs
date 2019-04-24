@@ -1,7 +1,7 @@
 <h1 style="font-size: 1.5rem; text-align:center;">Cursos terminados por ti </h1>
 <div class="row">
     <div class="col col-lg-12 col-sm-12">
-        <% if (courses.length() == 0) {%> <!-- si no esta registrado en ningun curso debe decir ... -->
+        <% if (courses.length == 0) {%> <!-- si no esta registrado en ningun curso debe decir ... -->
         <p>Usted no tiene cursos terminados. Vaya al inicio y escoja un curso para empezar a estudiar.</p>
         <% } else { %>
         <% courses.forEach(function(e, i) { %>
