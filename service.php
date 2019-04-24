@@ -503,7 +503,7 @@ class Service {
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen,
-				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course 
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course 
 					AND _escuela_answer_choosen.email = '$email'
 					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers					
 				FROM _escuela_course A
