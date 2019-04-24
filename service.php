@@ -536,7 +536,7 @@ class Service {
 			SELECT id, medal, 
 				(select count(*) from _escuela_chapter_viewed where _escuela_course.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
 				(select count(*) from _escuela_chapter where _escuela_course.id = _escuela_chapter.course) as chapters,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype == 'PRUEBA') as tests,
+				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
 				(select count(*) from _escuela_question where _escuela_course.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_answer where _escuela_course.id = _escuela_answer.course) as answers,
 				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course 
