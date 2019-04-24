@@ -116,7 +116,7 @@ class Service {
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
 			WHERE A.active = 1) subq
-			WHERE viewed = 0 TRUE $where ORDER BY popularity DESC LIMIT 10");
+			WHERE viewed = 0 AND TRUE $where ORDER BY popularity DESC LIMIT 10");
 
 		if (!is_array($courses)) {
 			$courses = [];
