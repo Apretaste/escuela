@@ -513,9 +513,8 @@ class Service {
 				ON A.teacher = B.id
 				WHERE A.active = 1
 				) subq 
-				WHERE viewed >= chapters - tests and answers_choosen >= questions 
-				ORDER BY calification DESC
-			LIMIT 10");
+				WHERE viewed >= (chapters - tests) and answers_choosen >= questions 
+				ORDER BY calification DESC;");
 
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("terminated.ejs", [
