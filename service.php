@@ -22,6 +22,7 @@ class Service {
 				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
 				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype == 'PRUEBA') as tests,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen					
 				FROM _escuela_course A
@@ -29,7 +30,7 @@ class Service {
 				ON A.teacher = B.id
 				WHERE A.active = 1
 				) subq 
-				WHERE viewed < chapters or answers_choosen < questions -- no se han visto todos, no se ha respondido todas 
+				WHERE viewed < chapters - tests or answers_choosen < questions -- no se han visto todos, no se ha respondido todas 
 				ORDER BY viewed/nullif(chapters,0) desc,  answers_choosen/nullif(answers,0) desc, popularity DESC
 			LIMIT 10");
 
@@ -501,6 +502,7 @@ class Service {
 				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
 				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype == 'PRUEBA') as tests,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course 
@@ -511,7 +513,7 @@ class Service {
 				ON A.teacher = B.id
 				WHERE A.active = 1
 				) subq 
-				WHERE viewed = chapters and answers_choosen >= questions 
+				WHERE viewed >= chapters - tests and answers_choosen >= questions 
 				ORDER BY calification DESC
 			LIMIT 10");
 
@@ -535,6 +537,7 @@ class Service {
 			SELECT id, medal, 
 				(select count(*) from _escuela_chapter_viewed where _escuela_course.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
 				(select count(*) from _escuela_chapter where _escuela_course.id = _escuela_chapter.course) as chapters,
+				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype == 'PRUEBA') as tests,
 				(select count(*) from _escuela_question where _escuela_course.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_answer where _escuela_course.id = _escuela_answer.course) as answers,
 				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course 
