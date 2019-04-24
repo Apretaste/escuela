@@ -482,6 +482,54 @@ class Service {
 		]);
 	}
 
+	/**
+	 * Cursos terminados
+	 *
+	 * @param \Request $request
+	 * @param \Response $response
+	 */
+	public function _terminados(Request $request, Response $response){
+		$email = $request->person->email;
+		$person = Utils::getPerson($email);
+		$this->setLevel($request);
+
+		// get the most popular courses
+		$courses = Connection::query("
+		  SELECT *, viewed / nullif(chapters,0) * 40 + right_answers / nullif(questions,0) * 60 as calification FROM (
+				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
+				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
+				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
+				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
+				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen,
+				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course 
+					AND _escuela_answer_choosen.email = '$email'
+					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers					
+				FROM _escuela_course A
+				JOIN _escuela_teacher B
+				ON A.teacher = B.id
+				WHERE A.active = 1
+				) subq 
+				WHERE viewed == chapters and answers_choosen >= questions 
+				ORDER BY calification DESC
+			LIMIT 10");
+
+		$response->setLayout('escuela.ejs');
+		$response->setTemplate("terminated.ejs", [
+			"courses"  => $courses,
+			"profile" => $person
+		]);
+	}
+
+	/**
+	 * Return a resume of courses filtered by email and course id
+	 *
+	 * @param $email
+	 * @param null $course_id
+	 *
+	 * @return array|mixed
+	 */
 	private function getResume($email, $course_id = null) {
 		$r = Connection::query("
 			SELECT id, medal, 
