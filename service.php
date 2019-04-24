@@ -29,7 +29,7 @@ class Service {
 				ON A.teacher = B.id
 				WHERE A.active = 1
 				) subq 
-				WHERE viewed < chapters and answers_choosen < questions -- no se han visto todos, no se ha respondido todas 
+				WHERE viewed < chapters or answers_choosen < questions -- no se han visto todos, no se ha respondido todas 
 				ORDER BY viewed/nullif(chapters,0) desc,  answers_choosen/nullif(answers,0) desc, popularity DESC
 			LIMIT 10");
 
