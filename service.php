@@ -10,7 +10,7 @@ class Service {
 	 * @param Request
 	 */
 	public function _main(Request $request, Response &$response) {
-		$email = $request->person->email;
+		$email  = $request->person->email;
 		$person = Utils::getPerson($email);
 		$this->setLevel($request);
 
@@ -71,38 +71,40 @@ class Service {
 	 * @param \Response $response
 	 */
 	public function _buscar(Request $request, Response &$response) {
-		$courses   = [];
-		$noResults = FALSE;
-		$data      = $request->input->data->query;
-		if (isset($data->category)
-				|| isset($data->author)
-				|| isset($data->raiting)
-				|| isset($data->title)
-		) {
+		$where = '';
+		if (isset($request->input->data->query)) {
+			$data = $request->input->data->query;
+			if (isset($data->category)
+					|| isset($data->author)
+					|| isset($data->raiting)
+					|| isset($data->title)
+			) {
 
-			$where = ' ';
-			if (isset($data->category)) {
-				if ($data->category !== 'ALL') {
-					$where .= " AND category = '{$data->category}'";
+				$where = ' ';
+				if (isset($data->category)) {
+					if ($data->category !== 'ALL') {
+						$where .= " AND category = '{$data->category}'";
+					}
+				}
+				if (isset($data->author)) {
+					if ($data->author !== 'ALL') {
+						$where .= " AND teacher = '{$data->author}'";
+					}
+				}
+				if (isset($data->raiting)) {
+					if ($data->raiting !== 'ALL') {
+						$where .= " AND stars >= '{$data->raiting}'";
+					}
+				}
+				if (isset($data->title)) {
+					if ($data->title !== '') {
+						$where .= " AND title LIKE '%{$data->title}%'";
+					}
 				}
 			}
-			if (isset($data->author)) {
-				if ($data->author !== 'ALL') {
-					$where .= " AND teacher = '{$data->author}'";
-				}
-			}
-			if (isset($data->raiting)) {
-				if ($data->raiting !== 'ALL') {
-					$where .= " AND stars >= '{$data->raiting}'";
-				}
-			}
-			if (isset($data->title)) {
-				if ($data->title !== '') {
-					$where .= " AND title LIKE '%{$data->title}%'";
-				}
-			}
+		}
 
-			$courses = Connection::query("
+		$courses = Connection::query("
 			SELECT * FROM (
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
 			COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
@@ -116,12 +118,11 @@ class Service {
 			WHERE A.active = 1) subq
 			WHERE viewed = 0 TRUE $where ORDER BY popularity DESC LIMIT 10");
 
-			$noResults = !isset($courses);
-		}
-
 		if (!is_array($courses)) {
 			$courses = [];
 		}
+
+		$noResults = empty($courses);
 
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
@@ -291,7 +292,7 @@ class Service {
 			INSERT IGNORE INTO _escuela_answer_choosen (email, answer, chapter, question, course)
 			VALUES ('{$request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
 
-		  $this->setLevel($request);
+			$this->setLevel($request);
 		}
 	}
 
@@ -300,23 +301,37 @@ class Service {
 	 *
 	 * @param \Request $request
 	 */
-	public function setLevel(Request $request){
+	public function setLevel(Request $request) {
 		$resume = $this->getResume($request->person->email);
-		$total = 0;
-		foreach($resume as $item){
-			if ($item->answers > 0)
-				if ($item->right_answers / $item->answers >= 0.8)
+		$total  = 0;
+		foreach ($resume as $item) {
+			if ($item->answers > 0) {
+				if ($item->right_answers / $item->answers >= 0.8) {
 					$total++;
+				}
+			}
 		}
 
 		$level = 'PRINCIPIANTE';
 
-		if ($total >= 1) $level = 'LITERADO';
-		if ($total >= 3) $level = 'ESTUDIOSO';
-		if ($total >= 6) $level = 'EDUCADO';
-		if ($total >= 10) $level = 'EXPERTO';
-		if ($total >= 15) $level = 'MAESTRO';
-		if ($total >= 30) $level = 'GURU';
+		if ($total >= 1) {
+			$level = 'LITERADO';
+		}
+		if ($total >= 3) {
+			$level = 'ESTUDIOSO';
+		}
+		if ($total >= 6) {
+			$level = 'EDUCADO';
+		}
+		if ($total >= 10) {
+			$level = 'EXPERTO';
+		}
+		if ($total >= 15) {
+			$level = 'MAESTRO';
+		}
+		if ($total >= 30) {
+			$level = 'GURU';
+		}
 
 		// update user level
 		Connection::query("UPDATE _escuela_profile SET level = '$level' WHERE person_id = '{$request->person->id}';");
@@ -327,8 +342,8 @@ class Service {
 	 */
 	public function _calificar(Request $request, Response &$response) {
 		$course_id = $request->input->data->query->course;
-		$stars = $request->input->data->query->stars;
-		$stars = $stars > 5 ? 5: $stars;
+		$stars     = $request->input->data->query->stars;
+		$stars     = $stars > 5 ? 5 : $stars;
 
 		Connection::query("INSERT IGNORE INTO _escuela_stars (course, person_id, stars) VALUES ('$course_id', '{$request->person->id}', '$stars');");
 		Connection::query("UPDATE _escuela_stars SET stars = $stars WHERE course = $course_id AND person_id = {$request->person->id};");
@@ -487,8 +502,8 @@ class Service {
 	 * @param \Request $request
 	 * @param \Response $response
 	 */
-	public function _terminados(Request $request, Response $response){
-		$email = $request->person->email;
+	public function _terminados(Request $request, Response $response) {
+		$email  = $request->person->email;
 		$person = Utils::getPerson($email);
 		$this->setLevel($request);
 
@@ -516,9 +531,9 @@ class Service {
 
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("terminated.ejs", [
-			"courses"  => is_array($courses) ? $courses : [],
-			"profile" => $person,
-			"max_stars" => 5
+			"courses"   => is_array($courses) ? $courses : [],
+			"profile"   => $person,
+			"max_stars" => 5,
 		]);
 	}
 
@@ -530,7 +545,7 @@ class Service {
 	 *
 	 * @return array|mixed
 	 */
-	private function getResume($email, $course_id = null) {
+	private function getResume($email, $course_id = NULL) {
 		$r = Connection::query("
 			SELECT id, medal, 
 				(select count(*) from _escuela_chapter_viewed where _escuela_course.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
@@ -542,7 +557,7 @@ class Service {
 					AND _escuela_answer_choosen.email = '$email'
 					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers
 			FROM _escuela_course
-			".(is_null($course_id)?"": " WHERE id = $course_id ").";");
+			" . (is_null($course_id) ? "" : " WHERE id = $course_id ") . ";");
 
 		return $r;
 	}
@@ -698,19 +713,21 @@ class Service {
 		$course->calification = 0;
 
 		// 40% por leer
-		if ($course->total_childs > 0)
+		if ($course->total_childs > 0) {
 			$course->calification = $course->total_seen / $course->total_childs * 40;
+		}
 
 		// 60% por responder bien
-		if ($course->total_questions > 0)
+		if ($course->total_questions > 0) {
 			$course->calification += $course->total_right / $course->total_questions * 60;
+		}
 
 		$course->calification = intval($course->calification);
 
-/*		if ($course->total_tests > 0) {
-			$course->calification = number_format($calification / $course->total_tests, 2) * 1;
-		}
-*/
+		/*		if ($course->total_tests > 0) {
+					$course->calification = number_format($calification / $course->total_tests, 2) * 1;
+				}
+		*/
 		$course->progress = 0;
 		if ($course->total_childs > 0) {
 			$course->progress = number_format($course->total_terminated / $course->total_childs * 100, 2) * 1;
