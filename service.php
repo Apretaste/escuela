@@ -519,7 +519,8 @@ class Service {
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("terminated.ejs", [
 			"courses"  => is_array($courses) ? $courses : [],
-			"profile" => $person
+			"profile" => $person,
+			"max_stars" => 5
 		]);
 	}
 
