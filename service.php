@@ -22,7 +22,7 @@ class Service {
 				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
 				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype == 'PRUEBA') as tests,
+				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen					
 				FROM _escuela_course A
@@ -502,7 +502,7 @@ class Service {
 				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
 				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype == 'PRUEBA') as tests,
+				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course 
