@@ -19,11 +19,10 @@ class Service {
 		  SELECT * FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
-								(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
-					(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
-					(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-					(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course 
-						AND _escuela_answer_choosen.email = '$email') as answers_choosen					
+				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
+				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen					
 				FROM _escuela_course A
 				JOIN _escuela_teacher B
 				ON A.teacher = B.id
@@ -104,12 +103,16 @@ class Service {
 			$courses = Connection::query("
 			SELECT * FROM (
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
-			COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars
+			COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
+			(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '{$request->person->email}') as viewed,
+			(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+			(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
+			(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '{$request->person->email}') as answers_choosen					
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
 			WHERE A.active = 1) subq
-			WHERE TRUE $where ORDER BY popularity DESC LIMIT 10");
+			WHERE viewed = 0 TRUE $where ORDER BY popularity DESC LIMIT 10");
 
 			$noResults = !isset($courses);
 		}
@@ -398,6 +401,7 @@ class Service {
 	 */
 	public function _repetir(Request $request, Response &$response) {
 		// remove the previous answers
+		Connection::query("DELETE FROM _escuela_chapter_viewed WHERE course='{$request->input->data->query}' AND email='{$request->person->email}'");
 		Connection::query("DELETE FROM _escuela_answer_choosen WHERE course='{$request->input->data->query}' AND email='{$request->person->email}'");
 
 		// load the test again
@@ -477,7 +481,7 @@ class Service {
 		]);
 	}
 
-	private function getResume($email) {
+	private function getResume($email, $course_id = null) {
 		$r = Connection::query("
 			SELECT id, medal, 
 				(select count(*) from _escuela_chapter_viewed where _escuela_course.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
@@ -487,7 +491,8 @@ class Service {
 				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course 
 					AND _escuela_answer_choosen.email = '$email'
 					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers
-			FROM _escuela_course;");
+			FROM _escuela_course
+			".(is_null($course_id)?"": " WHERE id = $course_id ").";");
 
 		return $r;
 	}
@@ -641,10 +646,19 @@ class Service {
 		$course->terminated     = $course->total_terminated == $course->total_childs;
 
 		$course->calification = 0;
-		if ($course->total_tests > 0) {
+
+		// 40% por leer
+		if ($course->total_childs > 0)
+			$course->calification = $course->total_seen / $course->total_childs * 40;
+
+		// 60% por responder bien
+		if ($course->total_questions > 0)
+			$course->calification += $course->total_right / $course->total_questions * 60;
+
+/*		if ($course->total_tests > 0) {
 			$course->calification = number_format($calification / $course->total_tests, 2) * 1;
 		}
-
+*/
 		$course->progress = 0;
 		if ($course->total_childs > 0) {
 			$course->progress = number_format($course->total_terminated / $course->total_childs * 100, 2) * 1;
