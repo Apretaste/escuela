@@ -655,6 +655,8 @@ class Service {
 		if ($course->total_questions > 0)
 			$course->calification += $course->total_right / $course->total_questions * 60;
 
+		$course->calification = intval($course->calification);
+
 /*		if ($course->total_tests > 0) {
 			$course->calification = number_format($calification / $course->total_tests, 2) * 1;
 		}
