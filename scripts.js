@@ -25,7 +25,7 @@ $(function () {
     });
   });
 
-  if (typeof data != 'undefined') {
+  if (typeof data != 'undefined' && data != null) {
     //data = data.query;
     if (typeof data.category != 'undefined') {
       $('#category option[value="' + data.category + '"]').prop("selected", true);
