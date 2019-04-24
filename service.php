@@ -511,13 +511,13 @@ class Service {
 				ON A.teacher = B.id
 				WHERE A.active = 1
 				) subq 
-				WHERE viewed == chapters and answers_choosen >= questions 
+				WHERE viewed = chapters and answers_choosen >= questions 
 				ORDER BY calification DESC
 			LIMIT 10");
 
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("terminated.ejs", [
-			"courses"  => $courses,
+			"courses"  => is_array($courses) ? $courses : [],
 			"profile" => $person
 		]);
 	}
