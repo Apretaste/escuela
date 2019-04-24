@@ -22,6 +22,10 @@
         <p align="center">
             Usted ha concluido el curso "<%= course.title %>" con <b><% course.calification %></b> puntos y ha ganado esta medalla. Vea sus medallas desde el perfil.<br/>
             <i class="material-icons" style="font-size: 4em;"><%= course.medal %></i><br/>
+            Valore este curso:<br/>
+            <% for(var k = 0; k < 5; k++) {%>
+            <a href="#!" class="star-link" data-query="{course: <%= course.id %>, stars: <%= k %>}"><i class="material-icons">star_border</i></a>
+            <% } %>
             <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA PERFIL" data-query="">Ver medalla</a>
         </p>
     </div>
@@ -59,7 +63,7 @@
                     <a href="#!" class="link link-simple" data-command="ESCUELA <%= chapter.xtype %>"
                        data-query="<%= chapter.id %>"><%= chapter.title %></a>
                 </td>
-                <td align="right">
+                <td align="right" style="text-align:right;">
                     <% if (chapter.xtype == 'CAPITULO') { %>
                     <% if (chapter.terminated) { %>
                     <i class="material-icons">check_box</i>
@@ -75,14 +79,7 @@
         </table>
     </div>
 </div>
-<div class="row">
-    <div class="col s12 m12 l12 xl12">
-     Valore este curso:<br/>
-    <% for(var k = 0; k < 5; k++) {%>
-    <a href="#!" class="star-link" data-query="{course: <%= course.id %>, stars: <%= k %>}"><i class="material-icons">star_border</i></a>
-    <% } %>
-    </div>
-</div>
+
 <div class="row">
     <div class="col s12 m12 l12 xl12">
         <% if (course.calification < 80) { %>
