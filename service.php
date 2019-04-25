@@ -72,6 +72,7 @@ class Service {
 	 */
 	public function _buscar(Request $request, Response &$response) {
 		$where = '';
+		$data = null;
 		if (isset($request->input->data->query)) {
 			$data = $request->input->data->query;
 			if (isset($data->category)
