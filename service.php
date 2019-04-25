@@ -440,7 +440,7 @@ class Service {
 			$fields = [
 				'first_name',
 				'last_name',
-				'year_of_birth',
+				'date_of_birth',
 				'gender',
 				'province',
 				'city',
