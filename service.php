@@ -452,7 +452,7 @@ class Service {
 
 			// get the JSON with the bulk
 			$pieces = [];
-			foreach ($request->input->data as $key => $value) {
+			foreach ($request->input->data->query as $key => $value) {
 
 				if ($key == 'date_of_birth') {
 					$value = DateTime::createFromFormat('d/m/Y', $value)->format('Y-m-d');
