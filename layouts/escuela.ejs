@@ -1,47 +1,48 @@
 <!-- MENU -->
 <div class="row">
      <div class="col s12 text-center">
-        <div style="font-family:Times; font-size:2rem; font-weight:bold; margin:15px 0px; color:black;">
+        <div style="font-family:Times; font-size:2rem; font-weight:bold; margin:15px 0px; color:black;text-align:center;">
         ESCUELA
         <span style="color:white; background-color:#C11414; padding:3px;">ONLINE</span>
     </div>
     </div>
 </div>
+<div class="row">
+    <div class="col s12 text-center">
+        <nav class="transparent z-depth-0 text-center">
+            <div class="nav-wrapper white text-center">
+                 <ul class="center">
+                    <li>
+                        <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA'})">
+                            <i class="material-icons">home</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA PERFIL'})">
+                            <i class="material-icons">account_box</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA BUSCAR'})">
+                            <i class="material-icons">search</i>
+                        </a>
+                    </li>
+                     <li>
+                         <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA TERMINADOS'})">
+                             <i class="material-icons">verified_user</i>
+                         </a>
+                     </li>
+                    <li>
+                        <a class="red lighten-3" href="/logout">
+                            <i class="material-icons">exit_to_app</i>
+                        </a>
+                    </li>
+                </ul>
 
-<nav class="transparent z-depth-0">
-    <div class="nav-wrapper white">
-         <ul class="center">
-            <li>
-                <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA'})">
-                    <i class="material-icons">home</i>
-                </a>
-            </li>
-            <li>
-                <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA PERFIL'})">
-                    <i class="material-icons">account_box</i>
-                </a>
-            </li>
-            <li>
-                <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA BUSCAR'})">
-                    <i class="material-icons">search</i>
-                </a>
-            </li>
-             <li>
-                 <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA TERMINADOS'})">
-                     <i class="material-icons">verified_user</i>
-                 </a>
-             </li>
-            <li>
-                <a class="red lighten-3" href="/logout">
-                    <i class="material-icons">exit_to_app</i>
-                </a>
-            </li>
-        </ul>
 
-
+            </div>
+        </nav>
     </div>
-</nav>
-
 {{APP_TEMPLATE_CODE}}
 
 

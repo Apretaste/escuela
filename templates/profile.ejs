@@ -1,14 +1,21 @@
+<% var resumeFiltered = []; %>
+<% resume.forEach(function(e) {
+    if (e.viewed >= e.chapters - e.tests && e.answers_choosen >= e.questions) {
+        resumeFiltered.push(e);
+    }
+}); %>
+
+<% if (resumeFiltered.length > 0) {%>
 <div class="row">
     <div class="col s12 l12 m12 xl12">
         <h1>Medallas</h1>
         <p>Sus medallas recibidas por los cursos que ha pasado</p>
-        <% resume.forEach(function(e, i){ %>
-            <% if (e.chapters == e.viewed) { %>
-                <i class="material-icons"><%= e.medal %></i>
-            <% } %>
+        <% resumeFiltered.forEach(function(e, i){ %>
+            <i class="material-icons"><%= e.medal %></i>
         <% }); %>
     </div>
 </div>
+<% } %>
 
 <div class="row">
     <div class="col s12 l12 m12 xl12">

@@ -554,6 +554,7 @@ class Service {
 				(select count(*) from _escuela_chapter where _escuela_course.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
 				(select count(*) from _escuela_question where _escuela_course.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_answer where _escuela_course.id = _escuela_answer.course) as answers,
+				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen,
 				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course 
 					AND _escuela_answer_choosen.email = '$email'
 					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers
