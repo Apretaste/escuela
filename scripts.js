@@ -112,7 +112,7 @@ $(function () {
     });
 
     states.forEach((state) => {
-      $('#usstate').prepend('<option value=\'' + state.value + '\'>' + state.caption + '</option>');
+      $('#usstate').append('<option value=\'' + state.value + '\'>' + state.caption + '</option>');
     });
 
     if (profile.country.toUpperCase() == 'US') {
