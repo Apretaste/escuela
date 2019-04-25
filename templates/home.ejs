@@ -1,6 +1,10 @@
-<h1 style="font-size: 1.5rem; text-align:center;">Bienvenido <%= name %></h1>
 <div class="row">
-	<div class="col col-lg-12 col-sm-12">
+	<div class="col s12 m12 l12 xl12 text-center">
+		<h1 style="font-size: 1.5rem; text-align:center;">Bienvenido <%= name %></h1>
+	</div>
+</div>
+<div class="row">
+	<div class="col s12 m12 l12 xl12">
         <% if (completed == 0) {%> <!-- si no esta registrado en ningun curso debe decir ... -->
         <p>Usted no tiene cursos empezados. Escoja un curso para empezar a estudiar y ganar nivel.</p>
         <% } else { %>

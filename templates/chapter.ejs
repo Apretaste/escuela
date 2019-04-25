@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="col col-md-12">
+    <div class="col s12 m12 l12 xl12">
         <h1><%= chapter.title %></h1>
 
         <%- chapter.content %>
@@ -7,7 +7,7 @@
 </div>
 
 <div class="row">
-    <div class="col col-md-12">
+    <div class="col s12 m12 l12 xl12">
 
         <% if (chapter.xtype == 'PRUEBA') { %>
             <% if (chapter.terminated) { %>
@@ -53,7 +53,7 @@
     </div>
 <% } %>
 <div class="row">
-    <div class="col col-md-12">
+    <div class="col s12 m12 l12 xl12">
 
     <% if (chapter.xtype == 'PRUEBA' && course.all_chapters_finished) { %>
     <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA CURSO" data-query = "<%= chapter.course %>">&Iacute;ndice</a>
