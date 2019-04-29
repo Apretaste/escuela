@@ -53,7 +53,7 @@
     </div>
 <% } %>
 <div class="row">
-    <div class="col s12 m12 l12 xl12">
+    <div class="col s12 m12 l12 xl12 text-center valign-wrapper">
 
     <% if (chapter.xtype == 'PRUEBA' && course.all_chapters_finished) { %>
     <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA CURSO" data-query = "<%= chapter.course %>">&Iacute;ndice</a>
@@ -61,11 +61,10 @@
         <% if (before) { %>
         <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons circle">arrow_back</i> Anterior</a>
         <% } %>
-        <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>">&Iacute;ndice</a>
-
         <% if (after) {%>
             <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>">Siguiente <i class="material-icons circle">arrow_forward</i></a>
         <% } %>
     <% } %>
+        <a href="#!" class="link link-simple waves-effect waves-light btn btn-floating btn-large" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbere</i>&Iacute;ndice</a>
     </div>
 </div>
