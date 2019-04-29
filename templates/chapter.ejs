@@ -53,14 +53,14 @@
     </div>
 <% } %>
 <div class="row">
-    <div class="col s12 m12 l12 xl12 center-align valign-wrapper">
+    <div class="col s12 m12 l12 xl12 center-align">
 
     <% if (!(chapter.xtype == 'PRUEBA' && course.all_chapters_finished)) { %>
         <% if (before) { %>
-        <a href="#!" class="link link-simple waves-effect waves-light btn center-align valign-wrapper" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons circle">arrow_back</i> Anterior</a> &nbsp;
+        <a href="#!" class="link link-simple waves-effect waves-light btn center-align" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons left">arrow_back</i> Anterior</a> &nbsp;
         <% } %>
         <% if (after) {%>
-            <a href="#!" class="link link-simple waves-effect waves-light btn center-align  valign-wrapper" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>">Siguiente <i class="material-icons circle">arrow_forward</i></a>
+            <a href="#!" class="link link-simple waves-effect waves-light btn center-align" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>"><i class="material-icons right">arrow_forward</i>Siguiente </a>
         <% } %>
     <% } %>
     </div>
