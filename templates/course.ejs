@@ -20,13 +20,13 @@
     <div class="col s12 m12 l12 xl12 text-center" style="text-align:center;">
         <span style="font-size: 3em;"><b>Felicidades!</b></span>
         <p align="center">
-            Usted ha concluido el curso "<%= course.title %>" con <b><% course.calification %></b> puntos y ha ganado esta medalla. Vea sus medallas desde el perfil.<br/>
+            Usted ha concluido el curso "<%= course.title %>" con <b><%= course.calification %></b> puntos y ha ganado esta medalla. Vea sus medallas desde el perfil.<br/>
             <i class="material-icons" style="font-size: 4em;"><%= course.medal %></i><br/>
             Valore este curso:<br/>
             <% for(var k = 0; k < 5; k++) {%>
             <a href="#!" class="star-link" data-query="{course: <%= course.id %>, stars: <%= k %>}"><i class="material-icons">star_border</i></a>
             <% } %><br/>
-            <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA PERFIL" data-query="">Ver medalla</a>
+            <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA PERFIL" data-query="{}">Ver medallas</a>
         </p>
     </div>
 </div>
@@ -38,9 +38,6 @@
                 <div class="determinate" style="width: <%= course.progress %>%"></div>
             </div>
             <%= course.content %>
-            <% if (course.calification > 0) { %>
-            <b><nobr><%= course.calification %>/100 puntos</nobr></b> de calificaci&oacute;n
-            <% } %>
         </p>
     </div>
 </div>
