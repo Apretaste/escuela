@@ -52,20 +52,17 @@
         <a class="btn-floating btn-large waves-effect waves-light green" href="#!" onclick="submitTest()"><i class="material-icons">send</i></a>
     </div>
 <% } %>
-<div class="row">
+<div class="row text-center">
     <div class="col s12 m12 l12 xl12 text-center valign-wrapper">
 
-    <% if (chapter.xtype == 'PRUEBA' && course.all_chapters_finished) { %>
-    <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA CURSO" data-query = "<%= chapter.course %>">&Iacute;ndice</a>
-    <% } else { %>
+    <% if (!(chapter.xtype == 'PRUEBA' && course.all_chapters_finished)) { %>
         <% if (before) { %>
-        <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons circle">arrow_back</i> Anterior</a>
+        <a href="#!" class="link link-simple waves-effect waves-light btn centeer-align valign-wrappe" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons circle">arrow_back</i> Anterior</a> &nbsp;
         <% } %>
         <% if (after) {%>
-            <a href="#!" class="link link-simple waves-effect waves-light btn" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>">Siguiente <i class="material-icons circle">arrow_forward</i></a>
+            <a href="#!" class="link link-simple waves-effect waves-light btn centeer-align  valign-wrappe" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>">Siguiente <i class="material-icons circle">arrow_forward</i></a>
         <% } %>
     <% } %>
-
     </div>
 </div>
 <div class="row left-align">
