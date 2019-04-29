@@ -37,8 +37,9 @@
             <div class="progress">
                 <div class="determinate" style="width: <%= course.progress %>%"></div>
             </div>
+            <%= course.content %>
             <% if (course.calification > 0) { %>
-            <b><nobr><%= course.calification %> puntos</nobr></b> de calificaci&oacute;n
+            <b><nobr><%= course.calification %>/100 puntos</nobr></b> de calificaci&oacute;n
             <% } %>
         </p>
     </div>
