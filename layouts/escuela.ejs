@@ -1,38 +1,43 @@
 <!-- MENU -->
 <div class="row">
-     <div class="col s12 text-center">
-        <div style="font-family:Times; font-size:2rem; font-weight:bold; margin:15px 0px; color:black;text-align:center;">
-        ESCUELA
-        <span style="color:white; background-color:#C11414; padding:3px;">ONLINE</span>
-    </div>
-    </div>
+    <nav class="nav-center">
+        <div class="nav-wrapper white">
+            <!--Logo-->
+            <span class="brand-logo left hide-on-small-only">
+                    <i><b style="color:#9E100A; font-size:40px;">&nbsp; E</b></i>
+                </span>
+            <!--notifications & profile-->
+            <%if(num_notifications>0) noti_icon = "notifications_active"; else noti_icon = "notifications";%>
+            <ul>
+                <li>
+                    <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA'})">
+                        <i class="material-icons">home</i>
+                    </a>
+                </li>
+                <li>
+                    <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA PERFIL'})">
+                        <i class="material-icons">account_box</i>
+                    </a>
+                </li>
+                <li>
+                    <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA BUSCAR'})">
+                        <i class="material-icons">search</i>
+                    </a>
+                </li>
+                <li>
+                    <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA TERMINADOS'})">
+                        <i class="material-icons">verified_user</i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 </div>
 <div class="row">
     <div class="col s12 text-center">
         <nav class="transparent z-depth-0 text-center">
             <div class="nav-wrapper white text-center">
-                 <ul class="center">
-                    <li>
-                        <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA'})">
-                            <i class="material-icons">home</i>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA PERFIL'})">
-                            <i class="material-icons">account_box</i>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA BUSCAR'})">
-                            <i class="material-icons">search</i>
-                        </a>
-                    </li>
-                     <li>
-                         <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA TERMINADOS'})">
-                             <i class="material-icons">verified_user</i>
-                         </a>
-                     </li>
-                </ul>
+
             </div>
         </nav>
     </div>
