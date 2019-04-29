@@ -115,6 +115,7 @@ $(function () {
       $('#usstate').append('<option value=\'' + state.value + '\'>' + state.caption + '</option>');
     });
 
+    /*
     if (profile.country.toUpperCase() == 'US') {
       $("#province-section").hide();
       $("#usstate-section").show();
@@ -122,7 +123,7 @@ $(function () {
     else {
       $("#province-section").show();
       $("#usstate-section").hide();
-    }
+    }*/
 
     $('#gender option[value="' + profile.gender.substring(0, 1) + '"]').prop("selected", true);
     $('#sexual_orientation option[value="' + profile.sexual_orientation + '"]').prop("selected", true);
@@ -137,7 +138,7 @@ $(function () {
     $('#hair option[value="' + profile.hair + '"]').prop("selected", true);
     $('#highest_school_level option[value="' + profile.highest_school_level + '"]').prop("selected", true);
     $('#occupation option[value="' + profile.occupation + '"]').prop("selected", true);
-
+/*
     $('#country').on('change', function () { // Important! Do not use lambda notation
       if ($(this).val() == 'US') {
         $("#province-section").hide();
@@ -148,7 +149,7 @@ $(function () {
         $("#usstate-section").hide();
       }
     });
-
+*/
     $('select').formSelect();
 
     var date = new Date();
