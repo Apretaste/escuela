@@ -17,8 +17,7 @@
             <% } %>
 
             <% chapter.questions.forEach(function(question) { %>
-               <%= question.title %>
-                <br/>
+               <%= question.title %><br/>
                     <% question.answers.forEach(function(answer){ %>
                     <% if (question.terminated) { %>
                         <% if (question.answer_choosen == answer.id) { %>
@@ -36,7 +35,7 @@
                         <span><%= answer.title %></span>
                     </label>
 
-                    <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER" data-query="<%= answer.id %>"></a>
+                    <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER" data-query="<%= answer.id %>"></a><br/>
                     <% } %>
 
                     <% }); %>
