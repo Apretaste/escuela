@@ -12,7 +12,7 @@
         <h1>Medallas</h1>
         <p>Sus medallas recibidas por los cursos que ha pasado</p>
         <% resumeFiltered.forEach(function(e, i){ %>
-            <span class="medal"><i class="material-icons"><%= e.medal %></i></span>
+            <i class="material-icons medal"><%= e.medal %></i>
         <% }); %>
         <% } %>
         <p>Tu nivel actual es de <b><%= profile.level %></b>. Completa tu perfil para ganar niveles y recomendarle cursos: </p>
