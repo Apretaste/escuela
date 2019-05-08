@@ -21,9 +21,9 @@
                     <% question.answers.forEach(function(answer){ %>
                     <% if (question.terminated) { %>
                         <% if (question.answer_choosen == answer.id) { %>
-                            <b><%= answer.title %></b>
+                            -&nbsp;<b><%= answer.title %></b>
                         <% } else { %>
-                            <%= answer.title %>
+                            -&nbsp;<%= answer.title %>
                         <% } %>
                         <% if (question.answer == answer.id) { %>
                             <span style="color:gray;">&#10004;</span>
