@@ -21,3 +21,9 @@ nav.nav-center ul li {
 nav.nav-center ul li a {
 	display: inline-block;
 }
+
+.medal {
+	border: 2px solid green;
+	-webkit-border-radius: 20px; -moz-border-radius: 20px; border-radius: 20px;
+	margin-right: 20px;
+}
