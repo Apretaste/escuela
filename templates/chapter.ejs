@@ -38,9 +38,18 @@
 
                     <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER" data-query="<%= answer.id %>"></a>
                     <% } %>
-                    <br/> <br/>
+
                     <% }); %>
             <% }); %>
+            <br/> <br/>
+            <% if (!chapter.terminated) { %>
+            <div class="row left-align">
+                <!-- SAVE BUTTON -->
+                <div class="fixed-action-btn">
+                    <a class="btn btn-large waves-effect waves-light green" href="#!" onclick="submitTest()"><i class="material-icons">send</i></a>
+                </div>
+            </div>
+            <% } %>
         <% } %>
     </div>
 </div>
@@ -61,14 +70,6 @@
 </div>
 <% } %>
 
-<% if (chapter.xtype == 'PRUEBA') { %>
-<div class="row left-align">
-    <!-- SAVE BUTTON -->
-    <div class="fixed-action-btn">
-        <a class="btn btn-large waves-effect waves-light green" href="#!" onclick="submitTest()"><i class="material-icons">send</i></a>
-    </div>
-</div>
-<% } %>
 
 <div class="row right-align">
     <div class="fixed-action-btn hide-on-med-and-up">
