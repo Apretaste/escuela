@@ -25,36 +25,20 @@ $(function () {
     });
   });
 
-  if (typeof data != 'undefined' && data != null) {
-    //data = data.query;
-    if (typeof data.category != 'undefined') {
-      $('#category option[value="' + data.category + '"]').prop("selected", true);
-    }
-    if (typeof data.author != 'undefined') {
-      $('#author option[value="' + data.author + '"]').prop("selected", true);
-    }
-    if (typeof data.raiting != 'undefined') {
-      $('#author option[value="' + data.raiting + '"]').prop("selected", true);
-    }
-    if (typeof data.title != 'undefined') {
-      $('#title').val(data.title);
-    }
 
-    $('select').formSelect();
-  }
 
   if (typeof profile != 'undefined') {
 
-    $('#level option[value="' + profile.level + '"]').prop("selected", true);
+   // $('#level option[value="' + profile.level + '"]').prop("selected", true);
 
-    let provinces = [
+    var provinces = [
       'Pinar del Rio', 'La Habana', 'Artemisa', 'Mayabeque',
       'Matanzas', 'Villa Clara', 'Cienfuegos', 'Sancti Spiritus',
       'Ciego de Avila', 'Camaguey', 'Las Tunas', 'Holguin',
       'Granma', 'Santiago de Cuba', 'Guantanamo', 'Isla de la Juventud'
     ];
 
-    let states = [
+    var states = [
       {caption: 'Alabama', value: 'AL'},
       {caption: 'Alaska', value: 'AK'},
       {caption: 'Arizona', value: 'AZ'},
@@ -107,11 +91,11 @@ $(function () {
       {caption: 'Wyoming', value: 'WY'}
     ];
 
-    provinces.forEach((province) => {
+    provinces.forEach(function (province) {
       $('#province').prepend('<option value=\'' + province.toUpperCase().replace(/\s/g, '_') + '\'>' + province + '</option>');
     });
 
-    states.forEach((state) => {
+    states.forEach(function (state) {
       $('#usstate').append('<option value=\'' + state.value + '\'>' + state.caption + '</option>');
     });
 
@@ -150,6 +134,23 @@ $(function () {
       }
     });
 */
+
+    if (typeof data != 'undefined' && data != null) {
+      //data = data.query;
+      if (typeof data.category != 'undefined') {
+        $('#category option[value="' + data.category + '"]').prop("selected", true);
+      }
+      if (typeof data.author != 'undefined') {
+        $('#author option[value="' + data.author + '"]').prop("selected", true);
+      }
+      if (typeof data.raiting != 'undefined') {
+        $('#author option[value="' + data.raiting + '"]').prop("selected", true);
+      }
+      if (typeof data.title != 'undefined') {
+        $('#title').val(data.title);
+      }
+    }
+
     $('select').formSelect();
 
     var date = new Date();
@@ -169,7 +170,7 @@ $(function () {
 
     profile.date_of_birth = $('#date_of_birth').val();
 
-    $('.save').click(() => {
+    $('.save').click(function () {
       var names = [
         'first_name', 'last_name', 'date_of_birth', 'country', 'province',
         'usstate', 'gender', 'highest_school_level', 'occupation', 'level'
@@ -177,7 +178,7 @@ $(function () {
 
       var data = {save: true, query: {level: $('#level').val()}};
 
-      names.forEach((prop) => {
+      names.forEach(function (prop) {
         if ($('#' + prop).val() != profile[prop] && $('#' + prop).val() != null) {
           data.query[prop] = $('#' + prop).val();
         }
