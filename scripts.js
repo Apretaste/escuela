@@ -201,7 +201,7 @@ $(function () {
 
     $('select').formSelect();
   }
-  
+
   // after render
   $(".link").attr('href', '#!');
   $(".link-simple").click(function(){
