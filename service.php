@@ -695,10 +695,10 @@ class Service {
 	 * @param integer $id
 	 * @param string $email
 	 *
-	 * @return object/boolean
+	 * @return object|bool
 	 */
 	private function getCourse($id, $email = '') {
-			$st = $this->pdo()->prepare("	SELECT *,
+		/*	$st = $this->pdo()->prepare("	SELECT *,
 				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
 				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title
 			FROM _escuela_course
@@ -712,7 +712,18 @@ class Service {
 		if ($course == false) {
 			return FALSE;
 		}
+		*/
+		$res = Connection::query("	SELECT *,
+				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
+				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title
+			FROM _escuela_course
+			WHERE id= '$id'
+			AND active=1");
 
+		if (!isset($res[0]))
+			return false;
+		
+		$course = $res[0];
 		$course->chapters = $this->getChapters($id, $email);
 
 		$calification             = 0;
