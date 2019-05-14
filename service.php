@@ -663,13 +663,14 @@ class Service {
 	 */
 	private function getCourse($id, $email = '') {
 		// get the full course
+
 		$res = Connection::query("
 			SELECT *,
 				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
 				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title
 			FROM _escuela_course
 			WHERE id='$id'
-			AND active=1");
+			AND active=1", true, 'utf8');
 
 		// do not continue with empty values
 		if (empty($res)) {
