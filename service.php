@@ -31,11 +31,8 @@ class Service {
 			$pass = $config['database']['password'];
 			$name = $config['database']['database'];
 
-			$this->pdo = mysql_connect($host, $user, $pass);
-
-			mysql_select_db($name, $this->pdo);
-			/*$this->pdo = new PDO("mysql:host=$host;dbname=$name;charset=latin1", $user, $pass);
-			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);*/
+			$this->pdo = new PDO("mysql:host=$host;dbname=$name;charset=latin1", $user, $pass);
+			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		}
 
 		return $this->pdo;
@@ -701,17 +698,7 @@ class Service {
 	 * @return object/boolean
 	 */
 	private function getCourse($id, $email = '') {
-		// get the full course
-		$sql = "	SELECT *,
-				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
-				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title
-			FROM _escuela_course
-			WHERE id = $id
-			AND active=1";
-
-		$result = mysql_query($sql, $this->pdo);
-		$course = mysql_fetch_object($result);
-/*		$st = $this->pdo()->prepare("	SELECT *,
+			$st = $this->pdo()->prepare("	SELECT *,
 				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
 				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title
 			FROM _escuela_course
@@ -720,7 +707,7 @@ class Service {
 		$st->execute([$id]);
 
 		$course = $st->fetchObject();
-*/
+
 		// do not continue with empty values
 		if ($course == false) {
 			return FALSE;
