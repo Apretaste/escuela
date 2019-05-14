@@ -31,6 +31,7 @@ class Service {
 			$name = $config['database']['database'];
 
 			$this->pdo = new PDO("mysql:host=$host;dbname=$name", $user, $pass);
+			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		}
 
 		return $this->pdo;
