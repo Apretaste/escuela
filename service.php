@@ -1,6 +1,40 @@
 <?php
 
+use \Phalcon\DI;
+
 class Service {
+
+	private $pdo = null;
+
+	/**
+	 * Creates a new connection
+	 *
+	 * @author salvipascual
+	 * @param Boolean $write
+	 * @return PDO
+	 */
+	public function pdo($write=false)
+	{
+		if (is_null($this->pdo))
+		{
+			// get the host count
+			$config = Di::getDefault()->get('config');
+			$count = $config['database']['host_count'];
+
+			// select host to use
+			$stream = $write ? 1 : rand(1, $count);
+
+			// get the config for the host
+			$host = $config['database']["host_$stream"];
+			$user = $config['database']['user'];
+			$pass = $config['database']['password'];
+			$name = $config['database']['database'];
+
+			$this->pdo = new PDO("mysql:host=$host;dbname=$name", $user, $pass);
+		}
+
+		return $this->pdo;
+	}
 
 	/**
 	 * Main function
@@ -664,20 +698,19 @@ class Service {
 	private function getCourse($id, $email = '') {
 		// get the full course
 
-		$res = Connection::query("
-			SELECT *,
+		$st = $this->pdo()->prepare("	SELECT *,
 				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
 				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title
 			FROM _escuela_course
-			WHERE id='$id'
-			AND active=1", true, 'utf8');
+			WHERE id= ?
+			AND active=1");
+		$st->execute([$id]);
+
+		$course = $st->fetchObject();
 
 		// do not continue with empty values
-		if (empty($res)) {
+		if ($course == false) {
 			return FALSE;
-		}
-		else {
-			$course = $res[0];
 		}
 
 		$course->chapters = $this->getChapters($id, $email);
