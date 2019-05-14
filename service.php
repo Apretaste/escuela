@@ -30,7 +30,7 @@ class Service {
 			$pass = $config['database']['password'];
 			$name = $config['database']['database'];
 
-			$this->pdo = new PDO("mysql:host=$host;dbname=$name;charset=utf8", $user, $pass);
+			$this->pdo = new PDO("mysql:host=$host;dbname=$name;charset=latin1", $user, $pass);
 			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		}
 
