@@ -4,39 +4,6 @@ use \Phalcon\DI;
 
 class Service {
 
-	private $pdo = null;
-
-	/**
-	 * Creates a new connection
-	 *
-	 * @author salvipascual
-	 * @param Boolean $write
-	 * @return resource | PDO
-	 */
-	public function pdo($write=false)
-	{
-		if (is_null($this->pdo))
-		{
-
-			// get the host count
-			$config = Di::getDefault()->get('config');
-			$count = $config['database']['host_count'];
-
-			// select host to use
-			$stream = $write ? 1 : rand(1, $count);
-
-			// get the config for the host
-			$host = $config['database']["host_$stream"];
-			$user = $config['database']['user'];
-			$pass = $config['database']['password'];
-			$name = $config['database']['database'];
-
-			$this->pdo = new PDO("mysql:host=$host;dbname=$name;charset=latin1", $user, $pass);
-			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		}
-
-		return $this->pdo;
-	}
 
 	/**
 	 * Main function
@@ -698,21 +665,6 @@ class Service {
 	 * @return object|bool
 	 */
 	private function getCourse($id, $email = '') {
-		/*	$st = $this->pdo()->prepare("	SELECT *,
-				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
-				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title
-			FROM _escuela_course
-			WHERE id= ?
-			AND active=1");
-		$st->execute([$id]);
-
-		$course = $st->fetchObject();
-
-		// do not continue with empty values
-		if ($course == false) {
-			return FALSE;
-		}
-		*/
 		$res = Connection::query("	SELECT *,
 				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
 				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title
@@ -836,7 +788,7 @@ class Service {
 	private function getChapter($id, $email = '', $answer_order = 'rand()') {
 		$chapter = FALSE;
 
-		$r = Connection::query("SELECT * FROM _escuela_chapter WHERE id = '$id';");
+		$r = Connection::query("SELECT * FROM _escuela_chapter WHERE id = '$id';", true, 'latin1');
 
 		if (isset($r[0])) {
 			$chapter = $r[0];
@@ -898,7 +850,7 @@ class Service {
 
 	private function getChapterQuestions($test_id, $email = '', $answer_order = 'rand()') {
 		$questions = [];
-		$rows      = Connection::query("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;");
+		$rows      = Connection::query("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;", true, 'latin1');
 		if (!is_array($questions)) {
 			$questions = [];
 		}
@@ -920,7 +872,7 @@ class Service {
 	 * @return bool
 	 */
 	private function getQuestion($question_id, $email = '', $answer_order = 'rand()') {
-		$row = Connection::query("SELECT * FROM _escuela_question WHERE id = '$question_id';");
+		$row = Connection::query("SELECT * FROM _escuela_question WHERE id = '$question_id';", true, 'latin1');
 		if (isset($row[0])) {
 			$q             = $row[0];
 			$q->answers    = $this->getAnswers($question_id, $answer_order);
