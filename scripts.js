@@ -1,3 +1,11 @@
+function formatDate(dateStr) {
+  var months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var date = new Date(dateStr);
+  var month = date.getMonth();
+  var day = date.getDate().toString().padStart(2, '0');
+  return day + ' de ' + months[month] + ' del ' + date.getFullYear();
+}
+
 function showToast(text) {
   M.toast({html: text});
 }
