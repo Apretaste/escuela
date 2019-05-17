@@ -561,7 +561,7 @@ class Service {
 				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course 
 					AND _escuela_answer_choosen.email = '$email'
 					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers,
-					(select MAX(_escuela_answer_choosen.date_choosen) FROM _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course and AND _escuela_answer_choosen.email = '$email') as answer_date
+					(select MAX(_escuela_answer_choosen.date_choosen) FROM _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answer_date
 			FROM _escuela_course
 			" . (is_null($course_id) ? "" : " WHERE id = $course_id ") . ";");
 
