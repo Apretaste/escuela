@@ -5,14 +5,13 @@
     }
 }); %>
 
-
 <div class="row">
     <div class="col s12 l12 m12 xl12">
         <% if (resumeFiltered.length > 0) {%>
         <h1>Medallas</h1>
         <p>Sus medallas recibidas por los cursos que ha pasado</p>
         <% resumeFiltered.forEach(function(e, i){ %>
-            <i class="material-icons medal"><%= e.medal %></i>
+            <i class="material-icons medal" onclick="showToast('Usted gano esta medalla el <%= e.answer_date %> al completar el curso <%= e.title %>')"><%= e.medal %></i>
         <% }); %>
         <% } %>
         <p>Tu nivel actual es de <b><%= profile.level %></b>. Completa tu perfil para ganar niveles y recomendarle cursos: </p>

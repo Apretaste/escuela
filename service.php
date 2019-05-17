@@ -551,7 +551,7 @@ class Service {
 	 */
 	private function getResume($email, $course_id = NULL) {
 		$r = Connection::query("
-			SELECT id, medal, 
+			SELECT id, medal, title,
 				(select count(*) from _escuela_chapter_viewed where _escuela_course.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
 				(select count(*) from _escuela_chapter where _escuela_course.id = _escuela_chapter.course) as chapters,
 				(select count(*) from _escuela_chapter where _escuela_course.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
@@ -560,7 +560,8 @@ class Service {
 				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen,
 				(select count(*) from _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course 
 					AND _escuela_answer_choosen.email = '$email'
-					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers
+					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers,
+					(select MAX(_escuela_answer_choosen.date_choosen) FROM _escuela_answer_choosen where _escuela_course.id = _escuela_answer_choosen.course and AND _escuela_answer_choosen.email = '$email') as answer_date
 			FROM _escuela_course
 			" . (is_null($course_id) ? "" : " WHERE id = $course_id ") . ";");
 
