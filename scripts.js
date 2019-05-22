@@ -10,6 +10,14 @@ function showToast(text) {
   M.toast({html: text});
 }
 
+function showModal(text) {
+  // open the modal
+  $("#modalText").html(text);
+  var popup = document.getElementById('modalText');
+  var modal = M.Modal.init(popup);
+  modal.open();
+}
+
 function jsUcfirst(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
