@@ -12,7 +12,7 @@ function showToast(text) {
 
 function showModal(text) {
   // open the modal
-  $("#modalText").html(text);
+  $("#modalText .modal-content").html(text);
   var popup = document.getElementById('modalText');
   var modal = M.Modal.init(popup);
   modal.open();
