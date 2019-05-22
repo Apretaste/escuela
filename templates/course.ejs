@@ -37,8 +37,14 @@
             <div class="progress">
                 <div class="determinate" style="width: <%= course.progress %>%"></div>
             </div>
-            <%= course.content %>
-        </p>
+            <div class="row">
+                <div class="col col-lg-1 col-md-1 col-sm-1">
+                     <i class="material-icons dp48"><%= course.medal %></i>
+                </div>
+                <div class="col col-lg-11 col-md-11 col-sm-11">
+                    <%= course.content %>
+                </div>
+            </div>
     </div>
 </div>
 
