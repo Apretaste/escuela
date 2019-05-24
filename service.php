@@ -84,7 +84,7 @@ class Service {
 					|| isset($data->title)
 			) {
 
-				$where = ' ';
+				$where = ' TRUE ';
 				if (isset($data->category)) {
 					if ($data->category !== 'ALL') {
 						$where .= " AND category = '{$data->category}'";
