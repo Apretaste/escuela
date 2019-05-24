@@ -11,7 +11,7 @@
 
         <% if (chapter.xtype == 'PRUEBA') { %>
             <% if (chapter.terminated) { %>
-            <p align="center" style="background-color:#C11414; color:white; padding:5px;">
+            <p align="center" style="background-color:<% if ( chapter.calification >=80) {%> green <%} else { %>#C11414<% } %>; color:white; padding:5px;">
                 <b>Terminada con <%= chapter.calification %> puntos de 100</b>
             </p>
             <% } %>
