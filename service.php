@@ -669,7 +669,7 @@ class Service {
 		$res = Connection::query("	SELECT *,
 				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
 				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title,
-				(SELECT count(*) FROM _escuela_stars WHERE _escuela_stars.person_id = (SEKECT id FROM person WHERE person.email = '$email') AND _escuela_stars.course = _escuela_course.id) > 0 as rated
+				(SELECT count(*) FROM _escuela_stars WHERE _escuela_stars.person_id = (SELECT id FROM person WHERE person.email = '$email') AND _escuela_stars.course = _escuela_course.id) > 0 as rated
 			FROM _escuela_course
 			WHERE id= '$id'
 			AND active=1", true, 'latin1');
