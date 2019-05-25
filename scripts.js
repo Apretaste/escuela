@@ -247,6 +247,8 @@ $(function () {
       }
     });
 
+    $("#rate-stars").hide();
+
   });
 
 });
