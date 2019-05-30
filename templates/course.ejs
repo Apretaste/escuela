@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="col s12 m12 l12 xl12">
+    <div class="col s12">
         <% if (course.repeated) { %>
         <table width="100%" class="stripped highlight">
             <tr>
@@ -17,11 +17,11 @@
 </div>
 <% if (course.progress == 100 && course.calification > 80) { %>
 <div class="row">
-    <div class="col s12 m12 l12 xl12 text-center" style="text-align:center;">
-        <span style="font-size: 3em;"><b>&iexcl;Felicidades!</b></span>
+    <div class="col s12 text-center" style="text-align:center;">
+        <span style="font-size: 3em;"><b>¡Felicidades!</b></span>
         <p align="center">
             Usted ha concluido el curso "<%= course.title %>" con <b><%= course.calification %></b> puntos y ha ganado esta medalla.<br/>
-            <i class="material-icons medal" style="font-size: 4em;margin-top:10px; margin-bottom:10px;margin-right: 0px;"><%= course.medal %></i><br/>
+            <i class="material-icons medal">start<%= course.medal %></i><br/>
             <% if (course.rated === "0") {%>
                 <div id="rate-stars" style="text-align:center;">
                 Valore este curso:<br/>
@@ -36,16 +36,16 @@
 </div>
 <% } %>
 <div class="row">
-    <div class="col s12 m12 l12 xl12">
+    <div class="col s12">
         <h1><%= course.title %></h1>
             <div class="progress">
                 <div class="determinate" style="width: <%= course.progress %>%"></div>
             </div>
-            <div class="row">
-                <div class="col col-lg-1 col-md-1 col-sm-1">
-                     <i class="material-icons dp48"><%= course.medal %></i>
+            <div class="row valign-wrapper">
+                <div class="col s2 l1">
+                     <i class="material-icons medium"><%= course.medal %></i>
                 </div>
-                <div class="col col-lg-11 col-md-11 col-sm-11">
+                <div class="col s10 l11">
                     <%= course.content %>
                 </div>
             </div>
@@ -53,7 +53,7 @@
 </div>
 
 <div class="row">
-    <div class="col s12 m12 l12 xl12">
+    <div class="col s12">
 
         <h2>&Iacute;ndice del curso</h2>
 
@@ -82,11 +82,11 @@
 </div>
 
 <div class="row">
-    <div class="col s12 m12 l12 xl12">
+    <div class="col s12 center-align">
         <% if (course.calification < 80) { %>
-            <% if (course.all_chapters_finished) { %>
-            <a href="#!" class="waves-effect waves-light btn-small link link-simple" data-command="ESCUELA REPETIR" data-query="<%= course.id %>">Repetir</a>
-            <% } %>
+			<% if (course.all_chapters_finished) { %>
+            <a href="#!" class="btn-floating btn-large waves-effect waves-light link link-simple" data-command="ESCUELA REPETIR" data-query="<%= course.id %>"><i class="material-icons">replay</i></a>
+			<% } %>
         <% } %>
     </div>
 </div>

@@ -23,10 +23,13 @@ function jsUcfirst(string) {
 }
 
 $(function () {
-
   $('select').formSelect();
 
   $("#btnSearch").click(function () {
+	if($("#category").val() == "ALL" && $("#author").val() == "ALL" && $("#raiting").val() == "0") {
+		showToast("Cambie las opciones y presione el botón para comenzar su búsqueda");
+		return;
+	}
 
     apretaste.send({
       command: 'ESCUELA BUSCAR',

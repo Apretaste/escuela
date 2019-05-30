@@ -6,7 +6,7 @@
 }); %>
 
 <div class="row">
-    <div class="col s12 l12 m12 xl12">
+    <div class="col s12">
         <% if (resumeFiltered.length > 0) {%>
         <h1>Medallas</h1>
         <p>Sus medallas recibidas por los cursos que ha pasado</p>
@@ -14,29 +14,29 @@
             <i class="material-icons medal" onclick="showModal('Usted gan&oacute; esta medalla el <%= formatDate(e.answer_date) %> al completar el curso &nbsp;<i><%= e.title %></i>')"><%= e.medal %></i>
         <% }); %>
         <% } %>
-        <p>Tu nivel actual es de <b><%= profile.level %></b>. Completa tu perfil para ganar niveles y recomendarle cursos: </p>
+        <p>Tu nivel actual es de <b><%= profile.level %></b>. Completa tu perfil para ganar niveles y medallas: </p>
         <form class="center-align">
             <div class="row">
-                <div class="input-field col s12 m6 l6 xl6">
+                <div class="input-field col s12 m6">
                     <input id="first_name" type="text" class="validate" value="<%=profile.first_name%>">
                     <label for="first_name">Nombre</label>
                 </div>
-                <div class="input-field col s12 m6 l6 xl6">
+                <div class="input-field col s12 m6">
                     <input id="last_name" type="text" class="validate" value="<%= profile.last_name %>">
                     <label for="last_name">Apellido</label>
                 </div>
-                <div class="input-field col s12 m6 l6 xl6">
+                <div class="input-field col s12 m6">
                     <select id="gender">
                         <option value="M">Masculino</option>
                         <option value="F">Femenino</option>
                     </select>
                     <label>Sexo</label>
                 </div>
-                <div class="input-field col s12 m6 l6 xl6">
+                <div class="input-field col s12 m6">
                     <input type="text" class="datepicker" id="date_of_birth">
                     <label for="date_of_birth">Cumpleaños</label>
                 </div>
-                <div class="input-field col s12 m6 l6 xl6">
+                <div class="input-field col s12 m6">
                     <select id="highest_school_level">
                         <option value="" disabled selected></option>
                         <option value="PRIMARIO">Primario</option>
@@ -49,7 +49,7 @@
                     </select>
                     <label>Nivel educativo</label>
                 </div>
-                <div class="input-field col s12 m6 l6 xl6">
+                <div class="input-field col s12 m6">
                     <select id="occupation">
                         <option value="" disabled selected></option>
                         <option value="TRABAJADOR ESTATAL">Trabajador estatal</option>
@@ -81,7 +81,7 @@
                     <label>País</label>
                 </div>
                 -->
-                <div id="province-section" class="input-field col s12 m6 l6 xl6">
+                <div id="province-section" class="input-field col s12 m6">
                     <select id="province" class="input">
                         <option value="" disabled selected></option>
                     </select>

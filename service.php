@@ -112,15 +112,14 @@ class Service {
 			SELECT * FROM (
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
 			COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
-			(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '{$request->person->email}') as viewed,
 			(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
 			(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-			(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '{$request->person->email}') as answers_choosen					
+			(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '{$request->person->email}') as answers_choosen
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
 			WHERE A.active = 1) subq
-			WHERE viewed = 0 AND TRUE $where ORDER BY popularity DESC LIMIT 10");
+			WHERE 1 $where ORDER BY popularity DESC LIMIT 10");
 
 		if (!is_array($courses)) {
 			$courses = [];
@@ -163,6 +162,8 @@ class Service {
 			"noResults"  => $noResults,
 			"max_stars"  => 5,
 		]);
+
+		$response->setCache('week');
 	}
 
 	/**
