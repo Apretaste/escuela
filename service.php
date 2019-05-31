@@ -1,10 +1,8 @@
 <?php
 
-use \Phalcon\DI;
-
 class Service {
 
-
+	private $files = [];
 	/**
 	 * Main function
 	 *
@@ -55,6 +53,8 @@ class Service {
 			$level = $r[0]->level;
 		}
 
+		$this->setFontFiles();
+
 		// setup response
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('home.ejs', [
@@ -64,7 +64,7 @@ class Service {
 			"name"      => $person->first_name ? $person->first_name : '',
 			"level"     => $level,
 			"completed" => $this->getTotalCompletedCourses($person->email),
-		]);
+		], [], $this->files);
 
 		$response->setCache(60);
 	}
@@ -141,6 +141,8 @@ class Service {
 			$courses[$k]  = $c;
 		}
 
+		$this->setFontFiles();
+
 		// display the course
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('search.ejs', [
@@ -163,7 +165,7 @@ class Service {
 			"data"       => $data,
 			"noResults"  => $noResults,
 			"max_stars"  => 5,
-		]);
+		], [], $this->files);
 
 		$response->setCache('month');
 	}
@@ -189,14 +191,16 @@ class Service {
 			$response->setTemplate('text.ejs', [
 				"title" => "Curso no encontrado",
 				"body"  => "No encontramos el curso que usted pidio",
-			]);
+			], [], $this->files);
 
 			return;
 		}
 
+		$this->setFontFiles();
+
 		// display the course
 		$response->setLayout('escuela.ejs');
-		$response->setTemplate('course.ejs', ['course' => $course]);
+		$response->setTemplate('course.ejs', ['course' => $course], [], $this->files);
 	}
 
 	/**
@@ -212,6 +216,8 @@ class Service {
 	public function _capitulo(Request $request, Response &$response) {
 		$id      = intval($request->input->data->query);
 		$chapter = $this->getChapter($id, $request->person->email);
+
+		$this->setFontFiles();
 
 		if ($chapter) {
 			$responses        = [];
@@ -242,7 +248,7 @@ class Service {
 				'course'  => $course,
 				'before'  => $beforeAfter['before'],
 				'after'   => $beforeAfter['after'],
-			], $images);
+			], $images, $this->files);
 
 			$responses[] = $response;
 
@@ -250,7 +256,7 @@ class Service {
 		}
 
 		$response->setLayout('escuela.ejs');
-		$response->createFromText("Capitulo no encontrado");
+		$response->setTemplate('text.ejs', ['title' => 'Lo Sentimos', 'body' => 'Capitulo no encontrado'], [], $this->files);
 	}
 
 	/**
@@ -480,13 +486,15 @@ class Service {
 				WHERE TABLE_NAME = '_escuela_profile'
 							AND COLUMN_NAME = 'level';");
 
+		$this->setFontFiles();
+
 		$levels = explode(",", str_replace(["'", "enum(", ")"], "", $r[0]->result));
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("profile.ejs", [
 			"resume"  => $resume,
 			"profile" => $profile,
 			"levels"  => $levels,
-		]);
+		], [], $this->files);
 	}
 
 	/**
@@ -522,12 +530,14 @@ class Service {
 				WHERE viewed >= (chapters - tests) and answers_choosen >= questions 
 				ORDER BY calification DESC;");
 
+		$this->setFontFiles();
+
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate("terminated.ejs", [
 			"courses"   => is_array($courses) ? $courses : [],
 			"profile"   => $person,
 			"max_stars" => 5,
-		]);
+		], [], $this->files);
 	}
 
 	/**
@@ -1010,5 +1020,10 @@ class Service {
 		return $html;
 	}
 
-
+	private function setFontFiles(){
+		$this->files = [
+			Utils::getPathToService("escuela")."/resources/Roboto-Bold.ttf",
+			Utils::getPathToService("escuela")."/resources/Roboto-Regular.ttf",
+		];
+	}
 }
