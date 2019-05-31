@@ -43,9 +43,9 @@
             <% }); %>
             <br/> <br/>
             <% if (!chapter.terminated) { %>
-            <div class="row center-align">
+            <div class="row left-align">
                 <!-- SAVE BUTTON -->
-                    <a class="btn btn-large waves-effect waves-light green" href="#!" onclick="submitTest()"><i class="material-icons right">send</i> Enviar</a>
+                	<div class="col s12"><a class="btn tiny waves-effect waves-light" href="#!" onclick="submitTest()">Enviar</a></div>
             </div>
             <% } %>
         <% } %>
@@ -54,24 +54,21 @@
 
 <% if (chapter.xtype != 'PRUEBA') { %>
 <div class="row">
-    <div class="col s12 m12 l12 xl12 center-align">
-
+    <div class="col s12 left-align">
     <% if (!(chapter.xtype == 'PRUEBA' && course.all_chapters_finished)) { %>
         <% if (before) { %>
-        <a href="#!" class="link link-simple waves-effect waves-light btn center-align" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons left">arrow_back</i> Anterior</a> &nbsp;
+        <a href="#!" class="link link-simple waves-effect waves-light btn tiny" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons left">arrow_back</i>Anterior</a> &nbsp;
         <% } %>
         <% if (after) {%>
-            <a href="#!" class="link link-simple waves-effect waves-light btn center-align" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>"><i class="material-icons right">arrow_forward</i>Siguiente</a>
+            <a href="#!" class="link link-simple waves-effect waves-light btn tiny" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>"><i class="material-icons right">arrow_forward</i>Siguiente</a>
         <% } %>
-    <% } %>
-    </div>
+	<% } %>
+	<div class="space5"></div>
+	</div>
 </div>
 <% } %>
 
 
-<div class="row right-align">
-    <div class="fixed-action-btn hide-on-med-and-up">
-        <a href="#!" class="link link-simple waves-effect waves-light btn btn-floating btn-large floating-action" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbered</i></a>
-    </div>
-    <a href="#!" class="link link-simple waves-effect waves-light btn btn-floating btn-large hide-on-small-only" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbered</i></a>
+<div class="fixed-action-btn">
+    <a href="#!" class="link link-simple waves-effect waves-light btn btn-floating btn-large floating-action" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbered</i></a>
 </div>

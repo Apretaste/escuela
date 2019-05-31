@@ -40,6 +40,31 @@ nav.nav-center ul li a {
 	-webkit-border-radius: 50%; -moz-border-radius: 50%; border-radius: 50%;
 	margin: 10px auto;
 	padding: 5px;
-	width: 40px;
-	height: 40px;
+	display: inline-block;
+}
+
+.medal .material-icons.large{
+	width: 84px;
+	height: 84px;
+}
+
+.medal .material-icons.medium{
+	width: 56px;
+	height: 56px;
+}
+
+@media (max-width: 600px){
+	.btn.tiny{
+		height: 28px;
+		line-height: 28px;
+		padding: 0 12px;
+	}
+	
+	.btn.tiny i.left{
+		margin-right: 10px;
+	}
+	
+	.btn.tiny i.right{
+		margin-left: 10px;
+	}
 }

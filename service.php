@@ -65,6 +65,8 @@ class Service {
 			"level"     => $level,
 			"completed" => $this->getTotalCompletedCourses($person->email),
 		]);
+
+		$response->setCache(60);
 	}
 
 	/**
@@ -163,7 +165,7 @@ class Service {
 			"max_stars"  => 5,
 		]);
 
-		$response->setCache('week');
+		$response->setCache('month');
 	}
 
 	/**
@@ -221,20 +223,6 @@ class Service {
 			if ($chapter->xtype == 'CAPITULO') {
 				Connection::query("INSERT IGNORE INTO _escuela_chapter_viewed (email, chapter, course) VALUES ('{$request->person->email}', '{$id}', '{$chapter->course}');");
 			}
-
-			// remove the cid: part from the content
-			//$di = \Phalcon\DI\FactoryDefault::getDefault();
-			/*if($di->get('environment') == "app")
-			{
-				$chapter->content = str_replace("cid:", "", $chapter->content);
-			}
-
-			// display the image via web
-			if($di->get('environment') == "web")
-			{
-				$http = $di->get('path')['http'];
-				$chapter->content = str_replace("cid:", "$http/courses/8/149/", $chapter->content);
-			}*/
 
 			// get the code inside the <body> tag
 			if (stripos($chapter->content, '<body>') !== FALSE) {
@@ -514,7 +502,7 @@ class Service {
 
 		// get the most popular courses
 		$courses = Connection::query("
-		  SELECT *, viewed / nullif(chapters,0) * 40 + right_answers / nullif(questions,0) * 60 as calification FROM (
+		  SELECT *, right_answers / nullif(questions,0) * 100 as calification FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
 				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
@@ -525,7 +513,7 @@ class Service {
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course 
 					AND _escuela_answer_choosen.email = '$email'
-					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers					
+					AND (SELECT count(*) as right_choose FROM _escuela_question WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers					
 				FROM _escuela_course A
 				JOIN _escuela_teacher B
 				ON A.teacher = B.id
@@ -714,22 +702,18 @@ class Service {
 
 		$course->calification = 0;
 
-		// 40% por leer
+		/*// 40% por leer
 		if ($course->total_childs > 0) {
-			$course->calification = $course->total_seen / $course->total_childs * 40;
-		}
+			$course->calification = $course->total_seen / $course->total_chapters * 40;
+		}*/
 
-		// 60% por responder bien
+		// 100% por responder bien
 		if ($course->total_questions > 0) {
-			$course->calification += $course->total_right / $course->total_questions * 60;
+			$course->calification += $course->total_right / $course->total_questions * 100;
 		}
 
 		$course->calification = intval($course->calification);
-
-		/*		if ($course->total_tests > 0) {
-					$course->calification = number_format($calification / $course->total_tests, 2) * 1;
-				}
-		*/
+		
 		$course->progress = 0;
 		if ($course->total_childs > 0) {
 			$course->progress = number_format($course->total_terminated / $course->total_childs * 100, 2) * 1;
