@@ -15,12 +15,12 @@
         <% } %>
     </div>
 </div>
-<% if (course.progress == 100 && course.calification > 80) { %>
+<% if (course.progress == 100 && course.calification > 50) { %>
 <div class="row">
     <div class="col s12 center-align">
 		<h1><b>¡Felicidades!</b></h1>
 		<p>Usted ha concluido el curso "<%= course.title %>" con <b><%= course.calification %></b> puntos y ha ganado esta medalla.</p>
-        <div class="medal"><i class="material-icons large">start<%= course.medal %></i></div>
+        <div class="medal large"><i class="material-icons large">start<%= course.medal %></i></div>
         <% if (course.rated === "0") {%>
             <div id="rate-stars">
             Valore este curso:<br/>
