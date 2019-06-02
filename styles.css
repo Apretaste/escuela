@@ -60,34 +60,6 @@ nav.nav-center ul li a {
 	display: inline-block;
 }
 
-.medal {
-	border: 2px solid black;
-	-webkit-border-radius: 50%; -moz-border-radius: 50%; border-radius: 50%;
-	margin: 10px auto;
-	display: inline-block;
-	text-align: left;
-}
-
-.medal .material-icons.large{
-	width: 84px;
-	height: 84px;
-}
-
-.medal.large{
-	width: 100px;
-	height: 100px;
-}
-
-.medal .material-icons.medium{
-	width: 56px;
-	height: 56px;
-}
-
-.medal.medium{
-	width: 68px;
-	height: 68px;
-}
-
 @media (max-width: 600px){
 	.btn.tiny{
 		height: 28px;
