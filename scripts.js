@@ -24,6 +24,10 @@ function jsUcfirst(string) {
 
 $(function () {
   $('select').formSelect();
+  $('.fixed-action-btn').floatingActionButton({
+	direction: 'left',
+	hoverEnabled: false
+  });
 
   $("#btnSearch").click(function () {
 	if($("#category").val() == "ALL" && $("#author").val() == "ALL" && $("#raiting").val() == "0") {
@@ -220,19 +224,6 @@ $(function () {
 
     $('select').formSelect();
   }
-
-  // after render
-  $(".link").attr('href', '#!');
-  $(".link-simple").click(function(){
-    var q = null;
-    eval('q = ' + $(this).attr('data-query'));
-    apretaste.send({
-      command: $(this).attr('data-command'),
-      data: {
-        query: q
-      }
-    });
-  });
 
   $(".star-link").click(function(){
     var q = null;

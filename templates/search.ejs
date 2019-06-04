@@ -1,8 +1,8 @@
 
-<div class="row">
+<div class="row" style="margin-bottom: 0;">
     <div class="col s12">
         <h1>Buscar</h1>
-        <form class="row">
+        <form class="row" style="margin-bottom: 0;">
            <!-- <div class="input-field col s6 m6 l6 xl6">
                 <label for="title">T&iacute;tulo:</label>
                 <input id="title" type="text" class="validate" >
@@ -59,7 +59,12 @@
         <div class="card hoverable">
             <div class="card-content">
                 <span class="card-title"><%= e.title %></span>
-                <p>Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{author: courses[<%= i %>].teacher}"><%= e.professor %></a></p>
+                <p>
+					Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{author: courses[<%= i %>].teacher}"><%= e.professor %></a>
+					<%if (e.category != null){%> ●
+					<a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{category: courses[<%= i %>].category}"><%= jsUcfirst(e.category.toLowerCase()) %></a>
+					<%}%>
+				</p>
                 <p class="space5">
                     <% for(var k = 0; k < e.stars; k++) {%>
                     <i class="material-icons">star</i>
@@ -74,13 +79,13 @@
 					<i class="material-icons right">close</i>
 				</span>
                 <p><%= e.content %></p>
-                <p class="space5">Categoria: <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{category: courses[<%= i %>].category}"><%= e.category %></a></p>
             </div>
             <div class="card-action">
-                <a href="#!" class="link link-simple" data-command="ESCUELA CURSO" data-query="<%= e.id %>">Empezar</a>
+                <a href="#!" class="link link-simple" data-command="ESCUELA CURSO" data-query="<%= e.id %>">Ir al curso</a>
                 <i class="material-icons card-title right activator">more_horiz</i>
             </div>
         </div>
     </div>
     <% }); %>
 </div>
+<br><br>
