@@ -45,7 +45,13 @@
 	<a id="btnSearch" class="btn-floating btn-large"><i class="material-icons">search</i></a>
 </div>
 
-<% if (noResults) { %>
+<%if (noSearch){%>
+<div class="row">
+    <div class="col s12">
+    	Cambie las opciones y presione el boton para comenzar su busqueda.
+    </div>
+</div>
+<%} else if (noResults) { %>
 <div class="row">
     <div class="col s12">
         No se encontraron cursos.
@@ -55,13 +61,13 @@
 
 <div class="row">
     <% courses.forEach(function(e, i) { %>
-    <div class="col s12 m6 l4">
+    <div class="col s12 m6">
         <div class="card hoverable">
             <div class="card-content">
                 <span class="card-title"><%= e.title %></span>
                 <p>
 					Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{author: courses[<%= i %>].teacher}"><%= e.professor %></a>
-					<%if (e.category != null){%> ●
+					<%if (e.category != null){%> ● 
 					<a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{category: courses[<%= i %>].category}"><%= jsUcfirst(e.category.toLowerCase()) %></a>
 					<%}%>
 				</p>
