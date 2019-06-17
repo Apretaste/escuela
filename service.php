@@ -1,26 +1,32 @@
 <?php
 
+use Phalcon\DI\FactoryDefault;
+
 class Service
 {
+
+	/** @var Response */
+	public $response = null;
+
+	/** @var Request */
+	public $request = null;
 
 	private $files = [];
 
 	/**
 	 * Main function
 	 *
-	 * @param Request
-	 *
 	 * @author salvipascual
 	 *
 	 */
-	public function _main(Request $request, Response &$response)
+	public function _main()
 	{
-		$email  = $request->person->email;
+		$email  = $this->request->person->email;
 		$person = Utils::getPerson($email);
-		$this->setLevel($request);
+		$this->setLevel();
 
 		// get the most popular courses
-		$courses = Connection::query("
+		$courses = q("
 		  SELECT * FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
@@ -41,7 +47,7 @@ class Service
 
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
-			$course       = $this->getCourse($c->id, $request->person->id);
+			$course       = $this->getCourse($c->id, $this->request->person->id);
 			$c->progress  = $course->progress;
 			$c->title     = htmlspecialchars($c->title);
 			$c->content   = htmlspecialchars($c->content);
@@ -52,7 +58,7 @@ class Service
 		}
 
 		$level = 'PRINCIPIANTE';
-		$r     = Connection::query("SELECT level FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
+		$r     = q("SELECT level FROM _escuela_profile WHERE person_id = '{$this->request->person->id}'");
 		if (isset($r[0])) {
 			$level = $r[0]->level;
 		}
@@ -60,8 +66,8 @@ class Service
 		$this->setFontFiles();
 
 		// setup response
-		$response->setLayout('escuela.ejs');
-		$response->setTemplate('home.ejs', [
+		$this->response->setLayout('escuela.ejs');
+		$this->response->setTemplate('home.ejs', [
 			"max_stars" => 5,
 			"courses"   => $courses,
 			// si no ha completado el nombre en el perfil debe decir solo Bienvenido
@@ -70,21 +76,19 @@ class Service
 			"completed" => $this->getTotalCompletedCourses($person->email),
 		], [], $this->files);
 
-		$response->setCache(60);
+		$this->response->setCache(60);
 	}
 
 	/**
 	 * Buscar cursos
 	 *
-	 * @param \Request  $request
-	 * @param \Response $response
 	 */
-	public function _buscar(Request $request, Response &$response)
+	public function _buscar()
 	{
 		$where = '';
 		$data  = null;
-		if (isset($request->input->data->query)) {
-			$data = $request->input->data->query;
+		if (isset($this->request->input->data->query)) {
+			$data = $this->request->input->data->query;
 			if (isset($data->category)
 				|| isset($data->author)
 				|| isset($data->raiting)
@@ -114,29 +118,32 @@ class Service
 			}
 		}
 
-		if(!empty(trim($where))) $courses = Connection::query("
+		$courses = [];
+		if (!empty(trim($where))) {
+			$courses = q("
 			SELECT * FROM (
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
 			COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
 			(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
 			(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-			(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '{$request->person->email}') as answers_choosen
+			(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '{$this->request->person->email}') as answers_choosen
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
 			WHERE A.active = 1) subq
 			WHERE 1 $where ORDER BY popularity DESC LIMIT 10");
+		}
 
-		if (!is_array($courses)) {
+		if ( ! is_array($courses)) {
 			$courses = [];
 		}
 
 		$noResults = empty($courses);
-		$noSearch = empty(trim($where));
+		$noSearch  = empty(trim($where));
 
-		// remove extrange chars
+		// remove estrange chars
 		foreach ($courses as $k => $c) {
-			$course       = $this->getCourse($c->id, $request->person->id);
+			$course       = $this->getCourse($c->id, $this->request->person->id);
 			$c->progress  = $course->progress;
 			$c->title     = htmlspecialchars($c->title);
 			$c->content   = htmlspecialchars($c->content);
@@ -149,8 +156,8 @@ class Service
 		$this->setFontFiles();
 
 		// display the course
-		$response->setLayout('escuela.ejs');
-		$response->setTemplate('search.ejs', [
+		$this->response->setLayout('escuela.ejs');
+		$this->response->setTemplate('search.ejs', [
 			"categories" => [
 				'SOCIEDAD'    => 'Sociedad',
 				'NEGOCIOS'    => 'Negocios',
@@ -169,34 +176,32 @@ class Service
 			"courses"    => $courses,
 			"data"       => $data,
 			"noResults"  => $noResults,
-			"noSearch"	 => $noSearch,
+			"noSearch"   => $noSearch,
 			"max_stars"  => 5,
 		], [], $this->files);
 
-		$response->setCache('month');
+		$this->response->setCache('month');
 	}
 
 	/**
 	 * Retrieve a course
 	 *
-	 * @param Request  $request
-	 * @param Response $response
 	 *
 	 * @author  kuma
 	 * @example ESCUELA CURSO 2
 	 *
 	 */
-	public function _curso(Request $request, Response &$response)
+	public function _curso()
 	{
 		// get the course details
-		$id     = intval($request->input->data->query);
-		$course = $this->getCourse($id, $request->person->id);
+		$id     = intval($this->request->input->data->query);
+		$course = $this->getCourse($id, $this->request->person->id);
 
 		// if course cannot be found
 		if (empty($course)) {
 
-			$response->setLayout('escuela.ejs');
-			$response->setTemplate('text.ejs', [
+			$this->response->setLayout('escuela.ejs');
+			$this->response->setTemplate('text.ejs', [
 				"title" => "Curso no encontrado",
 				"body"  => "No encontramos el curso que usted pidio",
 			], [], $this->files);
@@ -207,36 +212,33 @@ class Service
 		$this->setFontFiles();
 
 		// display the course
-		$response->setLayout('escuela.ejs');
-		$response->setTemplate('course.ejs', ['course' => $course], [], $this->files);
+		$this->response->setLayout('escuela.ejs');
+		$this->response->setTemplate('course.ejs', ['course' => $course], [], $this->files);
 	}
 
 	/**
 	 * Subservice CAPITULO
 	 *
-	 * @param Response $response
-	 * @param Request  $request
 	 *
 	 * @author  kuma
 	 * @example ESCUELA CAPITULO 3
 	 *
 	 */
-	public function _capitulo(Request $request, Response &$response)
+	public function _capitulo()
 	{
-		$id      = intval($request->input->data->query);
-		$chapter = $this->getChapter($id, $request->person->id);
+		$id      = intval($this->request->input->data->query);
+		$chapter = $this->getChapter($id, $this->request->person->id);
 
 		$this->setFontFiles();
 
 		if ($chapter) {
-			$responses        = [];
 			$beforeAfter      = $this->getBeforeAfter($chapter);
 			$images           = $this->getChapterImages($id);
-			$chapter->content = Utils::putInlineImagesToHTML($chapter->content, $images, 'cid:', '.jpg');
+			$chapter->content = Utils::putInlineImagesToHTML($chapter->content, $images, 'cid:');
 
 			// Log the visit to this chapter
 			if ($chapter->xtype == 'CAPITULO') {
-				Connection::query("INSERT IGNORE INTO _escuela_chapter_viewed (email, chapter, course) VALUES ('{$request->person->email}', '{$id}', '{$chapter->course}');");
+				q("INSERT IGNORE INTO _escuela_chapter_viewed (email, chapter, course) VALUES ('{$this->request->person->email}', '{$id}', '{$chapter->course}');");
 			}
 
 			// get the code inside the <body> tag
@@ -247,25 +249,23 @@ class Service
 			}
 
 			// check if the course is terminated
-			$course = $this->getCourse($chapter->course, $request->person->id);
+			$course = $this->getCourse($chapter->course, $this->request->person->id);
 
 			// send response to the view
 
-			$response->setLayout('escuela.ejs');
-			$response->setTemplate('chapter.ejs', [
+			$this->response->setLayout('escuela.ejs');
+			$this->response->setTemplate('chapter.ejs', [
 				'chapter' => $chapter,
 				'course'  => $course,
 				'before'  => $beforeAfter['before'],
 				'after'   => $beforeAfter['after'],
 			], $images, $this->files);
 
-			$responses[] = $response;
-
-			return $responses;
+			return;
 		}
 
-		$response->setLayout('escuela.ejs');
-		$response->setTemplate('text.ejs', ['title' => 'Lo Sentimos', 'body' => 'Capitulo no encontrado'], [], $this->files);
+		$this->response->setLayout('escuela.ejs');
+		$this->response->setTemplate('text.ejs', ['title' => 'Lo Sentimos', 'body' => 'Capitulo no encontrado'], [], $this->files);
 	}
 
 	/**
@@ -273,21 +273,21 @@ class Service
 	 *
 	 * @example ESCUELA PRUEBA 2
 	 */
-	public function _prueba(Request $request, Response &$response)
+	public function _prueba()
 	{
-		$this->_capitulo($request, $response);
+		$this->_capitulo();
 	}
 
 	/**
 	 * Records the answer for a question and resturns an empty response
 	 */
-	public function _responder(Request $request, Response &$response)
+	public function _responder()
 	{
 		// pull the answer selected
-		$answers = $request->input->data->answers;
+		$answers = $this->request->input->data->answers;
 		foreach ($answers as $id) {
 
-			$res = Connection::query("SELECT * FROM _escuela_answer WHERE id=$id");
+			$res = q("SELECT * FROM _escuela_answer WHERE id=$id");
 
 			// do not let pass invalid answers
 			if (empty($res)) {
@@ -297,22 +297,21 @@ class Service
 			}
 
 			// save the answer in the database
-			Connection::query("
+			q("
 			INSERT IGNORE INTO _escuela_answer_choosen (email, answer, chapter, question, course)
-			VALUES ('{$request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
+			VALUES ('{$this->request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
 
-			$this->setLevel($request);
+			$this->setLevel();
 		}
 	}
 
 	/**
 	 * Set level
 	 *
-	 * @param \Request $request
 	 */
-	public function setLevel(Request $request)
+	public function setLevel()
 	{
-		$resume = $this->getResume($request->person->email);
+		$resume = $this->getResume($this->request->person->email);
 		$total  = 0;
 		foreach ($resume as $item) {
 			if ($item->answers > 0) {
@@ -344,112 +343,116 @@ class Service
 		}
 
 		// update user level
-		Connection::query("UPDATE _escuela_profile SET level = '$level' WHERE person_id = '{$request->person->id}';");
+		q("UPDATE _escuela_profile SET level = '$level' WHERE person_id = '{$this->request->person->id}';");
 	}
 
 	/**
 	 * Rate course
 	 */
-	public function _calificar(Request $request, Response &$response)
+	public function _calificar()
 	{
-		$course_id = $request->input->data->query->course;
-		$stars     = $request->input->data->query->stars;
+		$course_id = $this->request->input->data->query->course;
+		$stars     = $this->request->input->data->query->stars;
 		$stars     = $stars > 5 ? 5 : $stars;
 
-		Connection::query("INSERT IGNORE INTO _escuela_stars (course, person_id, stars) VALUES ('$course_id', '{$request->person->id}', '$stars');");
-		Connection::query("UPDATE _escuela_stars SET stars = $stars WHERE course = $course_id AND person_id = {$request->person->id};");
+		q("INSERT IGNORE INTO _escuela_stars (course, person_id, stars) VALUES ('$course_id', '{$this->request->person->id}', '$stars');");
+		q("UPDATE _escuela_stars SET stars = $stars WHERE course = $course_id AND person_id = {$this->request->person->id};");
 	}
 
 	/**
 	 * Subservice OPINAR
 	 *
-	 * @param \Request $request
-	 *
-	 * @return \Response
 	 */
-	public function _opinar(Request $request, Response &$response)
+	public function _opinar()
 	{
 		// expecting: course_id feedback_id answer
-		$q = trim($request->input->data->query);
+		$q = trim($this->request->input->data->query);
 
 		Utils::clearStr($q);
 		$feed = explode(' ', $q);
 
 		if (!isset($feed[0]) || !isset($feed[1]) || !isset($feed[2])) {
-			return new Response();
+			return;
 		}
 
-		$courseid    = intval($feed[0]);
+		$course_id   = intval($feed[0]);
 		$feedback_id = intval($feed[1]);
 		$answer      = trim(strtolower(($feed[2])));
 
-		$course = $this->getCourse($courseid);
+		$course = $this->getCourse($course_id, $this->request->person->id);
 
 		if ($course !== false) {
-			$feedback = Connection::query("SELECT id, text, answers FROM _escuela_feedback WHERE id = $feedback_id;");
+			$feedback = q("SELECT id, text, answers FROM _escuela_feedback WHERE id = $feedback_id;");
 			if (isset($feedback[0])) {
 				$feedback       = $feedback[0];
 				$answers        = $feedback->answers;
-				$feedback_where = " email = '{$request->person->email}' AND feedback = $feedback_id AND course = $courseid;";
+				$feedback_where = " email = '{$this->request->person->email}' AND feedback = $feedback_id AND course = $course_id;";
 
 				// get last answer, and decrease popularity of the course
 				$last_answer = false;
-				$r           = Connection::query("SELECT answer FROM _escuela_feedback_received WHERE $feedback_where;");
+				$r           = q("SELECT answer FROM _escuela_feedback_received WHERE $feedback_where;");
 				if (isset($r[0])) {
 					$last_answer = $r[0]->answer;
 				}
 
 				if ($last_answer !== false) {
 					$popularity = $this->getAnswerValue($answers, $last_answer);
-					Connection::query("DELETE FROM _escuela_feedback_received WHERE $feedback_where");
+					q("DELETE FROM _escuela_feedback_received WHERE $feedback_where");
 
 					if ($popularity !== false) {
-						Connection::query("UPDATE _escuela_course SET popularity = popularity - $popularity WHERE id = $courseid;");
+						q("UPDATE _escuela_course SET popularity = popularity - $popularity WHERE id = $course_id;");
 					}
 				}
 
 				// analyze current answer && increase popularity of the course
 				$popularity = $this->getAnswerValue($answers, $answer);
 				if ($popularity !== false) {
-					Connection::query("INSERT INTO _escuela_feedback_received (feedback, course, email, answer) VALUES ($feedback_id, $courseid, '{$request->person->email}', '$answer');");
-					Connection::query("UPDATE _escuela_course SET popularity = popularity + $popularity WHERE id = $courseid;");
+					q("INSERT INTO _escuela_feedback_received (feedback, course, email, answer) VALUES ($feedback_id, $course_id, '{$this->request->person->email}', '$answer');");
+					q("UPDATE _escuela_course SET popularity = popularity + $popularity WHERE id = $course_id;");
 				}
 			}
 		}
-
 	}
 
 	/**
 	 * Repeats a test for a course
 	 *
-	 * @param Request $request
-	 *
-	 * @return Response
 	 * @author kuma
-	 *
 	 */
-	public function _repetir(Request $request, Response &$response)
+	public function _repetir()
 	{
 		// remove the previous answers
-		Connection::query("DELETE FROM _escuela_chapter_viewed WHERE course='{$request->input->data->query}' AND email='{$request->person->email}'");
-		Connection::query("DELETE FROM _escuela_answer_choosen WHERE course='{$request->input->data->query}' AND email='{$request->person->email}'");
+		q("DELETE FROM _escuela_chapter_viewed WHERE course='{$this->request->input->data->query}' AND email='{$this->request->person->email}'");
+		q("DELETE FROM _escuela_answer_choosen WHERE course='{$this->request->input->data->query}' AND email='{$this->request->person->email}'");
 
 		// load the test again
-		$this->_curso($request, $response);
-		$response->content['course']->repeated = true;
+		$this->_curso();
+
+		// change response content
+		//TODO: improve this feature in the core
+		$data = @json_decode($this->response->json);
+
+		if (is_array($data)) {
+			$data = (object)$data;
+		}
+
+		if (!is_object($data)) {
+			if (isset($data->course)) {
+				$data->course->repeated = true;
+				$this->response->json   = json_encode($data, JSON_UNESCAPED_UNICODE);
+			}
+		}
 	}
 
 	/**
 	 * Perfil de escuela
 	 *
-	 * @param \Request  $request
-	 * @param \Response $response
 	 */
-	public function _perfil(Request $request, Response &$response)
+	public function _perfil()
 	{
 
 		// save profile
-		if (isset($request->input->data->save)) {
+		if (isset($this->request->input->data->save)) {
 			$fields = [
 				'first_name',
 				'last_name',
@@ -465,7 +468,7 @@ class Service
 
 			// get the JSON with the bulk
 			$pieces = [];
-			foreach ($request->input->data->query as $key => $value) {
+			foreach ($this->request->input->data->query as $key => $value) {
 
 				if ($key == 'date_of_birth') {
 					$value = DateTime::createFromFormat('d/m/Y', $value)->format('Y-m-d');
@@ -478,33 +481,33 @@ class Service
 
 			// save changes on the database
 			if (!empty($pieces)) {
-				Connection::query("UPDATE person SET " . implode(",", $pieces) . " WHERE id={$request->person->id}");
+				q("UPDATE person SET " . implode(",", $pieces) . " WHERE id={$this->request->person->id}");
 			}
 
 			return;
 		}
 
 		// show profile
-		$resume         = $this->getResume($request->person->email);
-		$profile        = Utils::getPerson($request->person->email);
+		$resume         = $this->getResume($this->request->person->email);
+		$profile        = Utils::getPerson($this->request->person->email);
 		$profile->level = 'PRINCIPIANTE';
-		$r              = Connection::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
+		$r              = q("SELECT * FROM _escuela_profile WHERE person_id = '{$this->request->person->id}'");
 		if (!isset($r[0])) {
-			Connection::query("INSERT INTO _escuela_profile (person_id, `level`) VALUES ('{$request->person->id}','PRINCIPIANTE');");
+			q("INSERT INTO _escuela_profile (person_id, level) VALUES ('{$this->request->person->id}','PRINCIPIANTE');");
 		} else {
 			$profile->level = $r[0]->level;
 		}
 
-		$r = Connection::query("SELECT COLUMN_TYPE AS result
-				FROM information_schema.`COLUMNS`
+		$r = q("SELECT COLUMN_TYPE AS result
+				FROM information_schema.COLUMNS
 				WHERE TABLE_NAME = '_escuela_profile'
 							AND COLUMN_NAME = 'level';");
 
 		$this->setFontFiles();
 
 		$levels = explode(",", str_replace(["'", "enum(", ")"], "", $r[0]->result));
-		$response->setLayout('escuela.ejs');
-		$response->setTemplate("profile.ejs", [
+		$this->response->setLayout('escuela.ejs');
+		$this->response->setTemplate("profile.ejs", [
 			"resume"  => $resume,
 			"profile" => $profile,
 			"levels"  => $levels,
@@ -514,17 +517,15 @@ class Service
 	/**
 	 * Cursos terminados
 	 *
-	 * @param \Request  $request
-	 * @param \Response $response
 	 */
-	public function _terminados(Request $request, Response $response)
+	public function _terminados()
 	{
-		$email  = $request->person->email;
+		$email  = $this->request->person->email;
 		$person = Utils::getPerson($email);
-		$this->setLevel($request);
+		$this->setLevel();
 
 		// get the most popular courses
-		$courses = Connection::query("
+		$courses = q("
 		  SELECT *, right_answers / nullif(questions,0) * 100 as calification FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
@@ -547,8 +548,8 @@ class Service
 
 		$this->setFontFiles();
 
-		$response->setLayout('escuela.ejs');
-		$response->setTemplate("terminated.ejs", [
+		$this->response->setLayout('escuela.ejs');
+		$this->response->setTemplate("terminated.ejs", [
 			"courses"   => is_array($courses) ? $courses : [],
 			"profile"   => $person,
 			"max_stars" => 5,
@@ -565,7 +566,7 @@ class Service
 	 */
 	private function getResume($email, $course_id = null)
 	{
-		$r = Connection::query("
+		$r = q("
 			SELECT id, medal, title,
 				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
@@ -588,9 +589,12 @@ class Service
 	 *
 	 * @return array
 	 */
-	private function getFeedbacks()
+
+	// TODO: metodo no se usa
+
+	/*private function getFeedbacks()
 	{
-		$feedback = Connection::query("SELECT id, text, answers FROM _escuela_feedback;");
+		$feedback = q("SELECT id, text, answers FROM _escuela_feedback;");
 		foreach ($feedback as $k => $fb) {
 			$fb->answers = explode(',', $fb->answers);
 
@@ -611,7 +615,7 @@ class Service
 		}
 
 		return $feedback;
-	}
+	}*/
 
 	/**
 	 * Get answer
@@ -659,12 +663,12 @@ class Service
 		$before = false;
 		$after  = false;
 
-		$r = Connection::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder - 1) . ";");
+		$r = q("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder - 1) . ";");
 		if (isset($r[0])) {
 			$before = $r[0];
 		}
 
-		$r = Connection::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder + 1) . ";");
+		$r = q("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder + 1) . ";");
 		if (isset($r[0])) {
 			$after = $r[0];
 		}
@@ -685,7 +689,7 @@ class Service
 	 */
 	private function getCourse($id, $person_id = '')
 	{
-		$res = Connection::query("	SELECT *,
+		$res = q("	SELECT *,
 				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
 				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title,
 				((SELECT count(*) FROM _escuela_stars WHERE _escuela_stars.person_id = (SELECT id FROM person WHERE person.id = '$person_id') AND _escuela_stars.course = _escuela_course.id) > 0) as rated
@@ -767,7 +771,7 @@ class Service
 	private function getChapterImages($chapter)
 	{
 		// get course and content
-		$chapterText = Connection::query("SELECT content, course FROM _escuela_chapter WHERE id=$chapter");
+		$chapterText = q("SELECT content, course FROM _escuela_chapter WHERE id=$chapter");
 		$content     = $chapterText[0]->content;
 
 		$tidy    = new tidy();
@@ -783,11 +787,12 @@ class Service
 		$imgs = $dom->getElementsByTagName('img');
 
 		// get path to root folder
-		$di      = \Phalcon\DI\FactoryDefault::getDefault();
+		$di      = FactoryDefault::getDefault();
 		$wwwroot = $di->get('path')['root'];
 
 		// get full path to the image
 		$images = [];
+		/** @var \DOMElement $img */
 		foreach ($imgs as $img) {
 			$src               = $img->getAttribute('src');
 			$filename          = str_replace("cid:", "", $src);
@@ -802,13 +807,16 @@ class Service
 	 *
 	 * @param integer $id
 	 *
+	 * @param string  $email
+	 * @param string  $answer_order
+	 *
 	 * @return object
 	 */
 	private function getChapter($id, $email = '', $answer_order = 'rand()')
 	{
 		$chapter = false;
 
-		$r = Connection::query("SELECT * FROM _escuela_chapter WHERE id = '$id';", true, 'latin1');
+		$r = q("SELECT * FROM _escuela_chapter WHERE id = '$id';", true, 'latin1');
 
 		if (isset($r[0])) {
 			$chapter = $r[0];
@@ -854,7 +862,7 @@ class Service
 	private function getChapters($course, $email = '', $terminated = null)
 	{
 		// get chapters
-		$r = Connection::query("SELECT id FROM _escuela_chapter WHERE course = '$course' ORDER BY xorder;");
+		$r = q("SELECT id FROM _escuela_chapter WHERE course = '$course' ORDER BY xorder;");
 
 		$chapters = [];
 		if ($r) {
@@ -872,7 +880,7 @@ class Service
 	private function getChapterQuestions($test_id, $email = '', $answer_order = 'rand()')
 	{
 		$questions = [];
-		$rows      = Connection::query("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;", true, 'latin1');
+		$rows      = q("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;", true, 'latin1');
 		if (!is_array($questions)) {
 			$questions = [];
 		}
@@ -895,7 +903,7 @@ class Service
 	 */
 	private function getQuestion($question_id, $email = '', $answer_order = 'rand()')
 	{
-		$row = Connection::query("SELECT * FROM _escuela_question WHERE id = '$question_id';", true, 'latin1');
+		$row = q("SELECT * FROM _escuela_question WHERE id = '$question_id';", true, 'latin1');
 		if (isset($row[0])) {
 			$q             = $row[0];
 			$q->answers    = $this->getAnswers($question_id, $answer_order);
@@ -903,7 +911,7 @@ class Service
 			$q->terminated = $t;
 
 			$q->answer_choosen = -1;
-			$a                 = Connection::query("SELECT answer FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id'");
+			$a                 = q("SELECT answer FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id'");
 			if (isset($a[0])) {
 				$q->answer_choosen = intval($a[0]->answer);
 			}
@@ -926,7 +934,7 @@ class Service
 	 */
 	private function getAnswers($question_id, $orderby = 'rand()')
 	{
-		$answers = Connection::query("SELECT * FROM _escuela_answer WHERE question = '{$question_id}' ORDER BY $orderby;");
+		$answers = q("SELECT * FROM _escuela_answer WHERE question = '{$question_id}' ORDER BY $orderby;");
 		if (!is_array($answers)) {
 			$answers = [];
 		}
@@ -943,7 +951,7 @@ class Service
 	 */
 	private function getTotalQuestionsOf($chapter_id)
 	{
-		$r = Connection::query("SELECT count(id) as t FROm _escuela_question WHERE chapter = '$chapter_id';");
+		$r = q("SELECT count(id) as t FROm _escuela_question WHERE chapter = '$chapter_id';");
 
 		return intval($r[0]->t);
 	}
@@ -958,7 +966,7 @@ class Service
 	 */
 	private function getTotalResponsesOf($email, $chapter_id)
 	{
-		$r = Connection::query("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND chapter = '$chapter_id';");
+		$r = q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND chapter = '$chapter_id';");
 
 		return intval($r[0]->t);
 	}
@@ -989,7 +997,7 @@ class Service
 	 */
 	private function isChapterSeen($email, $chapter_id)
 	{
-		$r = Connection::query("SELECT count(email) as t FROM _escuela_chapter_viewed WHERE email ='$email' AND chapter = '$chapter_id';");
+		$r = q("SELECT count(email) as t FROM _escuela_chapter_viewed WHERE email ='$email' AND chapter = '$chapter_id';");
 
 		return $r[0]->t * 1 > 0;
 	}
@@ -1004,14 +1012,14 @@ class Service
 	 */
 	private function isQuestionTerminated($email, $question_id)
 	{
-		$r = Connection::query("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id';");
+		$r = q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id';");
 
 		return intval($r[0]->t) > 0;
 	}
 
 	private function getTotalCompletedCourses($email)
 	{
-		$r = Connection::query("
+		$r = q("
 			select count(*) as t from (
 				select course, 
 						count(*) as total, 
@@ -1029,7 +1037,7 @@ class Service
 
 	private function getTeachers()
 	{
-		$r = Connection::query('SELECT * FROM _escuela_teacher');
+		$r = q('SELECT * FROM _escuela_teacher');
 		if (!is_array($r)) {
 			return [];
 		}
@@ -1056,6 +1064,9 @@ class Service
 		return $html;
 	}
 
+	/**
+	 * Set font files
+	 */
 	private function setFontFiles()
 	{
 		$this->files = [
