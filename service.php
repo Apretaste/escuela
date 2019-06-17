@@ -11,6 +11,7 @@ class Service
 	/** @var Request */
 	public $request = null;
 
+	/** @var array */
 	private $files = [];
 
 	/**
