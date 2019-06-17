@@ -90,7 +90,6 @@ class Service
 				|| isset($data->raiting)
 				|| isset($data->title)
 			) {
-
 				$where = ' ';
 				if (isset($data->category)) {
 					if ($data->category !== 'ALL') {
@@ -103,7 +102,7 @@ class Service
 					}
 				}
 				if (isset($data->raiting)) {
-					if ($data->raiting !== 'ALL') {
+					if ($data->raiting !== '0') {
 						$where .= " AND stars >= '{$data->raiting}'";
 					}
 				}
@@ -115,7 +114,7 @@ class Service
 			}
 		}
 
-		$courses = Connection::query("
+		if(!empty(trim($where))) $courses = Connection::query("
 			SELECT * FROM (
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
 			COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
@@ -133,6 +132,7 @@ class Service
 		}
 
 		$noResults = empty($courses);
+		$noSearch = empty(trim($where));
 
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
@@ -169,6 +169,7 @@ class Service
 			"courses"    => $courses,
 			"data"       => $data,
 			"noResults"  => $noResults,
+			"noSearch"	 => $noSearch,
 			"max_stars"  => 5,
 		], [], $this->files);
 
