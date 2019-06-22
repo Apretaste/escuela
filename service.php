@@ -22,8 +22,8 @@ class Service
 	 */
 	public function _main()
 	{
-		$email  = $this->request->person->email;
-		$person = Utils::getPerson($email);
+		$person_id = $this->request->person->id;
+		$person = Utils::getPerson($person_id);
 		$this->setLevel();
 
 		// get the most popular courses
@@ -31,12 +31,12 @@ class Service
 		  SELECT * FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
-				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
+				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = '$person_id') as viewed,
 				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen					
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$person_id') as answers_choosen					
 				FROM _escuela_course A
 				JOIN _escuela_teacher B
 				ON A.teacher = B.id
@@ -74,7 +74,7 @@ class Service
 			// si no ha completado el nombre en el perfil debe decir solo Bienvenido
 			"name"      => $person->first_name ? $person->first_name : '',
 			"level"     => $level,
-			"completed" => $this->getTotalCompletedCourses($person->email),
+			"completed" => $this->getTotalCompletedCourses($person_id),
 		], [], $this->files);
 
 		$this->response->setCache(60);
@@ -127,7 +127,7 @@ class Service
 			COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
 			(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
 			(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-			(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '{$this->request->person->email}') as answers_choosen
+			(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '{$this->request->person->id}') as answers_choosen
 			FROM _escuela_course A
 			JOIN _escuela_teacher B
 			ON A.teacher = B.id
@@ -239,7 +239,7 @@ class Service
 
 			// Log the visit to this chapter
 			if ($chapter->xtype == 'CAPITULO') {
-				q("INSERT IGNORE INTO _escuela_chapter_viewed (email, chapter, course) VALUES ('{$this->request->person->email}', '{$id}', '{$chapter->course}');");
+				q("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$this->request->person->id}','{$this->request->person->email}', '{$id}', '{$chapter->course}');");
 			}
 
 			// get the code inside the <body> tag
@@ -299,8 +299,8 @@ class Service
 
 			// save the answer in the database
 			q("
-			INSERT IGNORE INTO _escuela_answer_choosen (email, answer, chapter, question, course)
-			VALUES ('{$this->request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
+			INSERT IGNORE INTO _escuela_answer_choosen (person_id, email, answer, chapter, question, course)
+			VALUES ('{$this->request->person->id}','{$this->request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
 
 			$this->setLevel();
 		}
@@ -312,7 +312,7 @@ class Service
 	 */
 	public function setLevel()
 	{
-		$resume = $this->getResume($this->request->person->email);
+		$resume = $this->getResume($this->request->person->id);
 		$total  = 0;
 		foreach ($resume as $item) {
 			if ($item->answers > 0) {
@@ -387,7 +387,7 @@ class Service
 			if (isset($feedback[0])) {
 				$feedback       = $feedback[0];
 				$answers        = $feedback->answers;
-				$feedback_where = " email = '{$this->request->person->email}' AND feedback = $feedback_id AND course = $course_id;";
+				$feedback_where = " person_id = '{$this->request->person->id}' AND feedback = $feedback_id AND course = $course_id;";
 
 				// get last answer, and decrease popularity of the course
 				$last_answer = false;
@@ -408,7 +408,7 @@ class Service
 				// analyze current answer && increase popularity of the course
 				$popularity = $this->getAnswerValue($answers, $answer);
 				if ($popularity !== false) {
-					q("INSERT INTO _escuela_feedback_received (feedback, course, email, answer) VALUES ($feedback_id, $course_id, '{$this->request->person->email}', '$answer');");
+					q("INSERT INTO _escuela_feedback_received (feedback, course, person_id, email, answer) VALUES ($feedback_id, $course_id, '{$this->request->person->id}', '{$this->request->person->email}', '$answer');");
 					q("UPDATE _escuela_course SET popularity = popularity + $popularity WHERE id = $course_id;");
 				}
 			}
@@ -423,8 +423,8 @@ class Service
 	public function _repetir()
 	{
 		// remove the previous answers
-		q("DELETE FROM _escuela_chapter_viewed WHERE course='{$this->request->input->data->query}' AND email='{$this->request->person->email}'");
-		q("DELETE FROM _escuela_answer_choosen WHERE course='{$this->request->input->data->query}' AND email='{$this->request->person->email}'");
+		q("DELETE FROM _escuela_chapter_viewed WHERE course='{$this->request->input->data->query}' AND person_id='{$this->request->person->id}'");
+		q("DELETE FROM _escuela_answer_choosen WHERE course='{$this->request->input->data->query}' AND person_id='{$this->request->person->id}'");
 
 		// load the test again
 		$this->_curso();
@@ -489,8 +489,8 @@ class Service
 		}
 
 		// show profile
-		$resume         = $this->getResume($this->request->person->email);
-		$profile        = Utils::getPerson($this->request->person->email);
+		$resume         = $this->getResume($this->request->person->id);
+		$profile        = Utils::getPerson($this->request->person->id);
 		$profile->level = 'PRINCIPIANTE';
 		$r              = q("SELECT * FROM _escuela_profile WHERE person_id = '{$this->request->person->id}'");
 		if (!isset($r[0])) {
@@ -521,8 +521,8 @@ class Service
 	 */
 	public function _terminados()
 	{
-		$email  = $this->request->person->email;
-		$person = Utils::getPerson($email);
+		$id  = $this->request->person->id;
+		$person = Utils::getPerson($id);
 		$this->setLevel();
 
 		// get the most popular courses
@@ -530,14 +530,14 @@ class Service
 		  SELECT *, right_answers / nullif(questions,0) * 100 as calification FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
-				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
+				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and id = '$id') as viewed,
 				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen,
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.id = '$id') as answers_choosen,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course 
-					AND _escuela_answer_choosen.email = '$email'
+					AND _escuela_answer_choosen.id = '$id'
 					AND (SELECT count(*) as right_choose FROM _escuela_question WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers					
 				FROM _escuela_course A
 				JOIN _escuela_teacher B
@@ -558,27 +558,27 @@ class Service
 	}
 
 	/**
-	 * Return a resume of courses filtered by email and course id
+	 * Return a resume of courses filtered by person_id and course id
 	 *
-	 * @param      $email
+	 * @param      $id
 	 * @param null $course_id
 	 *
 	 * @return array|mixed
 	 */
-	private function getResume($email, $course_id = null)
+	private function getResume($id, $course_id = null)
 	{
 		$r = q("
 			SELECT id, medal, title,
-				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and email = '$email') as viewed,
+				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = '$id') as viewed,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
 				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answers_choosen,
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answers_choosen,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course 
-					AND _escuela_answer_choosen.email = '$email'
+					AND _escuela_answer_choosen.person_id = '$id'
 					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers,
-					(select MAX(_escuela_answer_choosen.date_choosen) FROM _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.email = '$email') as answer_date
+					(select MAX(_escuela_answer_choosen.date_choosen) FROM _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answer_date
 			FROM _escuela_course A
 			" . (is_null($course_id) ? "" : " WHERE id = $course_id ") . ";");
 
@@ -808,12 +808,12 @@ class Service
 	 *
 	 * @param integer $id
 	 *
-	 * @param string  $email
+	 * @param string  $person_id
 	 * @param string  $answer_order
 	 *
 	 * @return object
 	 */
-	private function getChapter($id, $email = '', $answer_order = 'rand()')
+	private function getChapter($id, $person_id = '', $answer_order = 'rand()')
 	{
 		$chapter = false;
 
@@ -823,7 +823,7 @@ class Service
 			$chapter = $r[0];
 		}
 
-		$chapter->questions = $this->getChapterQuestions($id, $email, $answer_order);
+		$chapter->questions = $this->getChapterQuestions($id, $person_id, $answer_order);
 
 		$total_questions = count($chapter->questions);
 		$total_right     = 0;
@@ -842,8 +842,8 @@ class Service
 			$chapter->calification = intval($total_right / $total_questions * 100);
 		}
 
-		$chapter->seen       = $this->isChapterSeen($email, $id);
-		$chapter->answered   = $this->isTestTerminated($email, $id) && $chapter->xtype == 'PRUEBA';
+		$chapter->seen       = $this->isChapterSeen($person_id, $id);
+		$chapter->answered   = $this->isTestTerminated($person_id, $id) && $chapter->xtype == 'PRUEBA';
 		$chapter->terminated = $chapter->answered || $chapter->seen;
 
 		$chapter->content = $this->clearHtml($chapter->content);
@@ -855,12 +855,12 @@ class Service
 	 * Get list of chapters
 	 *
 	 * @param integer $course
-	 * @param string  $email
+	 * @param string  $person_id
 	 * @param bool    $terminated
 	 *
 	 * @return array
 	 */
-	private function getChapters($course, $email = '', $terminated = null)
+	private function getChapters($course, $person_id = '', $terminated = null)
 	{
 		// get chapters
 		$r = q("SELECT id FROM _escuela_chapter WHERE course = '$course' ORDER BY xorder;");
@@ -868,7 +868,7 @@ class Service
 		$chapters = [];
 		if ($r) {
 			foreach ($r as $row) {
-				$c = $this->getChapter($row->id, $email);
+				$c = $this->getChapter($row->id, $person_id);
 				if ($c->terminated == $terminated || is_null($terminated)) {
 					$chapters[] = $c;
 				}
@@ -878,7 +878,7 @@ class Service
 		return $chapters;
 	}
 
-	private function getChapterQuestions($test_id, $email = '', $answer_order = 'rand()')
+	private function getChapterQuestions($test_id, $person_id = '', $answer_order = 'rand()')
 	{
 		$questions = [];
 		$rows      = q("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;", true, 'latin1');
@@ -887,7 +887,7 @@ class Service
 		}
 
 		foreach ($rows as $i => $q) {
-			$questions[] = $this->getQuestion($q->id, $email, $answer_order);
+			$questions[] = $this->getQuestion($q->id, $person_id, $answer_order);
 		}
 
 		return $questions;
@@ -897,22 +897,22 @@ class Service
 	 * Return question object
 	 *
 	 * @param        $question_id
-	 * @param string $email
+	 * @param string $person_id
 	 * @param string $answer_order
 	 *
 	 * @return bool
 	 */
-	private function getQuestion($question_id, $email = '', $answer_order = 'rand()')
+	private function getQuestion($question_id, $person_id = '', $answer_order = 'rand()')
 	{
 		$row = q("SELECT * FROM _escuela_question WHERE id = '$question_id';", true, 'latin1');
 		if (isset($row[0])) {
 			$q             = $row[0];
 			$q->answers    = $this->getAnswers($question_id, $answer_order);
-			$t             = $this->isQuestionTerminated($email, $question_id);
+			$t             = $this->isQuestionTerminated($person_id, $question_id);
 			$q->terminated = $t;
 
 			$q->answer_choosen = -1;
-			$a                 = q("SELECT answer FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id'");
+			$a                 = q("SELECT answer FROM _escuela_answer_choosen WHERE person_id = '$person_id' AND question = '$question_id'");
 			if (isset($a[0])) {
 				$q->answer_choosen = intval($a[0]->answer);
 			}
@@ -960,14 +960,14 @@ class Service
 	/**
 	 * Return the total of chapter's responses
 	 *
-	 * @param $email
+	 * @param $person_id
 	 * @param $chapter_id
 	 *
 	 * @return int
 	 */
-	private function getTotalResponsesOf($email, $chapter_id)
+	private function getTotalResponsesOf($person_id, $chapter_id)
 	{
-		$r = q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND chapter = '$chapter_id';");
+		$r = q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE person_id = '$person_id' AND chapter = '$chapter_id';");
 
 		return intval($r[0]->t);
 	}
@@ -975,15 +975,15 @@ class Service
 	/**
 	 * Check if user finish the test
 	 *
-	 * @param string  $email
+	 * @param string  $person_id
 	 * @param integer $test_id
 	 *
 	 * @return boolean
 	 */
-	private function isTestTerminated($email, $test_id)
+	private function isTestTerminated($person_id, $test_id)
 	{
 		$total_questions = $this->getTotalQuestionsOf($test_id);
-		$total_responses = $this->getTotalResponsesOf($email, $test_id);
+		$total_responses = $this->getTotalResponsesOf($person_id, $test_id);
 
 		return $total_questions == $total_responses;
 	}
@@ -991,14 +991,14 @@ class Service
 	/**
 	 * Return TRUE if a chapter was seen by the user
 	 *
-	 * @param $email
+	 * @param $person_id
 	 * @param $chapter_id
 	 *
 	 * @return bool
 	 */
-	private function isChapterSeen($email, $chapter_id)
+	private function isChapterSeen($person_id, $chapter_id)
 	{
-		$r = q("SELECT count(email) as t FROM _escuela_chapter_viewed WHERE email ='$email' AND chapter = '$chapter_id';");
+		$r = q("SELECT count(person_id) as t FROM _escuela_chapter_viewed WHERE person_id ='$person_id' AND chapter = '$chapter_id';");
 
 		return $r[0]->t * 1 > 0;
 	}
@@ -1006,19 +1006,19 @@ class Service
 	/**
 	 * Return TRUE if a question is terminated by the user
 	 *
-	 * @param $email
+	 * @param $person_id
 	 * @param $question_id
 	 *
 	 * @return bool
 	 */
-	private function isQuestionTerminated($email, $question_id)
+	private function isQuestionTerminated($person_id, $question_id)
 	{
-		$r = q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE email = '$email' AND question = '$question_id';");
+		$r = q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE person_id = '$person_id' AND question = '$question_id';");
 
 		return intval($r[0]->t) > 0;
 	}
 
-	private function getTotalCompletedCourses($email)
+	private function getTotalCompletedCourses($person_id)
 	{
 		$r = q("
 			select count(*) as t from (
@@ -1027,7 +1027,7 @@ class Service
 						(select count(*) 
 						from _escuela_chapter_viewed 
 						where _escuela_chapter.course = _escuela_chapter_viewed.course 
-						and email = '$email') as viewed
+						and person_id = '$person_id') as viewed
 				from  _escuela_chapter
 				group by course
     		) subq
