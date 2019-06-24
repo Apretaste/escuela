@@ -548,6 +548,18 @@ class Service
 				ORDER BY calification DESC;");
 
 		$this->setFontFiles();
+		
+		if(empty($courses)){
+			$content = [
+				"header"=>"¡Sin resultados!",
+				"icon"=>"sentiment_very_dissatisfied",
+				"text" => "Usted no tiene cursos terminados. Vaya al inicio y escoja un curso para empezar a estudiar.",
+				"button" => ["href"=>"ESCUELA", "caption"=>"Ver cursos"]];
+
+			$this->response->setLayout('escuela.ejs');
+			$this->response->setTemplate("text.ejs", $content, [], $this->files);
+			return;
+		}
 
 		$this->response->setLayout('escuela.ejs');
 		$this->response->setTemplate("terminated.ejs", [
