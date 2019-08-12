@@ -1,5 +1,7 @@
+"use strict";
+
 function formatDate(dateStr) {
-  var months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   var date = new Date(dateStr);
   var month = date.getMonth();
   var day = date.getDate().toString().padStart(2, '0');
@@ -7,7 +9,9 @@ function formatDate(dateStr) {
 }
 
 function showToast(text) {
-  M.toast({html: text});
+  M.toast({
+    html: text
+  });
 }
 
 function showModal(text) {
@@ -25,16 +29,14 @@ function jsUcfirst(string) {
 $(function () {
   $('select').formSelect();
   $('.fixed-action-btn').floatingActionButton({
-	direction: 'left',
-	hoverEnabled: false
+    direction: 'left',
+    hoverEnabled: false
   });
-
   $("#btnSearch").click(function () {
-	/*if($("#category").val() == "ALL" && $("#author").val() == "ALL" && $("#raiting").val() == "0") {
-		showToast("Cambie las opciones y presione el botón para comenzar su búsqueda");
-		return;
-	}*/
-
+    /*if($("#category").val() == "ALL" && $("#author").val() == "ALL" && $("#raiting").val() == "0") {
+    	showToast("Cambie las opciones y presione el botón para comenzar su búsqueda");
+    	return;
+    }*/
     apretaste.send({
       command: 'ESCUELA BUSCAR',
       data: {
@@ -43,83 +45,171 @@ $(function () {
           author: $("#author").val(),
           raiting: $("#raiting").val(),
           title: $("#title").val()
-        },
+        }
       }
     });
   });
 
   if (typeof profile != 'undefined') {
-
-   // $('#level option[value="' + profile.level + '"]').prop("selected", true);
-
-    var provinces = [
-      'Pinar del Rio', 'La Habana', 'Artemisa', 'Mayabeque',
-      'Matanzas', 'Villa Clara', 'Cienfuegos', 'Sancti Spiritus',
-      'Ciego de Avila', 'Camaguey', 'Las Tunas', 'Holguin',
-      'Granma', 'Santiago de Cuba', 'Guantanamo', 'Isla de la Juventud'
-    ];
-
-    var states = [
-      {caption: 'Alabama', value: 'AL'},
-      {caption: 'Alaska', value: 'AK'},
-      {caption: 'Arizona', value: 'AZ'},
-      {caption: 'Arkansas', value: 'AR'},
-      {caption: 'California', value: 'CA'},
-      {caption: 'Carolina del Norte', value: 'NC'},
-      {caption: 'Carolina del Sur', value: 'SC'},
-      {caption: 'Colorado', value: 'CO'},
-      {caption: 'Connecticut', value: 'CT'},
-      {caption: 'Dakota del Norte', value: 'ND'},
-      {caption: 'Dakota del Sur', value: 'SD'},
-      {caption: 'Delaware', value: 'DE'},
-      {caption: 'Florida', value: 'FL'},
-      {caption: 'Georgia', value: 'GA'},
-      {caption: 'Hawái', value: 'HI'},
-      {caption: 'Idaho', value: 'ID'},
-      {caption: 'Illinois', value: 'IL'},
-      {caption: 'Indiana', value: 'IN'},
-      {caption: 'Iowa', value: 'IA'},
-      {caption: 'Kansas', value: 'KS'},
-      {caption: 'Kentucky', value: 'KY'},
-      {caption: 'Luisiana', value: 'LA'},
-      {caption: 'Maine', value: 'ME'},
-      {caption: 'Maryland', value: 'MD'},
-      {caption: 'Massachusetts', value: 'MA'},
-      {caption: 'Míchigan', value: 'MI'},
-      {caption: 'Minnesota', value: 'MN'},
-      {caption: 'Misisipi', value: 'MS'},
-      {caption: 'Misuri', value: 'MO'},
-      {caption: 'Montana', value: 'MT'},
-      {caption: 'Nebraska', value: 'NE'},
-      {caption: 'Nevada', value: 'NV'},
-      {caption: 'Nueva Jersey', value: 'NJ'},
-      {caption: 'Nueva York', value: 'NY'},
-      {caption: 'Nuevo Hampshire', value: 'NH'},
-      {caption: 'Nuevo México', value: 'NM'},
-      {caption: 'Ohio', value: 'OH'},
-      {caption: 'Oklahoma', value: 'OK'},
-      {caption: 'Oregón', value: 'OR'},
-      {caption: 'Pensilvania', value: 'PA'},
-      {caption: 'Rhode Island', value: 'RI'},
-      {caption: 'Tennessee', value: 'TN'},
-      {caption: 'Texas', value: 'TX'},
-      {caption: 'Utah', value: 'UT'},
-      {caption: 'Vermont', value: 'VT'},
-      {caption: 'Virginia', value: 'VA'},
-      {caption: 'Virginia Occidental', value: 'WV'},
-      {caption: 'Washington', value: 'WA'},
-      {caption: 'Wisconsin', value: 'WI'},
-      {caption: 'Wyoming', value: 'WY'}
-    ];
-
+    // $('#level option[value="' + profile.level + '"]').prop("selected", true);
+    var provinces = ['Pinar del Rio', 'La Habana', 'Artemisa', 'Mayabeque', 'Matanzas', 'Villa Clara', 'Cienfuegos', 'Sancti Spiritus', 'Ciego de Avila', 'Camaguey', 'Las Tunas', 'Holguin', 'Granma', 'Santiago de Cuba', 'Guantanamo', 'Isla de la Juventud'];
+    var states = [{
+      caption: 'Alabama',
+      value: 'AL'
+    }, {
+      caption: 'Alaska',
+      value: 'AK'
+    }, {
+      caption: 'Arizona',
+      value: 'AZ'
+    }, {
+      caption: 'Arkansas',
+      value: 'AR'
+    }, {
+      caption: 'California',
+      value: 'CA'
+    }, {
+      caption: 'Carolina del Norte',
+      value: 'NC'
+    }, {
+      caption: 'Carolina del Sur',
+      value: 'SC'
+    }, {
+      caption: 'Colorado',
+      value: 'CO'
+    }, {
+      caption: 'Connecticut',
+      value: 'CT'
+    }, {
+      caption: 'Dakota del Norte',
+      value: 'ND'
+    }, {
+      caption: 'Dakota del Sur',
+      value: 'SD'
+    }, {
+      caption: 'Delaware',
+      value: 'DE'
+    }, {
+      caption: 'Florida',
+      value: 'FL'
+    }, {
+      caption: 'Georgia',
+      value: 'GA'
+    }, {
+      caption: 'Hawái',
+      value: 'HI'
+    }, {
+      caption: 'Idaho',
+      value: 'ID'
+    }, {
+      caption: 'Illinois',
+      value: 'IL'
+    }, {
+      caption: 'Indiana',
+      value: 'IN'
+    }, {
+      caption: 'Iowa',
+      value: 'IA'
+    }, {
+      caption: 'Kansas',
+      value: 'KS'
+    }, {
+      caption: 'Kentucky',
+      value: 'KY'
+    }, {
+      caption: 'Luisiana',
+      value: 'LA'
+    }, {
+      caption: 'Maine',
+      value: 'ME'
+    }, {
+      caption: 'Maryland',
+      value: 'MD'
+    }, {
+      caption: 'Massachusetts',
+      value: 'MA'
+    }, {
+      caption: 'Míchigan',
+      value: 'MI'
+    }, {
+      caption: 'Minnesota',
+      value: 'MN'
+    }, {
+      caption: 'Misisipi',
+      value: 'MS'
+    }, {
+      caption: 'Misuri',
+      value: 'MO'
+    }, {
+      caption: 'Montana',
+      value: 'MT'
+    }, {
+      caption: 'Nebraska',
+      value: 'NE'
+    }, {
+      caption: 'Nevada',
+      value: 'NV'
+    }, {
+      caption: 'Nueva Jersey',
+      value: 'NJ'
+    }, {
+      caption: 'Nueva York',
+      value: 'NY'
+    }, {
+      caption: 'Nuevo Hampshire',
+      value: 'NH'
+    }, {
+      caption: 'Nuevo México',
+      value: 'NM'
+    }, {
+      caption: 'Ohio',
+      value: 'OH'
+    }, {
+      caption: 'Oklahoma',
+      value: 'OK'
+    }, {
+      caption: 'Oregón',
+      value: 'OR'
+    }, {
+      caption: 'Pensilvania',
+      value: 'PA'
+    }, {
+      caption: 'Rhode Island',
+      value: 'RI'
+    }, {
+      caption: 'Tennessee',
+      value: 'TN'
+    }, {
+      caption: 'Texas',
+      value: 'TX'
+    }, {
+      caption: 'Utah',
+      value: 'UT'
+    }, {
+      caption: 'Vermont',
+      value: 'VT'
+    }, {
+      caption: 'Virginia',
+      value: 'VA'
+    }, {
+      caption: 'Virginia Occidental',
+      value: 'WV'
+    }, {
+      caption: 'Washington',
+      value: 'WA'
+    }, {
+      caption: 'Wisconsin',
+      value: 'WI'
+    }, {
+      caption: 'Wyoming',
+      value: 'WY'
+    }];
     provinces.forEach(function (province) {
       $('#province').prepend('<option value=\'' + province.toUpperCase().replace(/\s/g, '_') + '\'>' + province + '</option>');
     });
-
     states.forEach(function (state) {
       $('#usstate').append('<option value=\'' + state.value + '\'>' + state.caption + '</option>');
     });
-
     /*
     if (profile.country.toUpperCase() == 'US') {
       $("#province-section").hide();
@@ -143,44 +233,43 @@ $(function () {
     $('#hair option[value="' + profile.hair + '"]').prop("selected", true);
     $('#highest_school_level option[value="' + profile.highest_school_level + '"]').prop("selected", true);
     $('#occupation option[value="' + profile.occupation + '"]').prop("selected", true);
-/*
-    $('#country').on('change', function () { // Important! Do not use lambda notation
-      if ($(this).val() == 'US') {
-        $("#province-section").hide();
-        $("#usstate-section").show();
-      }
-      else {
-        $("#province-section").show();
-        $("#usstate-section").hide();
-      }
-    });
-*/
+    /*
+        $('#country').on('change', function () { // Important! Do not use lambda notation
+          if ($(this).val() == 'US') {
+            $("#province-section").hide();
+            $("#usstate-section").show();
+          }
+          else {
+            $("#province-section").show();
+            $("#usstate-section").hide();
+          }
+        });
+    */
 
     var date = new Date();
     var today = '12/31/' + date.getFullYear();
-
     $('.datepicker').datepicker({
       format: 'd/mm/yyyy',
       defaultDate: new Date(profile.date_of_birth),
       setDefaultDate: true,
-      selectMonths: true, // Creates a dropdown to control month
-      selectYears: 15, // Creates a dropdown of 15 years to control year,
+      selectMonths: true,
+      // Creates a dropdown to control month
+      selectYears: 15,
+      // Creates a dropdown of 15 years to control year,
       max: true,
       today: 'Hoy',
       clear: 'Limpiar',
       close: 'Aceptar'
     });
-
     profile.date_of_birth = $('#date_of_birth').val();
-
     $('.save').click(function () {
-      var names = [
-        'first_name', 'last_name', 'date_of_birth', 'country', 'province',
-        'usstate', 'gender', 'highest_school_level', 'occupation', 'level'
-      ];
-
-      var data = {save: true, query: {level: $('#level').val()}};
-
+      var names = ['first_name', 'last_name', 'date_of_birth', 'country', 'province', 'usstate', 'gender', 'highest_school_level', 'occupation', 'level'];
+      var data = {
+        save: true,
+        query: {
+          level: $('#level').val()
+        }
+      };
       names.forEach(function (prop) {
         if ($('#' + prop).val() != profile[prop] && $('#' + prop).val() != null) {
           data.query[prop] = $('#' + prop).val();
@@ -197,27 +286,27 @@ $(function () {
             "data": "Sus cambios han sido guardados"
           }
         });
-      }
-      else {
+      } else {
         showToast("Usted no ha hecho ningun cambio");
       }
     });
-
     $('select').formSelect();
   }
-
 
   if (typeof data != 'undefined' && data != null) {
     //data = data.query;
     if (typeof data.category != 'undefined') {
       $('#category option[value="' + data.category + '"]').prop("selected", true);
     }
+
     if (typeof data.author != 'undefined') {
       $('#author option[value="' + data.author + '"]').prop("selected", true);
     }
+
     if (typeof data.raiting != 'undefined') {
       $('#raiting option[value="' + data.raiting + '"]').prop("selected", true);
     }
+
     if (typeof data.title != 'undefined') {
       $('#title').val(data.title);
     }
@@ -225,10 +314,9 @@ $(function () {
     $('select').formSelect();
   }
 
-  $(".star-link").click(function(){
+  $(".star-link").click(function () {
     var q = null;
     eval('q = ' + $(this).attr('data-query'));
-
     apretaste.send({
       command: 'ESCUELA CALIFICAR',
       data: {
@@ -240,33 +328,31 @@ $(function () {
         data: "Su opinion ha sido enviada"
       }
     });
-
     $("#rate-stars").hide();
-
   });
+}); // submit a test once completed
 
-});
-
-// submit a test once completed
 function submitTest() {
   // variable to save the ID of the responses
   var answers = [];
-
   $('input.answer:checked').each(function () {
     answers.push($(this).val());
   });
 
   if (answers.length < chapter.questions.length) {
-    M.toast({html: 'Por favor responda todas las preguntas'});
-    $("html, body").animate({scrollTop: $(this).offset().top - 100}, 1000);
+    M.toast({
+      html: 'Por favor responda todas las preguntas'
+    });
+    $("html, body").animate({
+      scrollTop: $(this).offset().top - 100
+    }, 1000);
     answers = [];
     return false;
-  }
-  else {
+  } else {
+    M.toast({
+      html: 'Enviando sus respuestas...'
+    }); // send information to the backend
 
-    M.toast({html: 'Enviando sus respuestas...'});
-
-    // send information to the backend
     apretaste.send({
       command: "ESCUELA RESPONDER",
       data: {
@@ -282,12 +368,12 @@ function submitTest() {
 }
 
 function testSent(data) {
-  M.toast({html: 'Prueba enviada satisfactoriamente'});
+  M.toast({
+    html: 'Prueba enviada satisfactoriamente'
+  }); // display the DONE message
 
-  // display the DONE message
   $('#list').hide();
   $('#msg').show();
-
   apretaste.send({
     command: "ESCUELA PRUEBA",
     data: {
@@ -295,3 +381,47 @@ function testSent(data) {
     }
   });
 }
+
+// POLYFILL
+
+
+if (!String.prototype.padStart) {
+  String.prototype.padStart = function padStart(targetLength, padString) {
+    targetLength = targetLength >> 0; //truncate if number or convert non-number to 0;
+
+    padString = String(typeof padString !== 'undefined' ? padString : ' ');
+
+    if (this.length > targetLength) {
+      return String(this);
+    } else {
+      targetLength = targetLength - this.length;
+
+      if (targetLength > padString.length) {
+        padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
+      }
+
+      return padString.slice(0, targetLength) + String(this);
+    }
+  };
+}
+
+if (!String.prototype.padEnd) {
+  String.prototype.padEnd = function padEnd(targetLength, padString) {
+    targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
+
+    padString = String(typeof padString !== 'undefined' ? padString : ' ');
+
+    if (this.length > targetLength) {
+      return String(this);
+    } else {
+      targetLength = targetLength - this.length;
+
+      if (targetLength > padString.length) {
+        padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
+      }
+
+      return String(this) + padString.slice(0, targetLength);
+    }
+  };
+}
+
