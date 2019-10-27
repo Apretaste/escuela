@@ -135,7 +135,7 @@ class Service
 			WHERE 1 $where ORDER BY popularity DESC LIMIT 10");
 		}
 
-		if ( ! is_array($courses)) {
+		if (! is_array($courses)) {
 			$courses = [];
 		}
 
@@ -200,7 +200,6 @@ class Service
 
 		// if course cannot be found
 		if (empty($course)) {
-
 			$this->response->setLayout('escuela.ejs');
 			$this->response->setTemplate('text.ejs', [
 				"title" => "Curso no encontrado",
@@ -237,6 +236,9 @@ class Service
 			$images           = $this->getChapterImages($id);
 			$chapter->content = Utils::putInlineImagesToHTML($chapter->content, $images, 'cid:');
 
+			$course = $this->getCourse($chapter->course, $this->request->person->id);
+			$terminated = $course->terminated;
+
 			// Log the visit to this chapter
 			if ($chapter->xtype == 'CAPITULO') {
 				q("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$this->request->person->id}','{$this->request->person->email}', '{$id}', '{$chapter->course}');");
@@ -252,6 +254,9 @@ class Service
 			// check if the course is terminated
 			$course = $this->getCourse($chapter->course, $this->request->person->id);
 
+			if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
+				Challenges::complete("complete-course", $this->request->person->id);
+			}
 			// send response to the view
 
 			$this->response->setLayout('escuela.ejs');
@@ -287,7 +292,6 @@ class Service
 		// pull the answer selected
 		$answers = $this->request->input->data->answers;
 		foreach ($answers as $id) {
-
 			$res = q("SELECT * FROM _escuela_answer WHERE id=$id");
 
 			// do not let pass invalid answers
@@ -470,7 +474,6 @@ class Service
 			// get the JSON with the bulk
 			$pieces = [];
 			foreach ($this->request->input->data->query as $key => $value) {
-
 				if ($key == 'date_of_birth') {
 					$value = DateTime::createFromFormat('d/m/Y', $value)->format('Y-m-d');
 				}
@@ -548,8 +551,8 @@ class Service
 				ORDER BY calification DESC;");
 
 		$this->setFontFiles();
-		
-		if(empty($courses)){
+
+		if (empty($courses)) {
 			$content = [
 				"header"=>"¡Sin resultados!",
 				"icon"=>"sentiment_very_dissatisfied",
