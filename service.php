@@ -256,6 +256,9 @@ class Service
 
 			if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
 				Challenges::complete("complete-course", $this->request->person->id);
+
+				// add the experience if profile is completed
+				Level::setExperience('FINISH_COURSE', $this->request->person->id);
 			}
 			// send response to the view
 
