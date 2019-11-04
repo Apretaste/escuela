@@ -260,6 +260,7 @@ class Service
 				// add the experience if profile is completed
 				Level::setExperience('FINISH_COURSE', $this->request->person->id);
 			}
+
 			// send response to the view
 
 			$this->response->setLayout('escuela.ejs');
@@ -294,6 +295,9 @@ class Service
 	{
 		// pull the answer selected
 		$answers = $this->request->input->data->answers;
+		// check if the course is terminated
+
+
 		foreach ($answers as $id) {
 			$res = q("SELECT * FROM _escuela_answer WHERE id=$id");
 
@@ -304,10 +308,23 @@ class Service
 				$answer = $res[0];
 			}
 
+			$course = $this->getCourse($answer->course, $this->request->person->id);
+			$terminated =  $course->terminated;
+
 			// save the answer in the database
+
 			q("
 			INSERT IGNORE INTO _escuela_answer_choosen (person_id, email, answer, chapter, question, course)
 			VALUES ('{$this->request->person->id}','{$this->request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
+
+			$course = $this->getCourse($answer->course, $this->request->person->id);
+
+			if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
+				Challenges::complete("complete-course", $this->request->person->id);
+
+				// add the experience if profile is completed
+				Level::setExperience('FINISH_COURSE', $this->request->person->id);
+			}
 
 			$this->setLevel();
 		}
