@@ -15,6 +15,21 @@ class Service
 	private $files = [];
 
 	/**
+	 * Database query
+	 *
+	 * @param        $sql
+	 * @param string $set_charset
+	 *
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	public static function query($sql, $set_charset = 'utf8mb4')
+	{
+		return Connection::query($sql, true, $set_charset);
+	}
+
+
+	/**
 	 * Main function
 	 *
 	 * @author salvipascual
@@ -27,7 +42,7 @@ class Service
 		$this->setLevel();
 
 		// get the most popular courses
-		$courses = q("
+		$courses = self::query("
 		  SELECT * FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
@@ -59,7 +74,7 @@ class Service
 		}
 
 		$level = 'PRINCIPIANTE';
-		$r     = q("SELECT level FROM _escuela_profile WHERE person_id = '{$this->request->person->id}'");
+		$r     = self::query("SELECT level FROM _escuela_profile WHERE person_id = '{$this->request->person->id}'");
 		if (isset($r[0])) {
 			$level = $r[0]->level;
 		}
@@ -121,7 +136,7 @@ class Service
 
 		$courses = [];
 		if (!empty(trim($where))) {
-			$courses = q("
+			$courses = self::query("
 			SELECT * FROM (
 			SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
 			COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
@@ -241,7 +256,7 @@ class Service
 
 			// Log the visit to this chapter
 			if ($chapter->xtype == 'CAPITULO') {
-				q("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$this->request->person->id}','{$this->request->person->email}', '{$id}', '{$chapter->course}');");
+				self::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$this->request->person->id}','{$this->request->person->email}', '{$id}', '{$chapter->course}');");
 			}
 
 			// get the code inside the <body> tag
@@ -299,7 +314,7 @@ class Service
 
 
 		foreach ($answers as $id) {
-			$res = q("SELECT * FROM _escuela_answer WHERE id=$id");
+			$res = self::query("SELECT * FROM _escuela_answer WHERE id=$id");
 
 			// do not let pass invalid answers
 			if (empty($res)) {
@@ -313,7 +328,7 @@ class Service
 
 			// save the answer in the database
 
-			q("
+			self::query("
 			INSERT IGNORE INTO _escuela_answer_choosen (person_id, email, answer, chapter, question, course)
 			VALUES ('{$this->request->person->id}','{$this->request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
 
@@ -368,7 +383,7 @@ class Service
 		}
 
 		// update user level
-		q("UPDATE _escuela_profile SET level = '$level' WHERE person_id = '{$this->request->person->id}';");
+		self::query("UPDATE _escuela_profile SET level = '$level' WHERE person_id = '{$this->request->person->id}';");
 	}
 
 	/**
@@ -380,8 +395,8 @@ class Service
 		$stars     = $this->request->input->data->query->stars;
 		$stars     = $stars > 5 ? 5 : $stars;
 
-		q("INSERT IGNORE INTO _escuela_stars (course, person_id, stars) VALUES ('$course_id', '{$this->request->person->id}', '$stars');");
-		q("UPDATE _escuela_stars SET stars = $stars WHERE course = $course_id AND person_id = {$this->request->person->id};");
+		self::query("INSERT IGNORE INTO _escuela_stars (course, person_id, stars) VALUES ('$course_id', '{$this->request->person->id}', '$stars');");
+		self::query("UPDATE _escuela_stars SET stars = $stars WHERE course = $course_id AND person_id = {$this->request->person->id};");
 	}
 
 	/**
@@ -407,7 +422,7 @@ class Service
 		$course = $this->getCourse($course_id, $this->request->person->id);
 
 		if ($course !== false) {
-			$feedback = q("SELECT id, text, answers FROM _escuela_feedback WHERE id = $feedback_id;");
+			$feedback = self::query("SELECT id, text, answers FROM _escuela_feedback WHERE id = $feedback_id;");
 			if (isset($feedback[0])) {
 				$feedback       = $feedback[0];
 				$answers        = $feedback->answers;
@@ -415,25 +430,25 @@ class Service
 
 				// get last answer, and decrease popularity of the course
 				$last_answer = false;
-				$r           = q("SELECT answer FROM _escuela_feedback_received WHERE $feedback_where;");
+				$r           = self::query("SELECT answer FROM _escuela_feedback_received WHERE $feedback_where;");
 				if (isset($r[0])) {
 					$last_answer = $r[0]->answer;
 				}
 
 				if ($last_answer !== false) {
 					$popularity = $this->getAnswerValue($answers, $last_answer);
-					q("DELETE FROM _escuela_feedback_received WHERE $feedback_where");
+					self::query("DELETE FROM _escuela_feedback_received WHERE $feedback_where");
 
 					if ($popularity !== false) {
-						q("UPDATE _escuela_course SET popularity = popularity - $popularity WHERE id = $course_id;");
+						self::query("UPDATE _escuela_course SET popularity = popularity - $popularity WHERE id = $course_id;");
 					}
 				}
 
 				// analyze current answer && increase popularity of the course
 				$popularity = $this->getAnswerValue($answers, $answer);
 				if ($popularity !== false) {
-					q("INSERT INTO _escuela_feedback_received (feedback, course, person_id, email, answer) VALUES ($feedback_id, $course_id, '{$this->request->person->id}', '{$this->request->person->email}', '$answer');");
-					q("UPDATE _escuela_course SET popularity = popularity + $popularity WHERE id = $course_id;");
+					self::query("INSERT INTO _escuela_feedback_received (feedback, course, person_id, email, answer) VALUES ($feedback_id, $course_id, '{$this->request->person->id}', '{$this->request->person->email}', '$answer');");
+					self::query("UPDATE _escuela_course SET popularity = popularity + $popularity WHERE id = $course_id;");
 				}
 			}
 		}
@@ -447,8 +462,8 @@ class Service
 	public function _repetir()
 	{
 		// remove the previous answers
-		q("DELETE FROM _escuela_chapter_viewed WHERE course='{$this->request->input->data->query}' AND person_id='{$this->request->person->id}'");
-		q("DELETE FROM _escuela_answer_choosen WHERE course='{$this->request->input->data->query}' AND person_id='{$this->request->person->id}'");
+		self::query("DELETE FROM _escuela_chapter_viewed WHERE course='{$this->request->input->data->query}' AND person_id='{$this->request->person->id}'");
+		self::query("DELETE FROM _escuela_answer_choosen WHERE course='{$this->request->input->data->query}' AND person_id='{$this->request->person->id}'");
 
 		// load the test again
 		$this->_curso();
@@ -505,7 +520,7 @@ class Service
 
 			// save changes on the database
 			if (!empty($pieces)) {
-				q("UPDATE person SET " . implode(",", $pieces) . " WHERE id={$this->request->person->id}");
+				self::query("UPDATE person SET " . implode(",", $pieces) . " WHERE id={$this->request->person->id}");
 			}
 
 			return;
@@ -515,14 +530,14 @@ class Service
 		$resume         = $this->getResume($this->request->person->id);
 		$profile        = Utils::getPerson($this->request->person->id);
 		$profile->level = 'PRINCIPIANTE';
-		$r              = q("SELECT * FROM _escuela_profile WHERE person_id = '{$this->request->person->id}'");
+		$r              = self::query("SELECT * FROM _escuela_profile WHERE person_id = '{$this->request->person->id}'");
 		if (!isset($r[0])) {
-			q("INSERT INTO _escuela_profile (person_id, level) VALUES ('{$this->request->person->id}','PRINCIPIANTE');");
+			self::query("INSERT INTO _escuela_profile (person_id, level) VALUES ('{$this->request->person->id}','PRINCIPIANTE');");
 		} else {
 			$profile->level = $r[0]->level;
 		}
 
-		$r = q("SELECT COLUMN_TYPE AS result
+		$r = self::query("SELECT COLUMN_TYPE AS result
 				FROM information_schema.COLUMNS
 				WHERE TABLE_NAME = '_escuela_profile'
 							AND COLUMN_NAME = 'level';");
@@ -549,7 +564,7 @@ class Service
 		$this->setLevel();
 
 		// get the most popular courses
-		$courses = q("
+		$courses = self::query("
 		  SELECT *, right_answers / nullif(questions,0) * 100 as calification FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
@@ -602,7 +617,7 @@ class Service
 	 */
 	private function getResume($id, $course_id = null)
 	{
-		$r = q("
+		$r = self::query("
 			SELECT id, medal, title,
 				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = '$id') as viewed,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
@@ -630,7 +645,7 @@ class Service
 
 	/*private function getFeedbacks()
 	{
-		$feedback = q("SELECT id, text, answers FROM _escuela_feedback;");
+		$feedback = self::query("SELECT id, text, answers FROM _escuela_feedback;");
 		foreach ($feedback as $k => $fb) {
 			$fb->answers = explode(',', $fb->answers);
 
@@ -699,12 +714,12 @@ class Service
 		$before = false;
 		$after  = false;
 
-		$r = q("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder - 1) . ";");
+		$r = self::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder - 1) . ";");
 		if (isset($r[0])) {
 			$before = $r[0];
 		}
 
-		$r = q("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder + 1) . ";");
+		$r = self::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder + 1) . ";");
 		if (isset($r[0])) {
 			$after = $r[0];
 		}
@@ -725,7 +740,7 @@ class Service
 	 */
 	private function getCourse($id, $person_id = '')
 	{
-		$res = q("	SELECT *,
+		$res = self::query("	SELECT *,
 				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
 				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title,
 				((SELECT count(*) FROM _escuela_stars WHERE _escuela_stars.person_id = (SELECT id FROM person WHERE person.id = '$person_id') AND _escuela_stars.course = _escuela_course.id) > 0) as rated
@@ -807,7 +822,7 @@ class Service
 	private function getChapterImages($chapter)
 	{
 		// get course and content
-		$chapterText = q("SELECT content, course FROM _escuela_chapter WHERE id=$chapter");
+		$chapterText = self::query("SELECT content, course FROM _escuela_chapter WHERE id=$chapter");
 		$content     = $chapterText[0]->content;
 
 		$tidy    = new tidy();
@@ -852,7 +867,7 @@ class Service
 	{
 		$chapter = false;
 
-		$r = q("SELECT * FROM _escuela_chapter WHERE id = '$id';", true, 'latin1');
+		$r = self::query("SELECT * FROM _escuela_chapter WHERE id = '$id';", true, 'latin1');
 
 		if (isset($r[0])) {
 			$chapter = $r[0];
@@ -898,7 +913,7 @@ class Service
 	private function getChapters($course, $person_id = '', $terminated = null)
 	{
 		// get chapters
-		$r = q("SELECT id FROM _escuela_chapter WHERE course = '$course' ORDER BY xorder;");
+		$r = self::query("SELECT id FROM _escuela_chapter WHERE course = '$course' ORDER BY xorder;");
 
 		$chapters = [];
 		if ($r) {
@@ -916,7 +931,7 @@ class Service
 	private function getChapterQuestions($test_id, $person_id = '', $answer_order = 'rand()')
 	{
 		$questions = [];
-		$rows      = q("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;", true, 'latin1');
+		$rows      = self::query("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;", true, 'latin1');
 		if (!is_array($questions)) {
 			$questions = [];
 		}
@@ -939,7 +954,7 @@ class Service
 	 */
 	private function getQuestion($question_id, $person_id = '', $answer_order = 'rand()')
 	{
-		$row = q("SELECT * FROM _escuela_question WHERE id = '$question_id';", true, 'latin1');
+		$row = self::query("SELECT * FROM _escuela_question WHERE id = '$question_id';", true, 'latin1');
 		if (isset($row[0])) {
 			$q             = $row[0];
 			$q->answers    = $this->getAnswers($question_id, $answer_order);
@@ -947,7 +962,7 @@ class Service
 			$q->terminated = $t;
 
 			$q->answer_choosen = -1;
-			$a                 = q("SELECT answer FROM _escuela_answer_choosen WHERE person_id = '$person_id' AND question = '$question_id'");
+			$a                 = self::query("SELECT answer FROM _escuela_answer_choosen WHERE person_id = '$person_id' AND question = '$question_id'");
 			if (isset($a[0])) {
 				$q->answer_choosen = intval($a[0]->answer);
 			}
@@ -970,7 +985,7 @@ class Service
 	 */
 	private function getAnswers($question_id, $orderby = 'rand()')
 	{
-		$answers = q("SELECT * FROM _escuela_answer WHERE question = '{$question_id}' ORDER BY $orderby;");
+		$answers = self::query("SELECT * FROM _escuela_answer WHERE question = '{$question_id}' ORDER BY $orderby;");
 		if (!is_array($answers)) {
 			$answers = [];
 		}
@@ -987,7 +1002,7 @@ class Service
 	 */
 	private function getTotalQuestionsOf($chapter_id)
 	{
-		$r = q("SELECT count(id) as t FROm _escuela_question WHERE chapter = '$chapter_id';");
+		$r = self::query("SELECT count(id) as t FROm _escuela_question WHERE chapter = '$chapter_id';");
 
 		return intval($r[0]->t);
 	}
@@ -1002,7 +1017,7 @@ class Service
 	 */
 	private function getTotalResponsesOf($person_id, $chapter_id)
 	{
-		$r = q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE person_id = '$person_id' AND chapter = '$chapter_id';");
+		$r = self::query("SELECT count(id) as t FROM _escuela_answer_choosen WHERE person_id = '$person_id' AND chapter = '$chapter_id';");
 
 		return intval($r[0]->t);
 	}
@@ -1033,7 +1048,7 @@ class Service
 	 */
 	private function isChapterSeen($person_id, $chapter_id)
 	{
-		$r = q("SELECT count(person_id) as t FROM _escuela_chapter_viewed WHERE person_id ='$person_id' AND chapter = '$chapter_id';");
+		$r = self::query("SELECT count(person_id) as t FROM _escuela_chapter_viewed WHERE person_id ='$person_id' AND chapter = '$chapter_id';");
 
 		return $r[0]->t * 1 > 0;
 	}
@@ -1048,14 +1063,14 @@ class Service
 	 */
 	private function isQuestionTerminated($person_id, $question_id)
 	{
-		$r = q("SELECT count(id) as t FROM _escuela_answer_choosen WHERE person_id = '$person_id' AND question = '$question_id';");
+		$r = self::query("SELECT count(id) as t FROM _escuela_answer_choosen WHERE person_id = '$person_id' AND question = '$question_id';");
 
 		return intval($r[0]->t) > 0;
 	}
 
 	private function getTotalCompletedCourses($person_id)
 	{
-		$r = q("
+		$r = self::query("
 			select count(*) as t from (
 				select course, 
 						count(*) as total, 
@@ -1073,7 +1088,7 @@ class Service
 
 	private function getTeachers()
 	{
-		$r = q('SELECT * FROM _escuela_teacher');
+		$r = self::query('SELECT * FROM _escuela_teacher');
 		if (!is_array($r)) {
 			return [];
 		}
