@@ -847,7 +847,7 @@ class Service
 		foreach ($imgs as $img) {
 			$src               = $img->getAttribute('src');
 			$filename          = str_replace("cid:", "", $src);
-			$images[$filename] = "$wwwroot/public/courses/$course/$chapter/$filename";
+			$images[$filename] = __DIR__."/../../img/courses/$course/$chapter/$filename";
 		}
 
 		return $images;
