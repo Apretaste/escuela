@@ -53,11 +53,11 @@
 <div class="row" style="margin-bottom: 0;">
     <div class="col s12 left-align">
     <% if (!(chapter.xtype == 'PRUEBA' && course.all_chapters_finished)) { %>
-        <% if (after) {%>
+        <% if (after) { %>
 			<a href="#!" class="link link-simple waves-effect waves-light btn-floating btn-large" data-command = "ESCUELA <%= after.xtype %>" data-query="<%= after.id %>"><i class="material-icons">arrow_forward</i></a>
-		<% } %>￼￼
+        <% } %>
 	<% } %>
-	</div>
+    </div>
 </div>
 <% } %>￼￼
 
@@ -65,7 +65,6 @@
 <% if (!before) { %>
 		<a class="btn-floating btn-large link link-simple grey darken-3" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbered</i></a>
 	<% } else {%>
-
 	<a class="btn-floating btn-large grey darken-3">
 		<i class="large material-icons">menu</i>
 	</a>
