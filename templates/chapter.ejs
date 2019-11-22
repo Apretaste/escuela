@@ -35,7 +35,6 @@
 
                     <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER" data-query="<%= answer.id %>"></a><br/>
                     <% } %>
-
                     <% }); %>
             <% }); %>
 		</div>
@@ -63,14 +62,14 @@
 
 <div class="fixed-action-btn">
 <% if (!before) { %>
-		<a class="btn-floating btn-large link link-simple grey darken-3" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbered</i></a>
-	<% } else {%>
-	<a class="btn-floating btn-large grey darken-3">
-		<i class="large material-icons">menu</i>
-	</a>
-	<ul>
-		<li><a href="#!" class="btn-floating btn-small link link-simple grey darken-3" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons">arrow_back</i></a></li>
-		<li><a class="btn-floating btn-small link link-simple grey darken-3" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbered</i></a></li>
-	</ul>
-  <% } %>
+<a class="btn-floating btn-large link link-simple grey darken-3" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbered</i></a>
+<% } else { %>
+<a class="btn-floating btn-large grey darken-3">
+<i class="large material-icons">menu</i>
+</a>
+<ul>
+    <li><a href="#!" class="btn-floating btn-small link link-simple grey darken-3" data-command = "ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons">arrow_back</i></a></li>
+    <li><a class="btn-floating btn-small link link-simple grey darken-3" data-command = "ESCUELA CURSO" data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbered</i></a></li>
+</ul>
+    <% } %>
 </div>
