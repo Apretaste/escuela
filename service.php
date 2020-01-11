@@ -1,19 +1,14 @@
 <?php
 
 use Apretaste\Challenges;
+use Apretaste\Person;
 use Framework\Database;
 use Apretaste\Request;
 use Apretaste\Response;
+use Framework\Utils;
 
 class Service
 {
-
-	/** @var Response */
-	public $response = null;
-
-	/** @var Request */
-	public $request = null;
-
 	/** @var array */
 	private $files = [];
 
@@ -44,7 +39,7 @@ class Service
 	public function _main(Request $request, Response &$response)
 	{
 		$person_id = $request->person->id;
-		$person = Utils::getPerson($person_id);
+		$person = Person::find($person_id);
 		$this->setLevel($request);
 
 		// get the most popular courses
@@ -90,12 +85,12 @@ class Service
 		// setup response
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('home.ejs', [
-			"max_stars" => 5,
-			"courses"   => $courses,
+				'max_stars' => 5,
+				'courses'   => $courses,
 			// si no ha completado el nombre en el perfil debe decir solo Bienvenido
-			"name"      => $person->first_name ? $person->first_name : '',
-			"level"     => $level,
-			"completed" => $this->getTotalCompletedCourses($person_id),
+				'name'      => $person->first_name ? $person->first_name : '',
+				'level'     => $level,
+				'completed' => $this->getTotalCompletedCourses($person_id),
 		], [], $this->files);
 
 		$response->setCache(60);
@@ -184,7 +179,7 @@ class Service
 		// display the course
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('search.ejs', [
-			"categories" => [
+				'categories' => [
 				'SOCIEDAD'    => 'Sociedad',
 				'NEGOCIOS'    => 'Negocios',
 				'MEDICINA'    => 'Medicina',
@@ -198,12 +193,12 @@ class Service
 				'TECNICA'     => html_entity_decode('T&eacute;cnica'),
 				'OTRO'        => 'Otros',
 			],
-			"authors"    => $this->getTeachers(),
-			"courses"    => $courses,
-			"data"       => $data,
-			"noResults"  => $noResults,
-			"noSearch"   => $noSearch,
-			"max_stars"  => 5,
+				'authors'    => $this->getTeachers(),
+				'courses'    => $courses,
+				'data'       => $data,
+				'noResults'  => $noResults,
+				'noSearch'   => $noSearch,
+				'max_stars'  => 5,
 		], [], $this->files);
 
 		$response->setCache('month');
@@ -230,8 +225,8 @@ class Service
 		if (empty($course)) {
 			$response->setLayout('escuela.ejs');
 			$response->setTemplate('text.ejs', [
-				"title" => "Curso no encontrado",
-				"body"  => "No encontramos el curso que usted pidio",
+					'title' => 'Curso no encontrado',
+					'body'  => 'No encontramos el curso que usted pidio',
 			], [], $this->files);
 
 			return;
@@ -257,7 +252,7 @@ class Service
 	 */
 	public function _capitulo(Request $request, Response &$response)
 	{
-		$id      = intval($request->input->data->query);
+		$id      = (int) $request->input->data->query;
 		$chapter = $this->getChapter($id, $request->person->id);
 
 		$this->setFontFiles();
@@ -271,7 +266,7 @@ class Service
 			$terminated = $course->terminated;
 
 			// Log the visit to this chapter
-			if ($chapter->xtype == 'CAPITULO') {
+			if ($chapter->xtype==='CAPITULO') {
 				self::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
 			}
 
@@ -286,7 +281,7 @@ class Service
 			$course = $this->getCourse($chapter->course, $request->person->id);
 
 			if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
-				Challenges::complete("complete-course", $request->person->id);
+				Challenges::complete('complete-course', $request->person->id);
 
 				// add the experience if profile is completed
 				Level::setExperience('FINISH_COURSE', $request->person->id);
@@ -315,6 +310,7 @@ class Service
 	 * @param \Apretaste\Request  $request
 	 * @param \Apretaste\Response $response
 	 *
+	 * @throws \Framework\Alert
 	 * @example ESCUELA PRUEBA 2
 	 */
 	public function _prueba(Request $request, Response &$response)
@@ -359,7 +355,7 @@ class Service
 			$course = $this->getCourse($answer->course, $request->person->id);
 
 			if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
-				Challenges::complete("complete-course", $request->person->id);
+				Challenges::complete('complete-course', $request->person->id);
 
 				// add the experience if profile is completed
 				Level::setExperience('FINISH_COURSE', $request->person->id);
@@ -433,6 +429,29 @@ class Service
 	}
 
 	/**
+	 * Clear string
+	 *
+	 * @param String $name
+	 *
+	 * @return String
+	 */
+	public static function clearStr($name, $extra_chars = '', $chars = 'abcdefghijklmnopqrstuvwxyz')
+	{
+		$l = strlen($name);
+		$newname = '';
+		$chars .= $extra_chars;
+
+		for ($i = 0; $i < $l; $i++) {
+			$ch = $name[$i];
+			if (stripos($chars, $ch) !== false) {
+				$newname .= $ch;
+			}
+		}
+
+		return $newname;
+	}
+
+	/**
 	 * Subservice OPINAR
 	 *
 	 * @param \Apretaste\Request  $request
@@ -445,7 +464,7 @@ class Service
 		// expecting: course_id feedback_id answer
 		$q = trim($request->input->data->query);
 
-		Utils::clearStr($q);
+		self::clearStr($q);
 		$feed = explode(' ', $q);
 
 		if (!isset($feed[0]) || !isset($feed[1]) || !isset($feed[2])) {
@@ -554,7 +573,7 @@ class Service
 			// get the JSON with the bulk
 			$pieces = [];
 			foreach ($request->input->data->query as $key => $value) {
-				if ($key == 'date_of_birth') {
+				if ($key==='date_of_birth') {
 					$value = DateTime::createFromFormat('d/m/Y', $value)->format('Y-m-d');
 				}
 
@@ -565,7 +584,7 @@ class Service
 
 			// save changes on the database
 			if (!empty($pieces)) {
-				self::query("UPDATE person SET " . implode(",", $pieces) . " WHERE id={$request->person->id}");
+				self::query('UPDATE person SET '. implode(',', $pieces) . " WHERE id={$request->person->id}");
 			}
 
 			return;
@@ -573,7 +592,7 @@ class Service
 
 		// show profile
 		$resume         = $this->getResume($request->person->id);
-		$profile        = Utils::getPerson($request->person->id);
+		$profile        = Person::find($request->person->id);
 		$profile->level = 'PRINCIPIANTE';
 		$r              = self::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
 		if (!isset($r[0])) {
@@ -589,12 +608,12 @@ class Service
 
 		$this->setFontFiles();
 
-		$levels = explode(",", str_replace(["'", "enum(", ")"], "", $r[0]->result));
+		$levels = explode(',', str_replace(["'", 'enum(', ')'], '', $r[0]->result));
 		$response->setLayout('escuela.ejs');
-		$response->setTemplate("profile.ejs", [
-			"resume"  => $resume,
-			"profile" => $profile,
-			"levels"  => $levels,
+		$response->setTemplate('profile.ejs', [
+				'resume'  => $resume,
+				'profile' => $profile,
+				'levels'  => $levels,
 		], [], $this->files);
 	}
 
@@ -605,7 +624,7 @@ class Service
 	public function _terminados(Request $request, Response &$response)
 	{
 		$id  = $request->person->id;
-		$person = Utils::getPerson($id);
+		$person = Person::find($id);
 		$this->setLevel($request);
 
 		// get the most popular courses
@@ -634,21 +653,21 @@ class Service
 
 		if (empty($courses)) {
 			$content = [
-				"header"=>"¡Sin resultados!",
-				"icon"=>"sentiment_very_dissatisfied",
-				"text" => "Usted no tiene cursos terminados. Vaya al inicio y escoja un curso para empezar a estudiar.",
-				"button" => ["href"=>"ESCUELA", "caption"=>"Ver cursos"]];
+					'header' => '¡Sin resultados!',
+					'icon'   => 'sentiment_very_dissatisfied',
+					'text'   => 'Usted no tiene cursos terminados. Vaya al inicio y escoja un curso para empezar a estudiar.',
+					'button' => ['href' => 'ESCUELA', 'caption' => 'Ver cursos']];
 
 			$response->setLayout('escuela.ejs');
-			$response->setTemplate("text.ejs", $content, [], $this->files);
+			$response->setTemplate('text.ejs', $content, [], $this->files);
 			return;
 		}
 
 		$response->setLayout('escuela.ejs');
-		$response->setTemplate("terminated.ejs", [
-			"courses"   => is_array($courses) ? $courses : [],
-			"profile"   => $person,
-			"max_stars" => 5,
+		$response->setTemplate('terminated.ejs', [
+				'courses'   => is_array($courses) ? $courses : [],
+				'profile'   => $person,
+				'max_stars' => 5,
 		], [], $this->files);
 	}
 
@@ -676,7 +695,7 @@ class Service
 					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers,
 					(select MAX(_escuela_answer_choosen.date_choosen) FROM _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answer_date
 			FROM _escuela_course A
-			" . (is_null($course_id) ? "" : " WHERE id = $course_id ") . ";");
+			" . (is_null($course_id) ? '': " WHERE id = $course_id ") .';');
 
 		return $r;
 	}
@@ -724,7 +743,7 @@ class Service
 	 */
 	private function getAnswerValue($answers, $answer)
 	{
-		$answers = explode(",", $answers);
+		$answers = explode(',', $answers);
 
 		$i = 0;
 		foreach ($answers as $ans) {
@@ -733,8 +752,8 @@ class Service
 
 			$value = $ans;
 
-			if (strpos($ans, ":") !== false) {
-				$arr   = explode(":", $ans);
+			if (strpos($ans, ':') !== false) {
+				$arr   = explode(':', $ans);
 				$value = trim($arr[0]);
 			}
 
@@ -760,12 +779,12 @@ class Service
 		$before = false;
 		$after  = false;
 
-		$r = self::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder - 1) . ";");
+		$r = self::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder - 1) .';');
 		if (isset($r[0])) {
 			$before = $r[0];
 		}
 
-		$r = self::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder + 1) . ";");
+		$r = self::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder + 1) .';');
 		if (isset($r[0])) {
 			$after = $r[0];
 		}
@@ -890,7 +909,7 @@ class Service
 		/** @var \DOMElement $img */
 		foreach ($imgs as $img) {
 			$src               = $img->getAttribute('src');
-			$filename          = str_replace("cid:", "", $src);
+			$filename          = str_replace('cid:', '', $src);
 			$images[$filename] = SHARED_PATH."/img/courses/$course/$chapter/$filename";
 		}
 
@@ -1198,8 +1217,8 @@ class Service
 	private function setFontFiles()
 	{
 		$this->files = [
-			__DIR__ . "/resources/Roboto-Bold.ttf",
-			__DIR__ . "/resources/Roboto-Regular.ttf",
+			__DIR__ .'/resources/Roboto-Bold.ttf',
+			__DIR__ .'/resources/Roboto-Regular.ttf',
 		];
 	}
 }
