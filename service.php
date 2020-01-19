@@ -5,6 +5,7 @@ use Apretaste\Person;
 use Framework\Database;
 use Apretaste\Request;
 use Apretaste\Response;
+use Framework\Images;
 use Framework\Utils;
 
 class Service
@@ -260,7 +261,7 @@ class Service
 		if ($chapter) {
 			$beforeAfter      = $this->getBeforeAfter($chapter);
 			$images           = $this->getChapterImages($id);
-			$chapter->content = Utils::putInlineImagesToHTML($chapter->content, $images, 'cid:');
+			$chapter->content = Images::putInlineImagesToHTML($chapter->content, $images, 'cid:');
 
 			$course = $this->getCourse($chapter->course, $request->person->id);
 			$terminated = $course->terminated;
