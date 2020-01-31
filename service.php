@@ -6,6 +6,7 @@ use Framework\Database;
 use Apretaste\Request;
 use Apretaste\Response;
 use Framework\Images;
+use Apretaste\Level;
 
 class Service
 {
