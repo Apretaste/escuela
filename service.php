@@ -370,11 +370,10 @@ class Service
 	 * Set level
 	 *
 	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
 	 *
 	 * @throws \Exception
 	 */
-	public function setLevel(Request $request, Response &$response)
+	public function setLevel(Request $request)
 	{
 		$resume = $this->getResume($request->person->id);
 		$total = 0;
