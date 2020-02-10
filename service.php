@@ -900,7 +900,7 @@ class Service
 		$course = $chapterText[0]->course;
 
 		// get all images from the content
-		$dom = new DOMDocument();
+		$dom = new \DOMDocument();
 		$dom->loadHTML($content);
 		$imgs = $dom->getElementsByTagName('img');
 
