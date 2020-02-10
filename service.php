@@ -89,7 +89,7 @@ class Service
 				'max_stars' => 5,
 				'courses' => $courses,
 			// si no ha completado el nombre en el perfil debe decir solo Bienvenido
-				'name' => $person->first_name ? $person->first_name : '',
+				'name' => $person->firstName ? $person->firstName : '',
 				'level' => $level,
 				'completed' => $this->getTotalCompletedCourses($person_id),
 		], [], $this->files);
