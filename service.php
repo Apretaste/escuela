@@ -1184,7 +1184,7 @@ class Service
 	 */
 	private function getTeachers()
 	{
-		$r = self::query('SELECT * FROM _escuela_teacher');
+		$r = self::query('SELECT * FROM _escuela_teacher WHERE (SELECT COUNT(*) FROM _escuela_course WHERE _escuela_course.active = 1 AND _escuela_course.teacher = _escuela_teacher.id) > 0');
 		if (!is_array($r)) {
 			return [];
 		}
