@@ -27,6 +27,19 @@ function jsUcfirst(string) {
 }
 
 $(function () {
+    // after render
+    $(".link").attr('href', '#!');
+    $(".link-simple").click(function(){
+        var q = null;
+        eval('q = ' + $(this).attr('data-query'));
+        apretaste.send({
+            command: $(this).attr('data-command'),
+            data: {
+                query: q
+            }
+        });
+    });
+
   $('select').formSelect();
   $('.fixed-action-btn').floatingActionButton({
     direction: 'left',
