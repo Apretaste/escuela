@@ -262,13 +262,15 @@ class Service
 			$beforeAfter = $this->getBeforeAfter($chapter);
 			$images = $this->getChapterImages($id);
 			$chapter->content = Images::putInlineImagesToHTML($chapter->content, $images, 'cid:');
+			//$chapter->content = str_replace('"cid:', '"', $chapter->content);
+
 
 			$course = $this->getCourse($chapter->course, $request->person->id);
 			$terminated = $course->terminated;
 
 			// Log the visit to this chapter
 			if ($chapter->xtype === 'CAPITULO') {
-				self::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
+				 self::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
 			}
 
 			// get the code inside the <body> tag
@@ -296,7 +298,7 @@ class Service
 				'course' => $course,
 				'before' => $beforeAfter['before'],
 				'after' => $beforeAfter['after'],
-			], $images, $this->files);
+			], [], $this->files);
 
 			return;
 		}
@@ -841,7 +843,7 @@ class Service
 			if ($chapter->terminated) {
 				$course->total_terminated++;
 			}
-			if ($chapter->xtype == 'PRUEBA') {
+			if ($chapter->xtype === 'PRUEBA') {
 				$course->total_tests++;
 			}
 			$course->total_right += $chapter->total_right;
