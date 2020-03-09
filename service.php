@@ -5,7 +5,8 @@ use Apretaste\Person;
 use Framework\Database;
 use Apretaste\Request;
 use Apretaste\Response;
-use Framework\Utils;
+use Framework\Images;
+use Apretaste\Level;
 
 class Service
 {
@@ -82,18 +83,19 @@ class Service
 
 		$this->setFontFiles();
 
-		// setup response
-		$response->setLayout('escuela.ejs');
-		$response->setTemplate('home.ejs', [
-				'max_stars' => 5,
-				'courses' => $courses,
-			// si no ha completado el nombre en el perfil debe decir solo Bienvenido
-				'name' => $person->first_name ? $person->first_name : '',
-				'level' => $level,
-				'completed' => $this->getTotalCompletedCourses($person_id),
-		], [], $this->files);
+		// create content for the view
+		$content = [
+			'max_stars' => 5,
+			'courses' => $courses,
+			'name' => $person->firstName ? $person->firstName : '',
+			'level' => $level,
+			'completed' => $this->getTotalCompletedCourses($person_id)
+		];
 
+		// setup response
 		$response->setCache(60);
+		$response->setLayout('escuela.ejs');
+		$response->setTemplate('home.ejs', $content, [], $this->files);
 	}
 
 	/**
@@ -257,51 +259,50 @@ class Service
 
 		$this->setFontFiles();
 
-		if ($chapter) {
-			$beforeAfter = $this->getBeforeAfter($chapter);
-			$images = $this->getChapterImages($id);
-			$chapter->content = Utils::putInlineImagesToHTML($chapter->content, $images, 'cid:');
-
-			$course = $this->getCourse($chapter->course, $request->person->id);
-			$terminated = $course->terminated;
-
-			// Log the visit to this chapter
-			if ($chapter->xtype === 'CAPITULO') {
-				self::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
-			}
-
-			// get the code inside the <body> tag
-			if (stripos($chapter->content, '<body>') !== false) {
-				$ini = strpos($chapter->content, '<body>') + 6;
-				$end = strpos($chapter->content, '</body>');
-				$chapter->content = substr($chapter->content, $ini, $end - $ini);
-			}
-
-			// check if the course is terminated
-			$course = $this->getCourse($chapter->course, $request->person->id);
-
-			if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
-				Challenges::complete('complete-course', $request->person->id);
-
-				// add the experience if profile is completed
-				Level::setExperience('FINISH_COURSE', $request->person->id);
-			}
-
-			// send response to the view
-
+		if (empty($chapter)) {
 			$response->setLayout('escuela.ejs');
-			$response->setTemplate('chapter.ejs', [
-				'chapter' => $chapter,
-				'course' => $course,
-				'before' => $beforeAfter['before'],
-				'after' => $beforeAfter['after'],
-			], $images, $this->files);
-
-			return;
+			return $response->setTemplate('text.ejs', ['title' => 'Lo Sentimos', 'body' => 'Capítulo no encontrado'], [], $this->files);
 		}
 
+		$beforeAfter = $this->getBeforeAfter($chapter);
+		$images = $this->getChapterImages($id);
+		$chapter->content = Images::putInlineImagesToHTML($chapter->content, $images, 'cid:');
+		$course = $this->getCourse($chapter->course, $request->person->id);
+		$terminated = $course->terminated;
+
+		// Log the visit to this chapter
+		if ($chapter->xtype === 'CAPITULO') {
+			self::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
+		}
+
+		// get the code inside the <body> tag
+		if (stripos($chapter->content, '<body>') !== false) {
+			$ini = strpos($chapter->content, '<body>') + 6;
+			$end = strpos($chapter->content, '</body>');
+			$chapter->content = substr($chapter->content, $ini, $end - $ini);
+		}
+
+		// check if the course is terminated
+		$course = $this->getCourse($chapter->course, $request->person->id);
+
+		if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
+			Challenges::complete('complete-course', $request->person->id);
+
+			// add the experience if profile is completed
+			Level::setExperience('FINISH_COURSE', $request->person->id);
+		}
+
+		// create content for the view
+		$content = [
+			'chapter' => $chapter,
+			'course' => $course,
+			'before' => $beforeAfter['before'],
+			'after' => $beforeAfter['after']
+		];
+
+		// send response to the view
 		$response->setLayout('escuela.ejs');
-		$response->setTemplate('text.ejs', ['title' => 'Lo Sentimos', 'body' => 'Capitulo no encontrado'], [], $this->files);
+		$response->setTemplate('chapter.ejs', $content, $images, $this->files);
 	}
 
 	/**
@@ -368,12 +369,11 @@ class Service
 	/**
 	 * Set level
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
-	 *
+	 * @param Request $request
+	 * @param Response $response
 	 * @throws \Exception
 	 */
-	public function setLevel(Request $request, Response &$response)
+	public function setLevel(Request $request)
 	{
 		$resume = $this->getResume($request->person->id);
 		$total = 0;
@@ -841,7 +841,7 @@ class Service
 			if ($chapter->terminated) {
 				$course->total_terminated++;
 			}
-			if ($chapter->xtype == 'PRUEBA') {
+			if ($chapter->xtype === 'PRUEBA') {
 				$course->total_tests++;
 			}
 			$course->total_right += $chapter->total_right;
@@ -900,7 +900,7 @@ class Service
 		$course = $chapterText[0]->course;
 
 		// get all images from the content
-		$dom = new DOMDocument();
+		$dom = new \DOMDocument();
 		$dom->loadHTML($content);
 		$imgs = $dom->getElementsByTagName('img');
 
@@ -1184,7 +1184,7 @@ class Service
 	 */
 	private function getTeachers()
 	{
-		$r = self::query('SELECT * FROM _escuela_teacher');
+		$r = self::query('SELECT * FROM _escuela_teacher WHERE (SELECT COUNT(*) FROM _escuela_course WHERE _escuela_course.active = 1 AND _escuela_course.teacher = _escuela_teacher.id) > 0');
 		if (!is_array($r)) {
 			return [];
 		}
