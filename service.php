@@ -51,13 +51,13 @@ class Service
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$person_id') as answers_choosen					
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$person_id') as answers_choosen
 				FROM _escuela_course A
 				JOIN _escuela_teacher B
 				ON A.teacher = B.id
 				WHERE A.active = 1
-				) subq 
-				WHERE viewed < chapters - tests or answers_choosen < questions -- no se han visto todos, no se ha respondido todas 
+				) subq
+				WHERE viewed < chapters - tests or answers_choosen < questions -- no se han visto todos, no se ha respondido todas
 				ORDER BY viewed/nullif(chapters,0) desc,  answers_choosen/nullif(answers,0) desc, popularity DESC
 			LIMIT 10");
 
@@ -574,15 +574,15 @@ class Service
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answers_choosen,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course 
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course
 					AND _escuela_answer_choosen.person_id = '$id'
-					AND (SELECT count(*) as right_choose FROM _escuela_question WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers					
+					AND (SELECT count(*) as right_choose FROM _escuela_question WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers
 				FROM _escuela_course A
 				JOIN _escuela_teacher B
 				ON A.teacher = B.id
 				WHERE A.active = 1
-				) subq 
-				WHERE viewed >= (chapters - tests) and answers_choosen >= questions 
+				) subq
+				WHERE viewed >= (chapters - tests) and answers_choosen >= questions
 				ORDER BY calification DESC;");
 
 		$this->setFontFiles();
@@ -625,7 +625,7 @@ class Service
 				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
 				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answers_choosen,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course 
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course
 					AND _escuela_answer_choosen.person_id = '$id'
 					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers,
 					(select MAX(_escuela_answer_choosen.date_choosen) FROM _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answer_date
@@ -847,7 +847,7 @@ class Service
 		foreach ($imgs as $img) {
 			$src               = $img->getAttribute('src');
 			$filename          = str_replace("cid:", "", $src);
-			$images[$filename] = __DIR__."/../../img/courses/$course/$chapter/$filename";
+			$images[$filename] = "/var/www/shared/public/courses/$course/$chapter/$filename";
 		}
 
 		return $images;
@@ -1072,11 +1072,11 @@ class Service
 	{
 		$r = self::query("
 			select count(*) as t from (
-				select course, 
-						count(*) as total, 
-						(select count(*) 
-						from _escuela_chapter_viewed 
-						where _escuela_chapter.course = _escuela_chapter_viewed.course 
+				select course,
+						count(*) as total,
+						(select count(*)
+						from _escuela_chapter_viewed
+						where _escuela_chapter.course = _escuela_chapter_viewed.course
 						and person_id = '$person_id') as viewed
 				from  _escuela_chapter
 				group by course
