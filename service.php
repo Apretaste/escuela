@@ -2,6 +2,7 @@
 
 use Apretaste\Challenges;
 use Apretaste\Person;
+use Framework\Alert;
 use Framework\Database;
 use Apretaste\Request;
 use Apretaste\Response;
@@ -20,7 +21,7 @@ class Service
 	 * @param string $set_charset
 	 *
 	 * @return mixed
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public static function query($sql, $set_charset = 'utf8mb4')
 	{
@@ -31,10 +32,10 @@ class Service
 	/**
 	 * Main function
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
+	 * @param Request $request
+	 * @param Response $response
 	 *
-	 * @throws \Framework\Alert
+	 * @throws Alert
 	 * @author salvipascual
 	 */
 	public function _main(Request $request, Response &$response)
@@ -101,10 +102,10 @@ class Service
 	/**
 	 * Buscar cursos
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
+	 * @param Request $request
+	 * @param Response $response
 	 *
-	 * @throws \Framework\Alert
+	 * @throws Alert
 	 */
 	public function _buscar(Request $request, Response &$response)
 	{
@@ -157,7 +158,7 @@ class Service
 			WHERE 1 $where ORDER BY popularity DESC LIMIT 10");
 		}
 
-		if (! is_array($courses)) {
+		if (!is_array($courses)) {
 			$courses = [];
 		}
 
@@ -181,7 +182,7 @@ class Service
 		// display the course
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('search.ejs', [
-				'categories' => [
+			'categories' => [
 				'SOCIEDAD' => 'Sociedad',
 				'NEGOCIOS' => 'Negocios',
 				'MEDICINA' => 'Medicina',
@@ -195,12 +196,12 @@ class Service
 				'TECNICA' => html_entity_decode('T&eacute;cnica'),
 				'OTRO' => 'Otros',
 			],
-				'authors' => $this->getTeachers(),
-				'courses' => $courses,
-				'data' => $data,
-				'noResults' => $noResults,
-				'noSearch' => $noSearch,
-				'max_stars' => 5,
+			'authors' => $this->getTeachers(),
+			'courses' => $courses,
+			'data' => $data,
+			'noResults' => $noResults,
+			'noSearch' => $noSearch,
+			'max_stars' => 5,
 		], [], $this->files);
 
 		$response->setCache('month');
@@ -210,10 +211,10 @@ class Service
 	 * Retrieve a course
 	 *
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
+	 * @param Request $request
+	 * @param Response $response
 	 *
-	 * @throws \Framework\Alert
+	 * @throws Alert
 	 * @example ESCUELA CURSO 2
 	 * @author  kuma
 	 */
@@ -227,8 +228,8 @@ class Service
 		if (empty($course)) {
 			$response->setLayout('escuela.ejs');
 			$response->setTemplate('text.ejs', [
-					'title' => 'Curso no encontrado',
-					'body' => 'No encontramos el curso que usted pidio',
+				'title' => 'Curso no encontrado',
+				'body' => 'No encontramos el curso que usted pidio',
 			], [], $this->files);
 
 			return;
@@ -245,16 +246,16 @@ class Service
 	 * Subservice CAPITULO
 	 *
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
+	 * @param Request $request
+	 * @param Response $response
 	 *
-	 * @throws \Framework\Alert
+	 * @throws Alert
 	 * @example ESCUELA CAPITULO 3
 	 * @author  kuma
 	 */
 	public function _capitulo(Request $request, Response &$response)
 	{
-		$id = (int) $request->input->data->query;
+		$id = (int)$request->input->data->query;
 		$chapter = $this->getChapter($id, $request->person->id);
 
 		$this->setFontFiles();
@@ -308,10 +309,10 @@ class Service
 	/**
 	 * Subservice PRUEBA
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
+	 * @param Request $request
+	 * @param Response $response
 	 *
-	 * @throws \Framework\Alert
+	 * @throws Alert
 	 * @example ESCUELA PRUEBA 2
 	 */
 	public function _prueba(Request $request, Response &$response)
@@ -322,10 +323,10 @@ class Service
 	/**
 	 * Records the answer for a question and resturns an empty response
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
+	 * @param Request $request
+	 * @param Response $response
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function _responder(Request $request, Response &$response)
 	{
@@ -371,7 +372,7 @@ class Service
 	 *
 	 * @param Request $request
 	 * @param Response $response
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function setLevel(Request $request)
 	{
@@ -413,10 +414,10 @@ class Service
 	/**
 	 * Rate course
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
+	 * @param Request $request
+	 * @param Response $response
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function _calificar(Request $request, Response &$response)
 	{
@@ -454,10 +455,10 @@ class Service
 	/**
 	 * Subservice OPINAR
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
+	 * @param Request $request
+	 * @param Response $response
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function _opinar(Request $request, Response &$response)
 	{
@@ -513,10 +514,10 @@ class Service
 	/**
 	 * Repeats a test for a course
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
+	 * @param Request $request
+	 * @param Response $response
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 * @author kuma
 	 */
 	public function _repetir(Request $request, Response &$response)
@@ -526,14 +527,14 @@ class Service
 		self::query("DELETE FROM _escuela_answer_choosen WHERE course='{$request->input->data->query}' AND person_id='{$request->person->id}'");
 
 		// load the test again
-		$this->_curso();
+		$this->_curso($request, $response);
 
 		// change response content
 		//TODO: improve this feature in the core
 		$data = @json_decode($response->json);
 
 		if (is_array($data)) {
-			$data = (object) $data;
+			$data = (object)$data;
 		}
 
 		if (!is_object($data)) {
@@ -547,10 +548,10 @@ class Service
 	/**
 	 * Perfil de escuela
 	 *
-	 * @param \Apretaste\Request $request
-	 * @param \Apretaste\Response $response
+	 * @param Request $request
+	 * @param Response $response
 	 *
-	 * @throws \Framework\Alert
+	 * @throws Alert
 	 */
 	public function _perfil(Request $request, Response &$response)
 	{
@@ -584,7 +585,7 @@ class Service
 
 			// save changes on the database
 			if (!empty($pieces)) {
-				self::query('UPDATE person SET '. implode(',', $pieces) . " WHERE id={$request->person->id}");
+				self::query('UPDATE person SET ' . implode(',', $pieces) . " WHERE id={$request->person->id}");
 			}
 
 			return;
@@ -611,9 +612,9 @@ class Service
 		$levels = explode(',', str_replace(["'", 'enum(', ')'], '', $r[0]->result));
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('profile.ejs', [
-				'resume' => $resume,
-				'profile' => $profile,
-				'levels' => $levels,
+			'resume' => $resume,
+			'profile' => $profile,
+			'levels' => $levels,
 		], [], $this->files);
 	}
 
@@ -653,10 +654,10 @@ class Service
 
 		if (empty($courses)) {
 			$content = [
-					'header' => '¡Sin resultados!',
-					'icon' => 'sentiment_very_dissatisfied',
-					'text' => 'Usted no tiene cursos terminados. Vaya al inicio y escoja un curso para empezar a estudiar.',
-					'button' => ['href' => 'ESCUELA', 'caption' => 'Ver cursos']];
+				'header' => '¡Sin resultados!',
+				'icon' => 'sentiment_very_dissatisfied',
+				'text' => 'Usted no tiene cursos terminados. Vaya al inicio y escoja un curso para empezar a estudiar.',
+				'button' => ['href' => 'ESCUELA', 'caption' => 'Ver cursos']];
 
 			$response->setLayout('escuela.ejs');
 			$response->setTemplate('text.ejs', $content, [], $this->files);
@@ -665,9 +666,9 @@ class Service
 
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('terminated.ejs', [
-				'courses' => is_array($courses) ? $courses : [],
-				'profile' => $person,
-				'max_stars' => 5,
+			'courses' => is_array($courses) ? $courses : [],
+			'profile' => $person,
+			'max_stars' => 5,
 		], [], $this->files);
 	}
 
@@ -678,7 +679,7 @@ class Service
 	 * @param null $course_id
 	 *
 	 * @return array|mixed
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getResume($id, $course_id = null)
 	{
@@ -695,7 +696,7 @@ class Service
 					AND (SELECT right_choosen FROM _escuela_answer WHERE _escuela_answer.id = _escuela_answer_choosen.answer) = 1) as right_answers,
 					(select MAX(_escuela_answer_choosen.date_choosen) FROM _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answer_date
 			FROM _escuela_course A
-			" . (is_null($course_id) ? '': " WHERE id = $course_id ") .';');
+			" . (is_null($course_id) ? '' : " WHERE id = $course_id ") . ';');
 
 		return $r;
 	}
@@ -771,7 +772,7 @@ class Service
 	 * @param $chapter
 	 *
 	 * @return array
-	 * @throws \Exception
+	 * @throws Exception
 	 * @author kuma
 	 */
 	private function getBeforeAfter($chapter)
@@ -779,12 +780,12 @@ class Service
 		$before = false;
 		$after = false;
 
-		$r = self::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder - 1) .';');
+		$r = self::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder - 1) . ';');
 		if (isset($r[0])) {
 			$before = $r[0];
 		}
 
-		$r = self::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder + 1) .';');
+		$r = self::query("SELECT * FROM _escuela_chapter WHERE course = {$chapter->course} AND xorder = " . ($chapter->xorder + 1) . ';');
 		if (isset($r[0])) {
 			$after = $r[0];
 		}
@@ -802,7 +803,7 @@ class Service
 	 * @param string $person_id
 	 *
 	 * @return object|bool
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getCourse($id, $person_id = '')
 	{
@@ -882,7 +883,7 @@ class Service
 	 * @param $chapter
 	 *
 	 * @return array
-	 * @throws \Exception
+	 * @throws Exception
 	 * @internal param int $chapter_id
 	 *
 	 */
@@ -900,13 +901,13 @@ class Service
 		$course = $chapterText[0]->course;
 
 		// get all images from the content
-		$dom = new \DOMDocument();
+		$dom = new DOMDocument();
 		$dom->loadHTML($content);
 		$imgs = $dom->getElementsByTagName('img');
 
 		// get full path to the image
 		$images = [];
-		/** @var \DOMElement $img */
+		/** @var DOMElement $img */
 		foreach ($imgs as $img) {
 			$src = $img->getAttribute('src');
 			$filename = str_replace('cid:', '', $src);
@@ -925,7 +926,7 @@ class Service
 	 * @param string $answer_order
 	 *
 	 * @return object
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getChapter($id, $person_id = '', $answer_order = 'rand()')
 	{
@@ -973,7 +974,7 @@ class Service
 	 * @param bool $terminated
 	 *
 	 * @return array
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getChapters($course, $person_id = '', $terminated = null)
 	{
@@ -1001,7 +1002,7 @@ class Service
 	 * @param string $answer_order
 	 *
 	 * @return array
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getChapterQuestions($test_id, $person_id = '', $answer_order = 'rand()')
 	{
@@ -1026,7 +1027,7 @@ class Service
 	 * @param string $answer_order
 	 *
 	 * @return bool
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getQuestion($question_id, $person_id = '', $answer_order = 'rand()')
 	{
@@ -1058,7 +1059,7 @@ class Service
 	 * @param string $orderby
 	 *
 	 * @return array
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getAnswers($question_id, $orderby = 'rand()')
 	{
@@ -1076,7 +1077,7 @@ class Service
 	 * @param $chapter_id
 	 *
 	 * @return int
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getTotalQuestionsOf($chapter_id)
 	{
@@ -1092,7 +1093,7 @@ class Service
 	 * @param $chapter_id
 	 *
 	 * @return int
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getTotalResponsesOf($person_id, $chapter_id)
 	{
@@ -1108,7 +1109,7 @@ class Service
 	 * @param integer $test_id
 	 *
 	 * @return boolean
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function isTestTerminated($person_id, $test_id)
 	{
@@ -1125,7 +1126,7 @@ class Service
 	 * @param $chapter_id
 	 *
 	 * @return bool
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function isChapterSeen($person_id, $chapter_id)
 	{
@@ -1141,7 +1142,7 @@ class Service
 	 * @param $question_id
 	 *
 	 * @return bool
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function isQuestionTerminated($person_id, $question_id)
 	{
@@ -1156,7 +1157,7 @@ class Service
 	 * @param $person_id
 	 *
 	 * @return int
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getTotalCompletedCourses($person_id)
 	{
@@ -1180,7 +1181,7 @@ class Service
 	 * Get list of teachers
 	 *
 	 * @return array|mixed
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function getTeachers()
 	{
@@ -1217,8 +1218,8 @@ class Service
 	private function setFontFiles()
 	{
 		$this->files = [
-			__DIR__ .'/resources/Roboto-Bold.ttf',
-			__DIR__ .'/resources/Roboto-Regular.ttf',
+			__DIR__ . '/resources/Roboto-Bold.ttf',
+			__DIR__ . '/resources/Roboto-Regular.ttf',
 		];
 	}
 }
