@@ -343,6 +343,29 @@ $(function () {
     });
     $("#rate-stars").hide();
   });
+
+    if (typeof chapter != 'undefined') {
+        //  after DOM is loaded / after EJS render ...
+        for(var i in chapter.content) {
+            var cmp = chapter.content[i];
+            cmp.script.replace('{{' + 'APP_IMAGE_PATH' + '}}', '{{APP_IMAGE_PATH}}');
+            cmp.script.replace('{{' + 'APP_SERVICE_PATH' + '}}', '{{APP_SERVICE_PATH}}');
+            cmp.script.replace('{{' + 'APP_RESOURCES' + '}}', '{{APP_RESOURCES}}');
+            cmp.style.replace('{{' + 'APP_IMAGE_PATH' + '}}', '{{APP_IMAGE_PATH}}');
+            cmp.style.replace('{{' + 'APP_SERVICE_PATH' + '}}', '{{APP_SERVICE_PATH}}');
+            cmp.style.replace('{{' + 'APP_RESOURCES' + '}}', '{{APP_RESOURCES}}');
+
+            // ... execute the functionality (initialization, events, and more)
+            eval(cmp.script);
+
+            // ... apply the style
+            var style = document.createElement('style');
+            document.head.appendChild(style);
+            style.sheet.insertRule(cmp.style);
+        }
+    }
+
+
 }); // submit a test once completed
 
 function submitTest() {
