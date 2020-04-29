@@ -1223,4 +1223,23 @@ class Service
 			__DIR__ .'/resources/Roboto-Regular.ttf',
 		];
 	}
+
+	public function _example(Request $request, Response $response) {
+		$response->setTemplate('chapter2.ejs', [
+		  'chapter' => (object) [
+		    'title' => 'Ejemplo de capitulo',
+			'content' => [
+			  (object) [
+			    'template' => '<p id ="<%= id %>"><%- text %></p>',
+				'script' => '$("<%= id %>").click(function() {alert(1);});',
+				'style' => '#<%= id %> {background: red;}',
+				'data' => (object)[
+				  'id'=> 'parrafo1',
+				  'text'=>'tremendo texto'
+				]
+			  ]
+			]
+		  ]
+		]);
+	}
 }
