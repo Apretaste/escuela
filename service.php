@@ -1230,7 +1230,7 @@ class Service
 			'content' => [
 			  (object) [
 			    'template' => '<p id ="<%= id %>"><%- text %></p>',
-				'script' => '$("<%= id %>").click(function() {alert(1);});',
+				'script' => '$("#<%= id %>").click(function() {alert(1);});',
 				'style' => '#<%= id %> {background: red;}',
 				'data' => (object)[
 				  'id'=> 'parrafo1',

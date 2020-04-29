@@ -357,6 +357,7 @@ $(function () {
 
             // ... execute the functionality (initialization, events, and more)
             eval(cmp.script);
+            alert(cmp.script);
 
             // ... apply the style
             var style = document.createElement('style');
