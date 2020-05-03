@@ -246,9 +246,10 @@ class Service
 	 * Subservice CAPITULO
 	 *
 	 *
-	 * @param Request $request
-	 * @param Response $response
+	 * @param  Request  $request
+	 * @param  Response  $response
 	 *
+	 * @return \Apretaste\Response
 	 * @throws Alert
 	 * @example ESCUELA CAPITULO 3
 	 * @author  kuma
@@ -267,7 +268,8 @@ class Service
 
 		$beforeAfter = $this->getBeforeAfter($chapter);
 		$images = $this->getChapterImages($id);
-		$chapter->content = Images::putInlineImagesToHTML($chapter->content, $images, 'cid:');
+		$chapter->content = Parsedown::instance()->parse($chapter->content);
+		$chapter->content = str_replace('/school/image?guid=', '{{APP_RESOURCES}}/', $chapter->content);
 		$course = $this->getCourse($chapter->course, $request->person->id);
 		$terminated = $course->terminated;
 
@@ -892,27 +894,18 @@ class Service
 		// get course and content
 		$chapterText = self::query("SELECT content, course FROM _escuela_chapter WHERE id=$chapter");
 		$content = $chapterText[0]->content;
-
-		$tidy = new tidy();
-		$content = $tidy->repairString($content, [
-			'output-xhtml' => true,
-		], 'utf8');
-
-		$course = $chapterText[0]->course;
-
-		// get all images from the content
-		$dom = new DOMDocument();
-		$dom->loadHTML($content);
-		$imgs = $dom->getElementsByTagName('img');
-
-		// get full path to the image
 		$images = [];
-		/** @var DOMElement $img */
-		foreach ($imgs as $img) {
-			$src = $img->getAttribute('src');
-			$filename = str_replace('cid:', '', $src);
-			$images[$filename] = SHARED_PUBLIC_PATH . "/courses/$course/$chapter/$filename";
-		}
+
+		$p = -1;
+		do {
+			$p = stripos($content, '/school/image?guid=', $p + 1);
+			if ($p !== false) {
+				$p1 = strpos($content, ')', $p);
+				$guid = substr($content, $p + 19, $p1 - $p - 19);
+				$filename = $guid.'.png';
+				$images[$filename] = SHARED_PUBLIC_PATH . "/courses/{$chapter->course}/$chapter/$filename";
+			}
+		} while ($p !== false);
 
 		return $images;
 	}
@@ -1223,13 +1216,17 @@ class Service
 		];
 	}
 
+	private function getComponent($name, $data) {
+
+	}
+
 	public function _example(Request $request, Response $response) {
 		$response->setTemplate('chapter2.ejs', [
 		  'chapter' => (object) [
 		    'title' => 'Ejemplo de capitulo',
 			'content' => [
 			  (object) [
-			    'template' => '<p id ="<%= id %>"><%- text %></p>',
+			    'template' => '',
 				'script' => '$("#<%= id %>").click(function() {alert(1);});',
 				'style' => '#<%= id %> {background: red;}',
 				'data' => (object)[
