@@ -269,7 +269,7 @@ class Service
 		$beforeAfter = $this->getBeforeAfter($chapter);
 		$images = $this->getChapterImages($id);
 		$chapter->content = Parsedown::instance()->parse($chapter->content);
-		$chapter->content = str_replace('/school/image?guid=', '{{APP_RESOURCES}}/', $chapter->content);
+		$chapter->content = str_replace('/school/image?guid=', '{{APP_IMAGE_PATH}}/', $chapter->content);
 		$course = $this->getCourse($chapter->course, $request->person->id);
 		$terminated = $course->terminated;
 
