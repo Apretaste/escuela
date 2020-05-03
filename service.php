@@ -903,7 +903,7 @@ class Service
 				$p1 = strpos($content, ')', $p);
 				$guid = substr($content, $p + 19, $p1 - $p - 19);
 				$filename = $guid.'.png';
-				$images[$filename] = SHARED_PUBLIC_PATH . "/courses/{$chapter->course}/$chapter/$filename";
+				$images[$filename] = SHARED_PUBLIC_PATH . "/courses/{$chapterText[0]->course}/$chapter/$filename";
 			}
 		} while ($p !== false);
 
