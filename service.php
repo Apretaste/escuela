@@ -1226,7 +1226,7 @@ class Service
 		    'title' => 'Ejemplo de capitulo',
 			'content' => [
 			  (object) [
-			    'template' => '',
+			    'template' => '<p id="<%= id %>"><%= text %></p>',
 				'script' => '$("#<%= id %>").click(function() {alert(1);});',
 				'style' => '#<%= id %> {background: red;}',
 				'data' => (object)[
