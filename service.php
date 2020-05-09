@@ -887,7 +887,6 @@ class Service
 	 * @return array
 	 * @throws Exception
 	 * @internal param int $chapter_id
-	 *
 	 */
 	private function getChapterImages($chapter)
 	{
