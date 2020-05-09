@@ -72,7 +72,7 @@ class Service
 			$c->content = htmlspecialchars($c->content);
 			$c->professor = htmlspecialchars($c->professor);
 			$c->author = $c->professor;
-			$c->stars = intval($c->stars);
+			$c->stars = (int)$c->stars;
 			$courses[$k] = $c;
 		}
 
@@ -902,8 +902,7 @@ class Service
 			if ($p !== false) {
 				$p1 = strpos($content, ')', $p);
 				$guid = substr($content, $p + 19, $p1 - $p - 19);
-				$filename = $guid;
-				$images[$filename] = SHARED_PUBLIC_PATH . "/courses/{$chapterText[0]->course}/$chapter/$filename";
+				$images[$guid] = SHARED_PUBLIC_PATH . "/courses/$guid";
 			}
 		} while ($p !== false);
 
@@ -1216,10 +1215,14 @@ class Service
 		];
 	}
 
-	private function getComponent($name, $data) {
-
-	}
-
+	/**
+	 * EXPERIMENTAL
+	 *
+	 * @param  \Apretaste\Request  $request
+	 * @param  \Apretaste\Response  $response
+	 *
+	 * @throws \Framework\Alert
+	 */
 	public function _example(Request $request, Response $response) {
 		$response->setTemplate('chapter2.ejs', [
 		  'chapter' => (object) [
