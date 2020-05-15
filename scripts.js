@@ -343,7 +343,7 @@ $(function () {
     });
     $("#rate-stars").hide();
   });
-
+/*
     if (typeof chapter != 'undefined') {
         //  after DOM is loaded / after EJS render ...
         for(var i in chapter.content) {
@@ -364,7 +364,7 @@ $(function () {
             document.head.appendChild(style);
             style.sheet.insertRule(cmp.style);
         }
-    }
+    }*/
 
 
 }); // submit a test once completed
