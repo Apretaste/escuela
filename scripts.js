@@ -217,12 +217,15 @@ $(function () {
       caption: 'Wyoming',
       value: 'WY'
     }];
+
     provinces.forEach(function (province) {
       $('#province').prepend('<option value=\'' + province.toUpperCase().replace(/\s/g, '_') + '\'>' + province + '</option>');
     });
+
     states.forEach(function (state) {
       $('#usstate').append('<option value=\'' + state.value + '\'>' + state.caption + '</option>');
     });
+
     /*
     if (profile.country.toUpperCase() == 'US') {
       $("#province-section").hide();
@@ -237,8 +240,13 @@ $(function () {
     $('#sexual_orientation option[value="' + profile.sexual_orientation + '"]').prop("selected", true);
     $('#marital_status option[value="' + profile.marital_status + '"]').prop("selected", true);
     $('#religion option[value="' + profile.religion + '"]').prop("selected", true);
-    $('#country option[value="' + profile.country.toUpperCase() + '"]').prop("selected", true);
-    $('#province option[value="' + profile.province.toUpperCase().replace(/\s/g, '_') + '"]').prop("selected", true);
+
+    if (typeof profile.country !== "undefined")
+        $('#country option[value="' + profile.country.toUpperCase() + '"]').prop("selected", true);
+
+    if (typeof province.country !== "undefined")
+        $('#province option[value="' + profile.province.toUpperCase().replace(/\s/g, '_') + '"]').prop("selected", true);
+
     $('#usstate option[value="' + profile.usstate + '"]').prop("selected", true);
     $('#body_type option[value="' + profile.body_type + '"]').prop("selected", true);
     $('#eyes option[value="' + profile.eyes + '"]').prop("selected", true);
@@ -246,6 +254,7 @@ $(function () {
     $('#hair option[value="' + profile.hair + '"]').prop("selected", true);
     $('#highest_school_level option[value="' + profile.highest_school_level + '"]').prop("selected", true);
     $('#occupation option[value="' + profile.occupation + '"]').prop("selected", true);
+
     /*
         $('#country').on('change', function () { // Important! Do not use lambda notation
           if ($(this).val() == 'US') {
