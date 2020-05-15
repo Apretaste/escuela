@@ -603,7 +603,7 @@ class Service
 
 		if ($profile)
 		{
-			$person = Database::query("SELECT date_of_birth FROM person WHERE id = {$request->person->id}");
+			$person = Database::query("SELECT date_of_birth FROM person WHERE id = {$request->person->id}")[0];
 			$profile->date_of_birth = $person->date_of_birth;
 		}
 
