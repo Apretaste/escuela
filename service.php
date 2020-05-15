@@ -474,9 +474,9 @@ class Service
 			return;
 		}
 
-		$course_id = intval($feed[0]);
-		$feedback_id = intval($feed[1]);
-		$answer = trim(strtolower(($feed[2])));
+		$course_id = (int)$feed[0];
+		$feedback_id = (int)$feed[1];
+		$answer = strtolower(trim(($feed[2])));
 
 		$course = $this->getCourse($course_id, $request->person->id);
 
@@ -580,7 +580,7 @@ class Service
 					$value = DateTime::createFromFormat('d/m/Y', $value)->format('Y-m-d');
 				}
 
-				if (in_array($key, $fields)) {
+				if (in_array($key, $fields, true)) {
 					$pieces[] = "$key='$value'";
 				}
 			}
@@ -590,12 +590,23 @@ class Service
 				self::query('UPDATE person SET ' . implode(',', $pieces) . " WHERE id={$request->person->id}");
 			}
 
+
+			self::query("UPDATE person SET year_of_birth = YEAR(date_of_birth), month_of_birth = MONTH(date_of_birth), day_of_birth = DAY(date_of_birth) WHERE id={$request->person->id}");
+
 			return;
 		}
 
 		// show profile
 		$resume = $this->getResume($request->person->id);
+
 		$profile = Person::find($request->person->id);
+
+		if ($profile)
+		{
+			$person = Database::query("SELECT date_of_birth FROM person WHERE id = {$request->person->id}");
+			$profile->date_of_birth = $person->date_of_birth;
+		}
+
 		$profile->level = 'PRINCIPIANTE';
 		$r = self::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
 		if (!isset($r[0])) {
