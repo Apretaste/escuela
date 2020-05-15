@@ -591,7 +591,7 @@ class Service
 			}
 
 
-			self::query("UPDATE person SET year_of_birth = YEAR(date_of_birth), month_of_birth = MONTH(date_of_birth), day_of_birth = DAY(date_of_birth) WHERE id={$request->person->id}");
+			self::query("UPDATE person SET year_of_birth = YEAR(date_of_birth), month_of_birth = MONTH(date_of_birth), day_of_birth = DAY(date_of_birth) + 1 WHERE id={$request->person->id}");
 
 			return;
 		}
