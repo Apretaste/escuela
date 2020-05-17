@@ -531,17 +531,8 @@ class Service
 		// load the test again
 		$this->_curso($request, $response);
 
-		// change response content
-		//TODO: improve this feature in the core
-		$data = $response->json;
-		if (is_string($data))
-			$data = @json_decode($data);
-
-		$data = (object) $data;
-
-		if (isset($data->course)) {
-			$data->course->repeated = true;
-			$response->json = json_encode($data, JSON_UNESCAPED_UNICODE);
+		if (isset($response->json->course)) {
+			$response->json->course->repeated = true;
 		}
 	}
 
