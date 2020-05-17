@@ -533,17 +533,15 @@ class Service
 
 		// change response content
 		//TODO: improve this feature in the core
-		$data = @json_decode($response->json);
+		$data = $response->json;
+		if (is_string($data))
+			$data = @json_decode($data);
 
-		if (is_array($data)) {
-			$data = (object)$data;
-		}
+		$data = (object) $data;
 
-		if (!is_object($data)) {
-			if (isset($data->course)) {
-				$data->course->repeated = true;
-				$response->json = json_encode($data, JSON_UNESCAPED_UNICODE);
-			}
+		if (isset($data->course)) {
+			$data->course->repeated = true;
+			$response->json = json_encode($data, JSON_UNESCAPED_UNICODE);
 		}
 	}
 
