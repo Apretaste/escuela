@@ -289,10 +289,17 @@ class Service
 		$course = $this->getCourse($chapter->course, $request->person->id);
 
 		if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
-			Challenges::complete('complete-course', $request->person->id);
 
-			// add the experience if profile is completed
-			Level::setExperience('FINISH_COURSE', $request->person->id);
+			$times = (int) Database::query("select count(*) as t from  _escuela_completed_course where person = {$request->person->id} and course = {$chapter->course}")[0]->times;
+
+			if ($times === 0) {
+				Challenges::complete('complete-course', $request->person->id);
+
+				// add the experience if profile is completed
+				Level::setExperience('FINISH_COURSE', $request->person->id);
+			}
+
+			Database::query("INSERT INTO _escuela_completed_course (person, course) VALUES ({$request->person->id}, {$chapter->course});");
 		}
 
 		// create content for the view
