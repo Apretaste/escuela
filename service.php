@@ -290,7 +290,7 @@ class Service
 
 		if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
 
-			$times = (int) Database::query("select count(*) as t from  _escuela_completed_course where person = {$request->person->id} and course = {$chapter->course}")[0]->times;
+			$times = (int) Database::query("select count(*) as t from  _escuela_completed_course where person = {$request->person->id} and course = {$chapter->course}")[0]->t;
 
 			if ($times === 0) {
 				Challenges::complete('complete-course', $request->person->id);
