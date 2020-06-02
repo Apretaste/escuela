@@ -1,8 +1,9 @@
 {
 	"name": "escuela",
-	"version": "13",
 	"description": "Ofrece una gama de cursos practicos de diferentes especialidades con pruebas finales y diplomas.",
 	"category": "academico",
 	"creator": "salvi@apretaste.org",
-	"listed": true
+	"listed": true,
+	"guest": true,
+	"caption": "Escuela"
 }
