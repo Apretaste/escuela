@@ -36,64 +36,42 @@
                     <input type="text" class="datepicker" id="date_of_birth">
                     <label for="date_of_birth">Cumpleaños</label>
                 </div>
+
+                <!-- HIGHEST SCHOOL LEVEL-->
                 <div class="input-field col s12 m6">
-                    <select id="highest_school_level">
-                        <option value="" disabled selected></option>
-                        <option value="PRIMARIO">Primario</option>
-                        <option value="SECUNDARIO">Secundario</option>
-                        <option value="TECNICO">T&eacute;cnico</option>
-                        <option value="UNIVERSITARIO">Universitario</option>
-                        <option value="POSTGRADUADO">Postgraduado</option>
-                        <option value="DOCTORADO">Doctorado</option>
-                        <option value="OTRO">Otro</option>
+                    <select id="highest_school_level" class="validate">
+                        <option value=""></option>
+                        <% Object.keys(education).forEach(function(key){ %>
+                            <% var selected = key==profile.education ? 'selected' : '' %>
+                            <option <%= selected %> value="<%= key %>"><%= education[key] %></option>
+                        <% }) %>
                     </select>
-                    <label>Nivel educativo</label>
+                    <label for="highest_school_level">Nivel Educativo</label>
                 </div>
+
+                <!-- OCCUPATION -->
                 <div class="input-field col s12 m6">
-                    <select id="occupation">
-                        <option value="" disabled selected></option>
-                        <option value="TRABAJADOR ESTATAL">Trabajador estatal</option>
-                        <option value="CUENTAPROPISTA">Cuentapropista</option>
-                        <option value="ESTUDIANTE">Estudiante</option>
-                        <option value="AMA DE CASA">Ama de casa</option>
-                        <option value="DESEMPLEADO">Desempleado</option>
-                        <option value="OTRO">Otro</option>
+                    <select id="occupation" class="validate">
+                        <option value=""></option>
+                        <% Object.keys(occupation).forEach(function(key){ %>
+                            <% var selected = key==profile.occupation ? 'selected' : '' %>
+                            <option <%= selected %> value="<%= key %>"><%= occupation[key] %></option>
+                        <% }) %>
                     </select>
-                    <label>Ocupación</label>
+                    <label for="occupation">Ocupación</label>
                 </div>
-                <!--
+
+                <!-- PROVINCE-->
                 <div class="input-field col s12 m6">
-                    <select id="country" class="input">
-                        <option value="" disabled selected></option>
-                        <option value="CU">Cuba</option>
-                        <option value="US">Estados Unidos</option>
-                        <option value="ES">España</option>
-                        <option value="IT">Italia</option>
-                        <option value="MX">Mexico</option>
-                        <option value="BR">Brasil</option>
-                        <option value="EC">Ecuador</option>
-                        <option value="CA">Canada</option>
-                        <option value="VE">Venezuela</option>
-                        <option value="AL">Alemania</option>
-                        <option value="CO">Colombia</option>
-                        <option value="OTRO">Otro</option>
+                    <select id="province" class="validate">
+                        <option value=""></option>
+                        <% Object.keys(provinces).forEach(function(key){ %>
+                            <% var selected = key==profile.provinceCode ? 'selected' : '' %>
+                            <option <%= selected %> value="<%= key %>"><%= provinces[key] %></option>
+                        <% }) %>
                     </select>
-                    <label>País</label>
+                    <label for="province">Provincia</label>
                 </div>
-                -->
-                <div id="province-section" class="input-field col s12 m6">
-                    <select id="province" class="input">
-                        <option value="" disabled selected></option>
-                    </select>
-                    <label>Provincia</label>
-                </div>
-                <!--
-                <div id="usstate-section" class="input-field col s12 m6">
-                    <select id="usstate" class="input">
-                        <option value="" disabled selected></option>
-                    </select>
-                    <label>Estado</label>
-                </div>-->
             </div>
         </form>
     </div>

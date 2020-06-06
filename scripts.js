@@ -1,5 +1,42 @@
 "use strict";
 
+var education = {
+	'PRIMARIO': 'Primario',
+	'SECUNDARIO': 'Secundario',
+	'TECNICO': 'Técnico',
+	'UNIVERSITARIO': 'Universitario',
+	'POSTGRADUADO': 'Postgraduado',
+	'DOCTORADO': 'Doctorado',
+	'OTRO': 'Otro'
+};
+var occupation = {
+	'AMA_DE_CASA': 'Ama de casa',
+	'ESTUDIANTE': 'Estudiante',
+	'EMPLEADO_PRIVADO': 'Empleado Privado',
+	'EMPLEADO_ESTATAL': 'Empleado Estatal',
+	'INDEPENDIENTE': 'Trabajador Independiente',
+	'JUBILADO': 'Jubilado',
+	'DESEMPLEADO': 'Desempleado'
+};
+var provinces = {
+	'PINAR_DEL_RIO': 'Pinar del Río',
+	'LA_HABANA': 'La Habana',
+	'ARTEMISA': 'Artemisa',
+	'MAYABEQUE': 'Mayabeque',
+	'MATANZAS': 'Matanzas',
+	'VILLA_CLARA': 'Villa Clara',
+	'CIENFUEGOS': 'Cienfuegos',
+	'SANCTI_SPIRITUS': 'Sancti Spiritus',
+	'CIEGO_DE_AVILA': 'Ciego de Ávila',
+	'CAMAGUEY': 'Camagüey',
+	'LAS_TUNAS': 'Las Tunas',
+	'HOLGUIN': 'Holguín',
+	'GRANMA': 'Granma',
+	'SANTIAGO_DE_CUBA': 'Santiago de Cuba',
+	'GUANTANAMO': 'Guantánamo',
+	'ISLA_DE_LA_JUVENTUD': 'Isla de la Juventud'
+};
+
 function formatDate(dateStr) {
 	var months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 	var date = new Date(dateStr);
@@ -29,7 +66,7 @@ function jsUcfirst(string) {
 $(function () {
 	// after render
 	$(".link").attr('href', '#!');
-	$(".link-simple").click(function(){
+	$(".link-simple").click(function () {
 		var q = null;
 		eval('q = ' + $(this).attr('data-query'));
 		apretaste.send({
@@ -225,10 +262,10 @@ $(function () {
 		$('#religion option[value="' + profile.religion + '"]').prop("selected", true);
 
 		if (typeof profile.country !== "undefined")
-		$('#country option[value="' + profile.country.toUpperCase() + '"]').prop("selected", true);
+			$('#country option[value="' + profile.country.toUpperCase() + '"]').prop("selected", true);
 
 		if (typeof province.country !== "undefined")
-		$('#province option[value="' + profile.province.toUpperCase().replace(/\s/g, '_') + '"]').prop("selected", true);
+			$('#province option[value="' + profile.province.toUpperCase().replace(/\s/g, '_') + '"]').prop("selected", true);
 
 		$('#usstate option[value="' + profile.usstate + '"]').prop("selected", true);
 		$('#body_type option[value="' + profile.body_type + '"]').prop("selected", true);
@@ -322,7 +359,7 @@ $(function () {
 		});
 		$("#rate-stars").hide();
 	});
-}); 
+});
 
 // submit a test once completed
 function submitTest() {
@@ -344,7 +381,7 @@ function submitTest() {
 	} else {
 		M.toast({
 			html: 'Enviando sus respuestas...'
-		}); 
+		});
 
 		// send information to the backend
 		apretaste.send({
@@ -364,7 +401,7 @@ function submitTest() {
 function testSent(data) {
 	M.toast({
 		html: 'Prueba enviada satisfactoriamente'
-	}); 
+	});
 
 	// display the DONE message
 	$('#list').hide();
