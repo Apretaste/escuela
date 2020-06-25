@@ -354,8 +354,10 @@ class Service
 		}
 
 		if ($course !== null) {
+			$courseAfter = $this->getCourse($course->id);
+
 			// si esta terminado el curso y fue terminado ahora
-			if ($course->terminated && $affectedRows === count($answers)) {
+			if (!$course->terminated && $courseAfter->terminated && $affectedRows === count($answers)) {
 				Challenges::complete('complete-course', $request->person->id);
 
 				// add the experience if profile is completed
