@@ -1,87 +1,104 @@
 @font-face {
-	font-family: 'Roboto';
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-	src: local('Roboto'), local('Roboto-Regular'), url("{{APP_SERVICE_PATH}}/resources/Roboto-Regular.ttf") format("truetype");
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local('Roboto'), local('Roboto-Regular'), url("{{APP_SERVICE_PATH}}/resources/Roboto-Regular.ttf") format("truetype");
 }
 
 @font-face {
-	font-family: 'Roboto';
-	font-style: normal;
-	font-weight: 700;
-	font-display: swap;
-	src: local('Roboto Bold'), local('Roboto-Bold'), url("{{APP_SERVICE_PATH}}/resources/Roboto-Bold.ttf") format("truetype");
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: local('Roboto Bold'), local('Roboto-Bold'), url("{{APP_SERVICE_PATH}}/resources/Roboto-Bold.ttf") format("truetype");
 }
 
-html{
-	font-size: 16px;
-	font-family: 'Roboto', sans-serif;
+html {
+    font-size: 16px;
+    font-family: 'Roboto', sans-serif;
 }
 
-h1{
-	font-size: 32px;
+h1 {
+    font-size: 32px;
 }
 
 .space5 {
-	margin: 10px 0px !important;
+    margin: 10px 0px !important;
 }
 
 .border {
-	border: 1px solid red;
+    border: 1px solid red;
 }
 
-@media (min-width: 601px){
-	.card-content {
-		height: 210px;
-	}
+@media (min-width: 601px) {
+    .card-content {
+        height: 210px;
+    }
 }
 
-@media (max-width: 440px){
-	#medal-icon{
-		font-size: 3.4rem;
-	}
+@media (max-width: 440px) {
+    #medal-icon {
+        font-size: 3.4rem;
+    }
 }
 
-tr:last-child{
-	border-bottom: none;
+tr:last-child {
+    border-bottom: none;
 }
 
-.card-content{
-	padding-bottom: 7px !important;
+.card-content {
+    padding-bottom: 7px !important;
 }
 
 nav {
-	background-color: white;
+    background-color: white;
 }
 
 nav.nav-center ul {
-	text-align: center;
-}
-nav.nav-center ul li {
-	display: inline;
-	float: none;
-}
-nav.nav-center ul li a {
-	display: inline-block;
+    text-align: center;
 }
 
-@media (max-width: 600px){
-	.btn.tiny{
-		height: 28px;
-		line-height: 28px;
-		padding: 0 12px;
-	}
-	
-	.btn.tiny i.left{
-		margin-right: 10px;
-	}
-	
-	.btn.tiny i.right{
-		margin-left: 10px;
-	}
+nav.nav-center ul li {
+    display: inline;
+    float: none;
+}
+
+nav.nav-center ul li a {
+    display: inline-block;
+}
+
+@media (max-width: 600px) {
+    .btn.tiny {
+        height: 28px;
+        line-height: 28px;
+        padding: 0 12px;
+    }
+
+    .btn.tiny i.left {
+        margin-right: 10px;
+    }
+
+    .btn.tiny i.right {
+        margin-left: 10px;
+    }
 }
 
 img {
     max-width: 100%;
+}
+
+.middle-center {
+    padding: 150px 40px 0px 40px;
+}
+
+.chip.tiny {
+    height: 20px;
+    padding: 0 10px;
+    line-height: 20px;
+    font-size: x-small;
+}
+
+.chip.tiny .icon {
+    line-height: 20px;
 }

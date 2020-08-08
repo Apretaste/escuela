@@ -29,8 +29,56 @@ class Service
 		$person = Person::find($person_id);
 		$this->setLevel($request);
 
-		// get the most popular courses
-		$courses = Database::query("
+		$where = '';
+		$data = [];
+		if (isset($request->input->data->query)) {
+			$data = $request->input->data->query;
+			if (isset($data->category)
+				|| isset($data->author)
+				|| isset($data->raiting)
+				|| isset($data->title)
+			) {
+				$where = ' ';
+				if (isset($data->category)) {
+					if ($data->category !== 'ALL') {
+						$where .= " AND category = '{$data->category}'";
+					}
+				}
+				if (isset($data->author)) {
+					if ($data->author !== 'ALL') {
+						$where .= " AND teacher = '{$data->author}'";
+					}
+				}
+				if (isset($data->raiting)) {
+					if ($data->raiting !== '0') {
+						$where .= " AND stars >= '{$data->raiting}'";
+					}
+				}
+				if (isset($data->title)) {
+					if ($data->title !== '') {
+						$where .= " AND title LIKE '%{$data->title}%'";
+					}
+				}
+			}
+		}
+
+		$courses = [];
+		if (!empty(trim($where))) {
+			$courses = Database::query("
+				SELECT * FROM (
+				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
+				COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
+				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '{$request->person->id}') as answers_choosen
+				FROM _escuela_course A
+				JOIN _escuela_teacher B
+				ON A.teacher = B.id
+				WHERE A.active = 1) subq
+				WHERE 1 $where ORDER BY popularity DESC LIMIT 10");
+		} else {
+			// get the most popular courses
+			$courses = Database::query("
 			SELECT * FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
@@ -48,6 +96,7 @@ class Service
 				WHERE viewed < chapters - tests or answers_choosen < questions -- no se han visto todos, no se ha respondido todas
 				ORDER BY viewed/nullif(chapters,0) desc,  answers_choosen/nullif(answers,0) desc, popularity DESC
 			LIMIT 10");
+		}
 
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
@@ -57,7 +106,7 @@ class Service
 			$c->content = htmlspecialchars($c->content);
 			$c->professor = htmlspecialchars($c->professor);
 			$c->author = $c->professor;
-			$c->stars = (int) $c->stars;
+			$c->stars = (int)$c->stars;
 			$courses[$k] = $c;
 		}
 
@@ -75,7 +124,27 @@ class Service
 			'courses' => $courses,
 			'name' => $person->firstName ? $person->firstName : '',
 			'level' => $level,
-			'completed' => $this->getTotalCompletedCourses($person_id)
+			'completed' => $this->getTotalCompletedCourses($person_id),
+
+			'categories' => [
+				'ALL' => 'Todas',
+				'SOCIEDAD' => 'Sociedad',
+				'NEGOCIOS' => 'Negocios',
+				'MEDICINA' => 'Medicina',
+				'INFORMATICA' => html_entity_decode('Inform&aacute;tica'),
+				'INGENIERIA' => html_entity_decode('Ingenier&iacute;a'),
+				'LETRAS' => 'Letras',
+				'ARTES' => 'Artes',
+				'FILOSOFIA' => html_entity_decode('Filosof&iacute;a'),
+				'SALUD' => 'Salud',
+				'POLITICA' => html_entity_decode('Pol&iacute;tica'),
+				'TECNICA' => html_entity_decode('T&eacute;cnica'),
+				'OTRO' => 'Otros',
+			],
+			'authors' => $this->getTeachers(),
+			'data' => $data,
+			'max_stars' => 5,
+			'title' => 'Abiertos'
 		];
 
 		// setup response
@@ -240,7 +309,7 @@ class Service
 	 */
 	public function _capitulo(Request $request, Response &$response)
 	{
-		$id = (int) $request->input->data->query;
+		$id = (int)$request->input->data->query;
 		$chapter = $this->getChapter($id, $request->person->id);
 
 		$this->setFontFiles();
@@ -274,7 +343,7 @@ class Service
 
 		if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
 
-			$times = (int) Database::query("select count(*) as t from  _escuela_completed_course where person = {$request->person->id} and course = {$chapter->course}")[0]->t;
+			$times = (int)Database::query("select count(*) as t from  _escuela_completed_course where person = {$request->person->id} and course = {$chapter->course}")[0]->t;
 
 			if ($times === 0) { // si nunca lo ha terminado
 				Challenges::complete('complete-course', $request->person->id);
@@ -473,8 +542,8 @@ class Service
 			return;
 		}
 
-		$course_id = (int) $feed[0];
-		$feedback_id = (int) $feed[1];
+		$course_id = (int)$feed[0];
+		$feedback_id = (int)$feed[1];
 		$answer = strtolower(trim(($feed[2])));
 
 		$course = $this->getCourse($course_id, $request->person->id);
@@ -533,89 +602,6 @@ class Service
 		if (isset($response->json->course)) {
 			$response->json->course->repeated = true;
 		}
-	}
-
-	/**
-	 * Perfil de escuela
-	 *
-	 * @param Request $request
-	 * @param Response $response
-	 *
-	 * @throws Alert
-	 */
-	public function _perfil(Request $request, Response &$response)
-	{
-
-		// save profile
-		if (isset($request->input->data->save)) {
-			$fields = [
-				'first_name',
-				'last_name',
-				'date_of_birth',
-				'gender',
-				'province',
-				'city',
-				'highest_school_level',
-				'occupation',
-				'country',
-				'usstate',
-			];
-
-			// get the JSON with the bulk
-			$pieces = [];
-			foreach ($request->input->data->query as $key => $value) {
-				if ($key === 'date_of_birth') {
-					$value = DateTime::createFromFormat('d/m/Y', $value)->format('Y-m-d');
-				}
-
-				if (in_array($key, $fields, true)) {
-					$pieces[] = "$key='$value'";
-				}
-			}
-
-			// save changes on the database
-			if (!empty($pieces)) {
-				Database::query('UPDATE person SET ' . implode(',', $pieces) . " WHERE id={$request->person->id}");
-			}
-
-
-			Database::query("UPDATE person SET year_of_birth = YEAR(date_of_birth), month_of_birth = MONTH(date_of_birth), day_of_birth = DAY(date_of_birth) + 1 WHERE id={$request->person->id}");
-
-			return;
-		}
-
-		// show profile
-		$resume = $this->getResume($request->person->id);
-
-		$profile = Person::find($request->person->id);
-
-		if ($profile) {
-			$person = Database::query("SELECT date_of_birth FROM person WHERE id = {$request->person->id}")[0];
-			$profile->date_of_birth = $person->date_of_birth;
-		}
-
-		$profile->level = 'PRINCIPIANTE';
-		$r = Database::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
-		if (!isset($r[0])) {
-			Database::query("INSERT INTO _escuela_profile (person_id, level) VALUES ('{$request->person->id}','PRINCIPIANTE');");
-		} else {
-			$profile->level = $r[0]->level;
-		}
-
-		$r = Database::query("SELECT COLUMN_TYPE AS result
-				FROM information_schema.COLUMNS
-				WHERE TABLE_NAME = '_escuela_profile'
-							AND COLUMN_NAME = 'level';");
-
-		$this->setFontFiles();
-
-		$levels = explode(',', str_replace(["'", 'enum(', ')'], '', $r[0]->result));
-		$response->setLayout('escuela.ejs');
-		$response->setTemplate('profile.ejs', [
-			'resume' => $resume,
-			'profile' => $profile,
-			'levels' => $levels,
-		], [], $this->files);
 	}
 
 	/**
@@ -1185,20 +1171,20 @@ class Service
 	public function _example(Request $request, Response $response)
 	{
 		$response->setTemplate('chapter2.ejs', [
-		  'chapter' => (object) [
-			'title' => 'Ejemplo de capitulo',
-			'content' => [
-			  (object) [
-				'template' => '<p id="<%= id %>"><%= text %></p>',
-				'script' => '$("#<%= id %>").click(function() {alert(1);});',
-				'style' => '#<%= id %> {background: red;}',
-				'data' => (object) [
-				  'id' => 'parrafo1',
-				  'text' => 'tremendo texto'
+			'chapter' => (object)[
+				'title' => 'Ejemplo de capitulo',
+				'content' => [
+					(object)[
+						'template' => '<p id="<%= id %>"><%= text %></p>',
+						'script' => '$("#<%= id %>").click(function() {alert(1);});',
+						'style' => '#<%= id %> {background: red;}',
+						'data' => (object)[
+							'id' => 'parrafo1',
+							'text' => 'tremendo texto'
+						]
+					]
 				]
-			  ]
 			]
-		  ]
 		]);
 	}
 }
