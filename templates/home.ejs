@@ -80,7 +80,7 @@
     <div class="modal-content" style="margin-bottom: 3rem">
         <h1>Buscar</h1>
         <form class="row" style="margin-bottom: 0;">
-            <div class="input-field col s4 x12">
+            <div class="input-field col s12">
                 <select id="category" class="input">
                     <% for (var value in categories) { %>
                         <option value="<%= value %>"><%= categories[value] %></option>
@@ -89,7 +89,7 @@
                 <label for="category">Categor&iacute;a</label>
             </div>
 
-            <div class="input-field col s4 x12">
+            <div class="input-field col s12">
                 <select id="author">
                     <option value="ALL">Todos</option>
                     <% authors.forEach(function(author){ %>
@@ -98,7 +98,7 @@
                 </select>
                 <label for="author">Autor:</label>
             </div>
-            <div class="input-field col s4 x12">
+            <div class="input-field col s12">
                 <select id="raiting">
                     <option value="0">Todos</option>
                     <option value="1">1+</option>
