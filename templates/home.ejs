@@ -50,15 +50,6 @@
                             <i class="material-icons">star_border</i>
                         <% } %>
                     </p>
-
-                    <% if(item.preview) { %>
-                        <ul class="collection one-line preview" onclick="apretaste.send({command:'BAREBONE ARTICLE'})">
-                            <li class="collection-item avatar">
-                                <i class="fas fa-<%= item.preview.icon %> material-icons circle"></i>
-                                <span class="title"><%= item.preview.text %></span>
-                            </li>
-                        </ul>
-                    <% } %>
                 </div>
 
                 <div class="card-reveal">
