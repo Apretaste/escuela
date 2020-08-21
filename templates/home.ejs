@@ -26,19 +26,19 @@
     <% courses.forEach(function(e, i) { %>
         <div class="col s12 m6">
             <div class="card">
-                <div class="card-content">
-                    <div class="card-person grey lighten-5">
-                        <span class="chip tiny clear right">
+                <div class="card-person grey lighten-5">
+                        <span class="chip tiny clear">
                             <i class="fa fa-user"></i>
                             <%= e.professor %>
                         </span>
-                        <span class="chip tiny clear right">
+                    <span class="chip tiny clear">
                             <i class="fa fa-tag"></i>
-                            <% if (e.category != null){ %>
+                        <% if (e.category != null){ %>
                             <a href="#" onclick="apretaste.send({command: 'ESCUELA', data:{category: courses[<%= i %>].category}});"><%= jsUcfirst(e.category.toLowerCase()) %></a>
-                            <% } %>
-                        </span>
-                    </div>
+                        <% } %>
+                    </span>
+                </div>
+                <div class="card-content">
                     <span class="card-title"><%= e.title %></span>
                     <div class="progress">
                         <div class="determinate" style="width: <%= e.progress %>%"></div>
