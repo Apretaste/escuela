@@ -144,7 +144,7 @@ class Service
 			'authors' => $this->getTeachers(),
 			'data' => $data,
 			'max_stars' => 5,
-			'title' => 'Abiertos'
+			'title' => 'Cursos'
 		];
 
 		// setup response
