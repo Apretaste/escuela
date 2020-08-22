@@ -1,20 +1,20 @@
-<div class="row">
-    <div class="col s12">
-        <% if (course.repeated) { %>
-        <table width="100%" class="stripped highlight">
-            <tr>
-                <td align="center" bgcolor="#F6CED8">
-                    <p>
-                        <small>Hemos creado nuevas pruebas para que retomes este curso. Pasa todas las
-                            pruebas nuevamente; puedes leerte de nuevo el contenido de ser necesario.
-                        </small>
-                    </p>
-                </td>
-            </tr>
-        </table>
-        <% } %>
+<% if (course.repeated) { %>
+    <div class="row">
+        <div class="col s12">
+            <table width="100%" class="stripped highlight">
+                <tr>
+                    <td align="center" bgcolor="#F6CED8">
+                        <p>
+                            <small>Hemos creado nuevas pruebas para que retomes este curso. Pasa todas las
+                                pruebas nuevamente; puedes leerte de nuevo el contenido de ser necesario.
+                            </small>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
-</div>
+<% } %>
 <% if (course.progress == 100 && course.calification >= 80) { %>
 <div class="row">
     <div class="col s12 center-align">
@@ -50,9 +50,7 @@
 
 <div class="row">
     <div class="col s12">
-
         <h2>&Iacute;ndice del curso</h2>
-
         <table width="100%">
             <% course.chapters.forEach(function(chapter){ %>
             <tr>
@@ -76,12 +74,19 @@
         </table>
     </div>
 </div>
-<br>
-<br>
-<% if (course.calification < 80) { %>
-	<% if (course.all_chapters_finished) { %>
-		<div class="fixed-action-btn">
-        	<a href="#!" class="btn-floating btn-large waves-effect waves-light link link-simple" data-command="ESCUELA REPETIR" data-query="<%= course.id %>"><i class="material-icons">replay</i></a>
-		</div>
-	<% } %>
-<% } %>
+
+<div class="bottom-space"></div>
+
+<!-- BUTTON -->
+<div id="btn" class="fixed-action-btn">
+    <% if (course.calification < 80) { %>
+        <% if (course.all_chapters_finished) { %>
+            <a href="#!" class="btn-floating btn-large waves-effect waves-light link link-simple second" data-command="ESCUELA REPETIR" data-query="<%= course.id %>">
+                <i class="material-icons">replay</i>
+            </a>
+        <% } %>
+    <% } %>
+    <a class="btn-floating waves-effect waves-light grey " href="#!" onclick="apretaste.back()">
+        <i class="material-icons">arrow_back</i>
+    </a>
+</div>

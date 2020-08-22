@@ -292,7 +292,7 @@ class Service
 		$this->setFontFiles();
 
 		// display the course
-		$response->setLayout('escuela.ejs');
+		//$response->setLayout('escuela.ejs');
 		$response->setTemplate('course.ejs', ['course' => $course], [], $this->files);
 	}
 

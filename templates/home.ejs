@@ -8,21 +8,15 @@
             </div>
         <% } %>
 
-        <% if (completed == 0) { %>
-            <!-- si no esta registrado en ningun curso debe decir ... -->
-            <% if (courses.length > 0){ %>
-                <span>Escoja un curso para empezar a estudiar, ganar niveles y medallas.</span>
-            <% } else { %>
-                <p class="middle-center center-align">No se encontraron cursos.</p>
-            <% } %>
-        <% } else { %>
-            <p>Usted ha completado <%= completed %> cursos y tiene <b><%= level %></b></p>
-            <p>A continuaci&oacute;n sus cursos empezados.</p>
-        <% } %>
     </div>
 </div>
 
 <div class="row">
+    <% if (courses.length == 0){ %>
+        <div class="col s12 center">
+            <p class="middle-center grey-text">¡Wow! No te queda ningún curso por leer. Espera unos días mientras ponemos más cursos</p>
+        </div>
+    <% } %>
     <% courses.forEach(function(e, i) { %>
         <div class="col s12 m6">
             <div class="card">
