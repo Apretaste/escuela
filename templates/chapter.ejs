@@ -43,13 +43,7 @@
         </div>
     </div>
 
-    <% if (!chapter.terminated) { %>
-        <div class="row left-align" style="margin-bottom: 0;">
-            <!-- SAVE BUTTON -->
-            <div class="col s12"><a class="btn-floating btn-large waves-effect waves-light" href="#!"
-                                    onclick="submitTest()"><i class="material-icons">send</i></a></div>
-        </div>
-    <% } %>
+
 <% } %>
 
 <div class="bottom-space"></div>
@@ -59,7 +53,7 @@
     <% var showBefore = false; %>
 
     <% function secondButton() { %>
-        <a class="btn-floating waves-effect waves-light grey second" href="#!" onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: '<%= chapter.course %>'}})">
+        <a class="btn-floating btn-small waves-effect waves-light grey second" href="#!" onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: '<%= chapter.course %>'}})">
             <i class="material-icons">format_list_numbered</i>
         </a>
     <% } %>
@@ -79,7 +73,7 @@
     <% if (!showAfter) secondButton(); %>
 
     <% if (showBefore) { %>
-        <a class="btn-floating waves-effect waves-light <% if (showAfter) { %> grey third <% } else { %> green <% } %>" href="#!" onclick="apretaste.send({command: 'ESCUELA <%= before.xtype %>', data: {query: '<%= before.id %>'}});">
+        <a class="btn-floating waves-effect waves-light <% if (showAfter) { %> grey third btn-small <% } else { %> green <% } %>" href="#!" onclick="apretaste.send({command: 'ESCUELA <%= before.xtype %>', data: {query: '<%= before.id %>'}});">
             <i class="material-icons">arrow_back</i>
         </a>
     <% } %>
@@ -87,8 +81,17 @@
     <% if (showAfter) secondButton(); %>
 
     <% if (showAfter) { %>
-        <a href="#!" class="btn-floating waves-effect waves-light green" onclick="apretaste.send({command: 'ESCUELA <%= after.xtype %>', data:{query: '<%= after.id %>'}});">
+        <a href="#!" class="btn-floating btn-large waves-effect waves-light green" onclick="apretaste.send({command: 'ESCUELA <%= after.xtype %>', data:{query: '<%= after.id %>'}});">
             <i class="material-icons">arrow_forward</i>
         </a>
+    <% } %>
+
+    <% if (chapter.xtype == 'PRUEBA') { %>
+        <% if (!chapter.terminated) { %>
+            <!-- SAVE BUTTON -->
+            <a class="btn-floating btn-large waves-effect waves-light" href="#!" onclick="submitTest()">
+                <i class="material-icons">check</i>
+            </a>
+        <% } %>
     <% } %>
 </div>
