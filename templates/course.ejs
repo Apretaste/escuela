@@ -34,42 +34,37 @@
 <div class="row">
     <div class="col s12">
         <h1><%= course.title %></h1>
-            <div class="progress">
-                <div class="determinate" style="width: <%= course.progress %>%"></div>
-            </div>
-            <div class="row">
-                <div class="col s2 l1">
-                     <i class="material-icons medium" id="medal-icon"><%= course.medal %></i>
-                </div>
-                <div class="col s10 l11">
-                    <%= course.content %>
-                </div>
-            </div>
+        <div class="progress">
+            <div class="determinate" style="width: <%= course.progress %>%"></div>
+        </div>
     </div>
-</div>
-
-<div class="row">
+    <div class="col s2 l1">
+        <i class="material-icons medium" id="medal-icon"><%= course.medal %></i>
+    </div>
+    <div class="col s10 l11">
+        <%= course.content %>
+    </div>
     <div class="col s12">
         <h2>&Iacute;ndice del curso</h2>
         <table width="100%">
             <% course.chapters.forEach(function(chapter){ %>
-            <tr>
-                <td>
-                    <a href="#!" class="link link-simple" data-command="ESCUELA <%= chapter.xtype %>"
-                       data-query="<%= chapter.id %>"><%= chapter.title %></a>
-                </td>
-                <td align="right" style="text-align:right; white-space: nowrap;">
-                    <% if (chapter.xtype == 'CAPITULO') { %>
-                    <% if (chapter.terminated) { %>
-                    <i class="material-icons">check_box</i>
-                    <% } else { %>
-                    <i class="material-icons">check_box_outline_blank</i>
-                    <% } %>
-                    <% } else { %>
-                    <%= chapter.calification %>/100 puntos
-                    <% } %>
-                </td>
-            </tr>
+                <tr>
+                    <td>
+                        <a href="#!" class="link link-simple" data-command="ESCUELA <%= chapter.xtype %>"
+                           data-query="<%= chapter.id %>"><%= chapter.title %></a>
+                    </td>
+                    <td align="right" style="text-align:right; white-space: nowrap;">
+                        <% if (chapter.xtype == 'CAPITULO') { %>
+                            <% if (chapter.terminated) { %>
+                                <i class="material-icons">check_box</i>
+                            <% } else { %>
+                                <i class="material-icons">check_box_outline_blank</i>
+                            <% } %>
+                        <% } else { %>
+                            <%= chapter.calification %>/100 puntos
+                        <% } %>
+                    </td>
+                </tr>
             <% }) %>
         </table>
     </div>
