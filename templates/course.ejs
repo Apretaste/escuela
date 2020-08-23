@@ -76,12 +76,12 @@
 <div id="btn" class="fixed-action-btn">
     <% if (course.calification < 80) { %>
         <% if (course.all_chapters_finished) { %>
-            <a href="#!" class="btn-floating btn-large waves-effect waves-light link link-simple second" data-command="ESCUELA REPETIR" data-query="<%= course.id %>">
+            <a href="#!" class="btn-floating btn-small waves-effect waves-light second gray" onclick="apretaste.send({command: 'ESCUELA REPEIR', data: {query: '<%= course.id %>'}})">
                 <i class="material-icons">replay</i>
             </a>
         <% } %>
     <% } %>
-    <a class="btn-floating waves-effect waves-light " href="#!" onclick="apretaste.back()">
+    <a class="btn-floating waves-effect waves-light btn-large green" href="#!" onclick="apretaste.back()">
         <i class="material-icons">arrow_back</i>
     </a>
 </div>
