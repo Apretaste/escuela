@@ -78,7 +78,7 @@
         <% showBefore = true; %>
     <% } %>
 
-    <% if (!showAfter) secondButton(); %>
+    <% if (!showAfter && !showCheck) secondButton(); %>
 
     <% if (showBefore) { %>
         <a class="btn-floating waves-effect waves-light <% if (showAfter || showCheck) { %> grey third btn-small <% } else { %> green <% } %>" href="#!" onclick="apretaste.send({command: 'ESCUELA <%= before.xtype %>', data: {query: '<%= before.id %>'}});">
@@ -86,7 +86,7 @@
         </a>
     <% } %>
 
-    <% if (showAfter) secondButton(); %>
+    <% if (showAfter || showCheck) secondButton(); %>
 
     <% if (showAfter) { %>
         <a href="#!" class="btn-floating btn-large waves-effect waves-light green <% if (showCheck) { %> second <% } %>" onclick="apretaste.send({command: 'ESCUELA <%= after.xtype %>', data:{query: '<%= after.id %>'}});">
