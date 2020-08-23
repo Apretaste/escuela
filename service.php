@@ -106,7 +106,7 @@ class Service
 			$c->content = htmlspecialchars($c->content);
 			$c->professor = htmlspecialchars($c->professor);
 			$c->author = $c->professor;
-			$c->stars = (int)$c->stars;
+			$c->stars = (int) $c->stars;
 			$courses[$k] = $c;
 		}
 
@@ -120,7 +120,6 @@ class Service
 
 		// create content for the view
 		$content = [
-			'max_stars' => 5,
 			'courses' => $courses,
 			'name' => $person->firstName ? $person->firstName : '',
 			'level' => $level,
@@ -309,7 +308,7 @@ class Service
 	 */
 	public function _capitulo(Request $request, Response &$response)
 	{
-		$id = (int)$request->input->data->query;
+		$id = (int) $request->input->data->query;
 		$chapter = $this->getChapter($id, $request->person->id);
 
 		$this->setFontFiles();
@@ -343,7 +342,7 @@ class Service
 
 		if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
 
-			$times = (int)Database::query("select count(*) as t from  _escuela_completed_course where person = {$request->person->id} and course = {$chapter->course}")[0]->t;
+			$times = (int) Database::query("select count(*) as t from  _escuela_completed_course where person = {$request->person->id} and course = {$chapter->course}")[0]->t;
 
 			if ($times === 0) { // si nunca lo ha terminado
 				Challenges::complete('complete-course', $request->person->id);
@@ -542,8 +541,8 @@ class Service
 			return;
 		}
 
-		$course_id = (int)$feed[0];
-		$feedback_id = (int)$feed[1];
+		$course_id = (int) $feed[0];
+		$feedback_id = (int) $feed[1];
 		$answer = strtolower(trim(($feed[2])));
 
 		$course = $this->getCourse($course_id, $request->person->id);
@@ -606,7 +605,11 @@ class Service
 
 	/**
 	 * Cursos terminados
-	 *
+     *
+	 * @param Request $request
+	 * @param Response $response
+	 * @throws Alert
+	 * @throws Exception
 	 */
 	public function _terminados(Request $request, Response &$response)
 	{
@@ -652,6 +655,7 @@ class Service
 
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('terminated.ejs', [
+			'title' => 'Terminados',
 			'courses' => is_array($courses) ? $courses : [],
 			'profile' => $person,
 			'max_stars' => 5,
@@ -1171,14 +1175,14 @@ class Service
 	public function _example(Request $request, Response $response)
 	{
 		$response->setTemplate('chapter2.ejs', [
-			'chapter' => (object)[
+			'chapter' => (object) [
 				'title' => 'Ejemplo de capitulo',
 				'content' => [
-					(object)[
+					(object) [
 						'template' => '<p id="<%= id %>"><%= text %></p>',
 						'script' => '$("#<%= id %>").click(function() {alert(1);});',
 						'style' => '#<%= id %> {background: red;}',
-						'data' => (object)[
+						'data' => (object) [
 							'id' => 'parrafo1',
 							'text' => 'tremendo texto'
 						]
