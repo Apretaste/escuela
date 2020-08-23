@@ -60,14 +60,16 @@
     <% if (chapter.xtype != 'PRUEBA') { %>
         <% if (!(chapter.xtype == 'PRUEBA' && course.all_chapters_finished)) { %>
             <% if (after) { %>
-                <a href="#!" class="btn-floating waves-effect waves-light grey" onclick="apretaste.send({command: 'ESCUELA <%= after.xtype %>', data:{query: '<%= after.id %>'}});"><i class="material-icons">arrow_forward</i></a>
+                <a href="#!" class="btn-floating waves-effect waves-light green" onclick="apretaste.send({command: 'ESCUELA <%= after.xtype %>', data:{query: '<%= after.id %>'}});">
+                    <i class="material-icons">arrow_forward</i>
+                </a>
                 <% showAfter = true; %>
             <% } %>
         <% } %>
     <% } %>
 
     <% if (before) { %>
-        <a class="btn-floating waves-effect waves-light grey <% if (showAfter) { %>third <% } %>" href="#!" onclick="apretaste.send({command: 'ESCUELA <%= before.xtype %>', data: {query: '<%= before.id %>'}});">
+        <a class="btn-floating waves-effect waves-light <% if (showAfter) { %> grey third <% } else { %> green <% } %>" href="#!" onclick="apretaste.send({command: 'ESCUELA <%= before.xtype %>', data: {query: '<%= before.id %>'}});">
             <i class="material-icons">arrow_back</i>
         </a>
         <% showBefore = true; %>
