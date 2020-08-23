@@ -456,3 +456,7 @@ ul.chat li {
 #home-menu {
     padding-top: 20px;
 }
+
+pre {
+    overflow: auto;
+}

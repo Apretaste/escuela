@@ -51,6 +51,7 @@
 <div id="btn" class="fixed-action-btn">
     <% var showAfter = false; %>
     <% var showBefore = false; %>
+    <% var showCheck = false; %>
 
     <% function secondButton() { %>
         <a class="btn-floating btn-small waves-effect waves-light grey second" href="#!" onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: '<%= chapter.course %>'}})">
@@ -66,6 +67,13 @@
         <% } %>
     <% } %>
 
+    <% if (chapter.xtype == 'PRUEBA') { %>
+        <% if (!chapter.terminated) { %>
+            <!-- SAVE BUTTON -->
+            <% showCheck = true; %>
+        <% } %>
+    <% } %>
+
     <% if (before) { %>
         <% showBefore = true; %>
     <% } %>
@@ -73,7 +81,7 @@
     <% if (!showAfter) secondButton(); %>
 
     <% if (showBefore) { %>
-        <a class="btn-floating waves-effect waves-light <% if (showAfter) { %> grey third btn-small <% } else { %> green <% } %>" href="#!" onclick="apretaste.send({command: 'ESCUELA <%= before.xtype %>', data: {query: '<%= before.id %>'}});">
+        <a class="btn-floating waves-effect waves-light <% if (showAfter || showCheck) { %> grey third btn-small <% } else { %> green <% } %>" href="#!" onclick="apretaste.send({command: 'ESCUELA <%= before.xtype %>', data: {query: '<%= before.id %>'}});">
             <i class="material-icons">arrow_back</i>
         </a>
     <% } %>
@@ -81,17 +89,15 @@
     <% if (showAfter) secondButton(); %>
 
     <% if (showAfter) { %>
-        <a href="#!" class="btn-floating btn-large waves-effect waves-light green" onclick="apretaste.send({command: 'ESCUELA <%= after.xtype %>', data:{query: '<%= after.id %>'}});">
+        <a href="#!" class="btn-floating btn-large waves-effect waves-light green <% if (showCheck) { %> second <% } %>" onclick="apretaste.send({command: 'ESCUELA <%= after.xtype %>', data:{query: '<%= after.id %>'}});">
             <i class="material-icons">arrow_forward</i>
         </a>
     <% } %>
 
-    <% if (chapter.xtype == 'PRUEBA') { %>
-        <% if (!chapter.terminated) { %>
-            <!-- SAVE BUTTON -->
-            <a class="btn-floating btn-large waves-effect waves-light" href="#!" onclick="submitTest()">
-                <i class="material-icons">check</i>
-            </a>
-        <% } %>
+    <% if (showCheck) { %>
+        <a class="btn-floating btn-large waves-effect waves-light" href="#!" onclick="submitTest()">
+            <i class="material-icons">check</i>
+        </a>
     <% } %>
+
 </div>
