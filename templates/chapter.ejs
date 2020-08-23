@@ -58,6 +58,12 @@
     <% var showAfter = false; %>
     <% var showBefore = false; %>
 
+    <% function secondButton() { %>
+        <a class="btn-floating waves-effect waves-light grey second" href="#!" onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: '<%= chapter.course %>'}})">
+            <i class="material-icons">format_list_numbered</i>
+        </a>
+    <% } %>
+
     <% if (chapter.xtype != 'PRUEBA') { %>
         <% if (!(chapter.xtype == 'PRUEBA' && course.all_chapters_finished)) { %>
             <% if (after) { %>
@@ -70,15 +76,15 @@
         <% showBefore = true; %>
     <% } %>
 
-    <a class="btn-floating waves-effect waves-light grey second" href="#!" onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: '<%= chapter.course %>'}})">
-        <i class="material-icons">format_list_numbered</i>
-    </a>
+    <% if (!showAfter) secondButton(); %>
 
     <% if (showBefore) { %>
         <a class="btn-floating waves-effect waves-light <% if (showAfter) { %> grey third <% } else { %> green <% } %>" href="#!" onclick="apretaste.send({command: 'ESCUELA <%= before.xtype %>', data: {query: '<%= before.id %>'}});">
             <i class="material-icons">arrow_back</i>
         </a>
     <% } %>
+
+    <% if (showAfter) secondButton(); %>
 
     <% if (showAfter) { %>
         <a href="#!" class="btn-floating waves-effect waves-light green" onclick="apretaste.send({command: 'ESCUELA <%= after.xtype %>', data:{query: '<%= after.id %>'}});">
