@@ -17,14 +17,14 @@
         <div class="col s12 m6">
             <div class="card">
                 <div class="card-person grey lighten-5">
-                        <span class="chip tiny clear">
-                            <i class="fa fa-user"></i>
-                            <%= e.professor %>
-                        </span>
-                    <span class="chip tiny clear">
+                    <span class="chip clear">
+                        <i class="fa fa-user"></i>
+                        <%= e.professor %>
+                    </span>
+                    <span class="chip clear">
                             <i class="fa fa-tag"></i>
                         <% if (e.category != null){ %>
-                            <a href="#" onclick="apretaste.send({command: 'ESCUELA', data:{category: courses[<%= i %>].category}});"><%= jsUcfirst(e.category.toLowerCase()) %></a>
+                            <%= jsUcfirst(e.category.toLowerCase()) %>
                         <% } %>
                     </span>
                 </div>
@@ -52,7 +52,7 @@
                 </div>
 
                 <div class="card-action grey lighten-4">
-                    <a href="#!" class="link link-simple green" data-command="ESCUELA CURSO" data-query="<%= e.id %>">
+                    <a href="#!" class="link link-simple green-text" data-command="ESCUELA CURSO" data-query="<%= e.id %>">
                         Ir al curso</a>
                     <i class="material-icons card-title right activator">more_horiz</i>
                 </div>

@@ -18,6 +18,7 @@
                     <i class="material-icons">star_border</i>
                     <% } %>
                 </p>
+                <% if (typeof e.calification  == 'undefined' || e.calification == null) e.calification = 0;%>
                 <p class="space5"><%= parseInt(e.calification) %> puntos obtenidos</p>
             </div>
         </div>
