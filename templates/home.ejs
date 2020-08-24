@@ -1,5 +1,5 @@
-<% if(Object.keys(data).length > 0){ %>
-    <div class="row">
+<div class="row">
+    <% if(Object.keys(data).length > 0){ %>
         <div class="col s12">
             <div class="tags">
                 <div class="chip tiny"><%= categories[data.category] %></div>
@@ -7,10 +7,7 @@
                 <div class="chip tiny"><%= data.raiting + '+' %></div>
             </div>
         </div>
-    </div>
-<% } %>
-
-<div class="row">
+    <% } %>
     <% if (courses.length == 0){ %>
         <div class="col s12 center">
             <p class="middle-center grey-text">¡Wow! No te queda ningún curso por leer. Espera unos días mientras ponemos más cursos</p>
