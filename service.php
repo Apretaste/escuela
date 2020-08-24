@@ -364,7 +364,7 @@ class Service
 		];
 
 		// send response to the view
-		$response->setLayout('escuela.ejs');
+		//$response->setLayout('escuela.ejs');
 		$response->setTemplate('chapter.ejs', $content, $images, $this->files);
 	}
 

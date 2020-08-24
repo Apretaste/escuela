@@ -8,16 +8,20 @@
     <% courses.forEach(function(e, i) { %>
     <div class="col s12 m6">
         <div class="card">
+            <div class="card-person grey lighten-5">
+                <span class="chip clear">
+                    <i class="fa fa-user"></i>
+                    <%= e.professor %>
+                </span>
+                <span class="chip clear">
+                            <i class="fa fa-tag"></i>
+                    <% if (e.category != null){ %>
+                        <%= jsUcfirst(e.category.toLowerCase()) %>
+                    <% } %>
+                </span>
+            </div>
             <div class="card-content">
                 <span class="card-title"><%= e.title %></span>
-                <p class="space5">
-                    <% for(var k = 0; k < e.stars; k++) {%>
-                    <i class="material-icons">star</i>
-                    <% } %>
-                    <% for(var k = 0; k < max_stars - e.stars; k++) {%>
-                    <i class="material-icons">star_border</i>
-                    <% } %>
-                </p>
                 <% if (typeof e.calification  == 'undefined' || e.calification == null) e.calification = 0;%>
                 <p class="space5"><%= parseInt(e.calification) %> puntos obtenidos</p>
             </div>
