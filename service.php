@@ -619,7 +619,7 @@ class Service
 
 		// get the most popular courses
 		$courses = Database::query("
-		  SELECT *, right_answers / nullif(questions,0) * 100 as calification FROM (
+		  SELECT *, coalesce(right_answers / nullif(questions,0),0) * 100 as calification FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
 				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = '$id') as viewed,
