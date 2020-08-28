@@ -1,40 +1,42 @@
 "use strict";
 
 var education = {
-	'PRIMARIO': 'Primario',
-	'SECUNDARIO': 'Secundario',
-	'TECNICO': 'Técnico',
-	'UNIVERSITARIO': 'Universitario',
-	'POSTGRADUADO': 'Postgraduado',
-	'DOCTORADO': 'Doctorado',
-	'OTRO': 'Otro'
+	PRIMARIO: 'Primario',
+	SECUNDARIO: 'Secundario',
+	TECNICO: 'Técnico',
+	UNIVERSITARIO: 'Universitario',
+	POSTGRADUADO: 'Postgraduado',
+	DOCTORADO: 'Doctorado',
+	OTRO: 'Otro'
 };
+
 var occupation = {
-	'AMA_DE_CASA': 'Ama de casa',
-	'ESTUDIANTE': 'Estudiante',
-	'EMPLEADO_PRIVADO': 'Empleado Privado',
-	'EMPLEADO_ESTATAL': 'Empleado Estatal',
-	'INDEPENDIENTE': 'Trabajador Independiente',
-	'JUBILADO': 'Jubilado',
-	'DESEMPLEADO': 'Desempleado'
+	AMA_DE_CASA: 'Ama de casa',
+	ESTUDIANTE: 'Estudiante',
+	EMPLEADO_PRIVADO: 'Empleado Privado',
+	EMPLEADO_ESTATAL: 'Empleado Estatal',
+	INDEPENDIENTE: 'Trabajador Independiente',
+	JUBILADO: 'Jubilado',
+	DESEMPLEADO: 'Desempleado'
 };
+
 var provinces = {
-	'PINAR_DEL_RIO': 'Pinar del Río',
-	'LA_HABANA': 'La Habana',
-	'ARTEMISA': 'Artemisa',
-	'MAYABEQUE': 'Mayabeque',
-	'MATANZAS': 'Matanzas',
-	'VILLA_CLARA': 'Villa Clara',
-	'CIENFUEGOS': 'Cienfuegos',
-	'SANCTI_SPIRITUS': 'Sancti Spiritus',
-	'CIEGO_DE_AVILA': 'Ciego de Ávila',
-	'CAMAGUEY': 'Camagüey',
-	'LAS_TUNAS': 'Las Tunas',
-	'HOLGUIN': 'Holguín',
-	'GRANMA': 'Granma',
-	'SANTIAGO_DE_CUBA': 'Santiago de Cuba',
-	'GUANTANAMO': 'Guantánamo',
-	'ISLA_DE_LA_JUVENTUD': 'Isla de la Juventud'
+	PINAR_DEL_RIO: 'Pinar del Río',
+	LA_HABANA: 'La Habana',
+	ARTEMISA: 'Artemisa',
+	MAYABEQUE: 'Mayabeque',
+	MATANZAS: 'Matanzas',
+	VILLA_CLARA: 'Villa Clara',
+	CIENFUEGOS: 'Cienfuegos',
+	SANCTI_SPIRITUS: 'Sancti Spiritus',
+	CIEGO_DE_AVILA: 'Ciego de Ávila',
+	CAMAGUEY: 'Camagüey',
+	LAS_TUNAS: 'Las Tunas',
+	HOLGUIN: 'Holguín',
+	GRANMA: 'Granma',
+	SANTIAGO_DE_CUBA: 'Santiago de Cuba',
+	GUANTANAMO: 'Guantánamo',
+	ISLA_DE_LA_JUVENTUD: 'Isla de la Juventud'
 };
 
 function formatDate(dateStr) {
@@ -67,17 +69,6 @@ $(function () {
 	$('.modal').modal();
 	$('select').formSelect();
 	$('.tabs').tabs();
-
-	// after render
-	$(".link").attr('href', '#!');
-	$(".link-simple").click(function () {
-		var q = null;
-		eval('q = ' + $(this).attr('data-query'));
-		apretaste.send({
-			command: $(this).attr('data-command'),
-			data: {query: q}
-		});
-	});
 
 	$('.fixed-action-btn').floatingActionButton({
 		direction: 'left',
@@ -285,4 +276,31 @@ if (!Object.keys) {
 			return result;
 		};
 	}();
+}
+
+function showCourse(id){
+	apretaste.send({
+		command: 'ESCUELA CURSO',
+		data: {
+			query: id
+		}
+	});
+}
+
+function submitSearchByAuthor(author) {
+	apretaste.send({
+		command: 'ESCUELA BUSCAR',
+		data: {
+			author: author
+		}
+	});
+}
+
+function submitSearchByCategory(category) {
+	apretaste.send({
+		command: 'ESCUELA BUSCAR',
+		data: {
+			category: category
+		}
+	});
 }

@@ -50,8 +50,9 @@
             <% course.chapters.forEach(function(chapter){ %>
                 <tr>
                     <td>
-                        <a href="#!" class="link link-simple" data-command="ESCUELA <%= chapter.xtype %>"
-                           data-query="<%= chapter.id %>"><%= chapter.title %></a>
+                        <a href="#!" onclick="apretaste.send({command: 'ESCUELA <%= chapter.xtype %>', data: {query: '<%= chapter.id %>'}});">
+                            <%= chapter.title %>
+                        </a>
                     </td>
                     <td align="right" style="text-align:right; white-space: nowrap;">
                         <% if (chapter.xtype == 'CAPITULO') { %>
