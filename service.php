@@ -327,8 +327,19 @@ class Service
 
 		// Log the visit to this chapter
 		if ($chapter->xtype === 'CAPITULO') {
-			Database::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
-		}
+			Database::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) 
+                VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
+		} else {
+		    $r = Database::queryFirst("select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and chapter = '{$id}') as viewed,
+                                    (select count(id) as total from apretaste._escuela_chapter WHERE id = '{$id}' and xtype = 'CAPITULO') as total;");
+		    if ((int)$r->viewed < (int) $r->total) {
+		        return $response->setTemplate('text.ejs',	[
+                    'header' => 'Termine de estudiar!',
+                    'icon' => 'sentiment_very_dissatisfied',
+                    'text' => 'Cuando termine de leer todos los cap&iacute;tulos tendr&aacute;s es que podr&aacute; de resolver el examen.',
+                    'button' => ['href' => 'ESCUELA CURSO', 'caption' => 'Volver']];)
+            }
+        }
 
 		// get the code inside the <body> tag
 		if (stripos($chapter->content, '<body>') !== false) {
