@@ -325,8 +325,8 @@ class Service
 		$course = $this->getCourse($chapter->course, $request->person->id);
 		$terminated = $course->terminated;
 
-		$r = Database::queryFirst("select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and chapter = '{$id}') as viewed,
-                                    (select count(id) as total from apretaste._escuela_chapter WHERE id = '{$id}' and xtype = 'CAPITULO') as total;");
+		$r = Database::queryFirst("select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and course = '{$chapter->course}') as viewed,
+                                    (select count(id) as total from apretaste._escuela_chapter WHERE course = '{$chapter->course}' and xtype = 'CAPITULO') as total;");
 
 		$totalChapters = (int) $r->total;
 		$viewedChapters = (int) $r->viewed;
