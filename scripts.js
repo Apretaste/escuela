@@ -158,33 +158,12 @@ function submitTest() {
 			data: {
 				answers: answers
 			},
-			redirect: false,
-			callback: {
-				name: "testSent",
-				data: '{}'
-			}
+			redirect: true
 		});
 	}
 }
 
-function testSent(data) {
-	M.toast({
-		html: 'Prueba enviada satisfactoriamente'
-	});
-
-	// display the DONE message
-	$('#list').hide();
-	$('#msg').show();
-	apretaste.send({
-		command: "ESCUELA PRUEBA",
-		data: {
-			query: chapter.id
-		}
-	});
-}
-
 // POLYFILL
-
 
 if (!String.prototype.padStart) {
 	String.prototype.padStart = function padStart(targetLength, padString) {

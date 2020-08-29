@@ -355,31 +355,6 @@ class Service
 		// check if the course is terminated
 		$course = $this->getCourse($chapter->course, $request->person->id);
 
-		if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
-
-			if ($course->calification < 80) {
-				$this->_repetir($request, $response);
-
-				return $response->setTemplate('text.ejs', [
-					'header' => 'Desaprobado',
-					'icon' => 'sentiment_very_dissatisfied',
-					'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$course->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
-					'button' => ['href' => 'ESCUELA CURSO', 'query' => $chapter->course, 'caption' => 'Ir al curso']]);
-			}
-
-			$times = (int) Database::query("select count(*) as t from  _escuela_completed_course where person = {$request->person->id} and course = {$chapter->course}")[0]->t;
-
-			if ($times === 0) { // si nunca lo ha terminado
-				Challenges::complete('complete-course', $request->person->id);
-
-				// add the experience if profile is completed
-				Level::setExperience('FINISH_COURSE', $request->person->id);
-			}
-
-			// marca el curso como terminado
-			Database::query("INSERT INTO _escuela_completed_course (person, course) VALUES ({$request->person->id}, {$chapter->course});");
-		}
-
 		// create content for the view
 		$content = [
 			'totalChapters' => $totalChapters,
@@ -428,7 +403,6 @@ class Service
 		foreach ($answers as $id) {
 			$res = Database::query("SELECT * FROM _escuela_answer WHERE id = $id");
 
-
 			// do not let pass invalid answers
 			if (empty($res)) {
 				continue;
@@ -451,16 +425,35 @@ class Service
 		if ($course !== null) {
 			$courseAfter = $this->getCourse($course->id);
 
-			// si esta terminado el curso y fue terminado ahora
-			if (!$course->terminated && $courseAfter->terminated /*&& $affectedRows === count($answers)*/) {
-				Challenges::complete('complete-course', $request->person->id);
+			if ($courseAfter->calification < 80) {
+				$this->_repetir($request, $response);
 
-				// add the experience if profile is completed
-				Level::setExperience('FINISH_COURSE', $request->person->id);
+				return $response->setTemplate('text.ejs', [
+						'header' => 'Desaprobado',
+						'icon' => 'sentiment_very_dissatisfied',
+						'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$course->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
+						'button' => ['href' => 'ESCUELA CURSO', 'query' => $course->id, 'caption' => 'Ir al curso']]);
 			}
+
+			Challenges::complete('complete-course', $request->person->id);
+
+			// add the experience if profile is completed
+			Level::setExperience('FINISH_COURSE', $request->person->id);
+
+			// marca el curso como terminado
+			Database::query("INSERT IGNORE INTO _escuela_completed_course (person, course, calification) VALUES ({$request->person->id}, {$course->id}, {$courseAfter->calification});");
+
+			// TODO: como informar el nivel actual en el mensaje de felicitacion?
+			$this->setLevel($request);
+
+			return $response->setTemplate('text.ejs', [
+					'header' => 'Aprobado',
+					'icon' => 'sentiment_very_satisfied',
+					'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. Obtuviste '.$course->calification.' puntos. ',
+					'button' => ['href' => 'ESCUELA', 'query' => $course->id, 'caption' => 'Cursos']]);
 		}
 
-		$this->setLevel($request);
+		return null;
 	}
 
 	/**
