@@ -338,9 +338,9 @@ class Service
 		} else {
 			if ($viewedChapters < $totalChapters) {
 				return $response->setTemplate('text.ejs', [
-					'header' => 'Termine de estudiar!',
+					'header' => 'Termina de estudiar!',
 					'icon' => 'sentiment_very_dissatisfied',
-					'text' => 'Le faltan por leer '.($viewedChapters - $totalChapters).' cap&iacute;tulos. Cuando termine de leer todos los cap&iacute;tulos tendr&aacute;s es que podr&aacute; de resolver el examen.',
+					'text' => 'Le faltan por leer '.($totalChapters - $viewedChapters).' cap&iacute;tulos. Cuando termine de leer todos los cap&iacute;tulos tendr&aacute;s es que podr&aacute; de resolver el examen.',
 					'button' => ['href' => 'ESCUELA CURSO', 'caption' => 'Volver']]);
 			}
 		}
