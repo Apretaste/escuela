@@ -341,7 +341,7 @@ class Service
 					'header' => 'Termina de estudiar!',
 					'icon' => 'sentiment_very_dissatisfied',
 					'text' => 'Le faltan por leer '.($totalChapters - $viewedChapters).' cap&iacute;tulos. Cuando termines de leer todos los cap&iacute;tulos es que podr&aacute; hacer el examen.',
-					'button' => ['href' => 'ESCUELA CURSO', 'caption' => 'Volver']]);
+					'button' => ['href' => 'ESCUELA CURSO', 'query' => $chapter->course, 'caption' => 'Volver']]);
 			}
 		}
 
