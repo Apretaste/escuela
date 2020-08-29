@@ -29,7 +29,7 @@
                         <% } %> <br/>
                     <% } else { %>
                         <% var checked = answer.choosen ? 'checked' : '' %>
-                        <label>
+                        <label style="display: table-row;">
                             <input class="with-gap answer" name="<%= question.id %>"
                                    value="<%= answer.id %>" <%= checked %> type="radio"/>
                             <span><%= answer.title %></span>
