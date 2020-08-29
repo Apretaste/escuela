@@ -340,7 +340,7 @@ class Service
 				return $response->setTemplate('text.ejs', [
 					'header' => 'Termina de estudiar!',
 					'icon' => 'sentiment_very_dissatisfied',
-					'text' => 'Le faltan por leer '.($totalChapters - $viewedChapters).' cap&iacute;tulos. Cuando termine de leer todos los cap&iacute;tulos tendr&aacute;s es que podr&aacute; de resolver el examen.',
+					'text' => 'Le faltan por leer '.($totalChapters - $viewedChapters).' cap&iacute;tulos. Cuando termines de leer todos los cap&iacute;tulos es que podr&aacute; hacer el examen.',
 					'button' => ['href' => 'ESCUELA CURSO', 'caption' => 'Volver']]);
 			}
 		}
