@@ -426,6 +426,7 @@ class Service
 			$courseAfter = $this->getCourse($course->id);
 
 			if ($courseAfter->calification < 80) {
+				$request->input->data->query = $course->id;
 				$this->_repetir($request, $response);
 
 				return $response->setTemplate('text.ejs', [
