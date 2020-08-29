@@ -357,6 +357,16 @@ class Service
 
 		if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
 
+			if ($course->calification < 80) {
+				$this->_repetir($request, $response);
+
+				return $response->setTemplate('text.ejs', [
+					'header' => 'Desaprobado',
+					'icon' => 'sentiment_very_dissatisfied',
+					'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$course->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
+					'button' => ['href' => 'ESCUELA CURSO', 'query' => $chapter->course, 'caption' => 'Ir al curso']]);
+			}
+
 			$times = (int) Database::query("select count(*) as t from  _escuela_completed_course where person = {$request->person->id} and course = {$chapter->course}")[0]->t;
 
 			if ($times === 0) { // si nunca lo ha terminado
