@@ -340,7 +340,7 @@ class Service
 				return $response->setTemplate('text.ejs', [
 					'header' => 'Termina de estudiar!',
 					'icon' => 'sentiment_very_dissatisfied',
-					'text' => 'Le faltan por leer '.($totalChapters - $viewedChapters).' cap&iacute;tulos. Cuando termines de leer todos los cap&iacute;tulos es que podr&aacute; hacer el examen.',
+					'text' => 'Le faltan por leer '.($totalChapters - $viewedChapters).' cap&iacute;tulos. Cuando termines de leer todos los cap&iacute;tulos es que podr&aacute;s hacer el examen.',
 					'button' => ['href' => 'ESCUELA CURSO', 'query' => $chapter->course, 'caption' => 'Volver']]);
 			}
 		}
@@ -411,7 +411,7 @@ class Service
 			}
 
 			if ($course === null) {
-				$course = $this->getCourse($answer->course);
+				$course = $this->getCourse($answer->course, $request->person->id);
 			}
 
 			// save the answer in the database
@@ -423,7 +423,7 @@ class Service
 		}
 
 		if ($course !== null) {
-			$courseAfter = $this->getCourse($course->id);
+			$courseAfter = $this->getCourse($course->id, $request->person->id);
 
 			if ($courseAfter->calification < 80) {
 				$request->input->data->query = $course->id;
@@ -784,7 +784,7 @@ class Service
 	 * @return object|bool
 	 * @throws Exception
 	 */
-	private function getCourse($id, $person_id = '')
+	private function getCourse($id, $person_id)
 	{
         $course = Database::queryFirst("SELECT *, truncate(coalesce(right_answers / nullif(questions,0),0) * 100, 0) as calification FROM (
                     SELECT 
