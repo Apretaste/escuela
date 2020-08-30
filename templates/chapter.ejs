@@ -6,16 +6,17 @@
 </div>
 
 <% if (chapter.xtype == 'PRUEBA') { %>
+
+    <% if (chapter.terminated) { %>
     <div class="row">
         <div class="col s12">
-            <% if (chapter.terminated) { %>
-                <p align="center"
-                   style="background-color:<% if ( chapter.calification >= 80) { %> green <% } else { %>#C11414<% } %>; color:white; padding:5px;">
-                    <b>Terminada con <%= chapter.calification %> puntos de 100</b>
-                </p>
-            <% } %>
+            <p align="center"
+               style="background-color:<% if ( chapter.calification >= 80) { %> green <% } else { %>#C11414<% } %>; color:white; padding:5px;">
+                <b>Terminada con <%= chapter.calification %> puntos de 100</b>
+            </p>
         </div>
     </div>
+    <% } %>
 
     <% var i = 0;%>
     <% chapter.questions.forEach(function(question) { %>
