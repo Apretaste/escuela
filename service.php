@@ -786,7 +786,7 @@ class Service
 	 */
 	private function getCourse($id, $person_id = '')
 	{
-		$res = Database::queryFirst(" SELECT *, coalesce(right_answers / nullif(questions,0),0) * 100 as calification FROM (
+        $course = Database::queryFirst(" SELECT *, coalesce(right_answers / nullif(questions,0),0) * 100 as calification FROM (
                     SELECT 
                             A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', 
                             A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
@@ -808,11 +808,10 @@ class Service
 				) subq
 				WHERE id = $id;");
 
-		if ($res === null) {
+		if ($course === null) {
 			return false;
 		}
 
-		$course = $res[0];
 		$course->chapters = $this->getChapters($id, $person_id);
 		$course->total_tests = 0;
 		$course->total_seen = 0;
