@@ -452,6 +452,8 @@ class Service
 					'header' => 'Aprobado',
 					'icon' => 'sentiment_very_satisfied',
 					'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. Obtuviste '.$courseAfter->calification.' puntos. ',
+					'showRate' => true,
+					'courseId' => $course->id,
 					'button' => ['href' => 'ESCUELA', 'query' => $course->id, 'caption' => 'Cursos']]);
 		}
 

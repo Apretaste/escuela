@@ -15,22 +15,7 @@
         </div>
     </div>
 <% } %>
-<% if (course.progress == 100 && course.calification >= 80) { %>
-<div class="row">
-    <div class="col s12 center-align">
-		<h1><b>¡Felicidades!</b></h1>
-		<p>Usted ha concluido el curso "<%= course.title %>" con <b><%= course.calification %></b> puntos y ha ganado esta medalla.</p>
-        <i class="material-icons large"><%= course.medal %></i>
-        <% if (course.rated === "0") {%>
-            <div id="rate-stars">
-            Valore este curso:<br/>
-            <% for(var k = 0; k < 5; k++) {%>
-                <a href="#!" class="star-link" data-query="{course: <%= course.id %>, stars: <%= k %>}"><i class="material-icons">star_border</i></a>
-            <% } %></div>
-        <% } %>
-    </div>
-</div>
-<% } %>
+
 <div class="row">
     <div class="col s12">
         <h1><%= course.title %></h1>

@@ -112,23 +112,26 @@ $(function () {
 		$('select').formSelect();
 	}
 
-	$(".star-link").click(function () {
-		var q = null;
-		eval('q = ' + $(this).attr('data-query'));
-		apretaste.send({
-			command: 'ESCUELA CALIFICAR',
-			data: {
-				query: q
-			},
-			redirect: false,
-			callback: {
-				name: "showToast",
-				data: "Su opinion ha sido enviada"
-			}
-		});
-		$("#rate-stars").hide();
-	});
+
 });
+
+function submitRate(courseId, stars){
+	apretaste.send({
+		command: 'ESCUELA CALIFICAR',
+		data: {
+			query: {
+				course: courseId,
+				stars: stars
+			}
+		},
+		redirect: false,
+		callback: {
+			name: "showToast",
+			data: "Su opinion ha sido enviada"
+		}
+	});
+	$("#rate-stars").hide();
+}
 
 // submit a test once completed
 function submitTest() {
