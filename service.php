@@ -451,7 +451,7 @@ class Service
 			return $response->setTemplate('text.ejs', [
 					'header' => 'Aprobado',
 					'icon' => 'sentiment_very_satisfied',
-					'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. Obtuviste '.$course->calification.' puntos. ',
+					'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. Obtuviste '.$courseAfter->calification.' puntos. ',
 					'button' => ['href' => 'ESCUELA', 'query' => $course->id, 'caption' => 'Cursos']]);
 		}
 
