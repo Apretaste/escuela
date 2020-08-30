@@ -3,6 +3,9 @@
 		<h1 class="black-text"><%= header %></h1>
 		<i class="material-icons large"><%= icon %></i>
 		<p><%- text %></p>
+		<% if (typeof subtext !== 'undefined') { %>
+			<p class="blue-grey-text"><%- subtext %></p>
+		<% } %>
 
 		<% if (typeof showRate !== 'undefined') if (showRate) { %>
 			<div class="row">

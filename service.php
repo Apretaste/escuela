@@ -451,7 +451,8 @@ class Service
 			return $response->setTemplate('text.ejs', [
 					'header' => 'Aprobado',
 					'icon' => 'sentiment_very_satisfied',
-					'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. Obtuviste '.$courseAfter->calification.' puntos. ',
+					'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. ',
+					'subtext' => 'Aprobado con '.$courseAfter->calification.' puntos. ',
 					'showRate' => true,
 					'courseId' => $course->id,
 					'button' => ['href' => 'ESCUELA', 'query' => $course->id, 'caption' => 'Cursos']]);
@@ -788,7 +789,7 @@ class Service
 	 */
 	private function getCourse($id, $person_id)
 	{
-        $course = Database::queryFirst("SELECT *, truncate(coalesce(right_answers / nullif(questions,0),0) * 100, 0) as calification FROM (
+		$course = Database::queryFirst("SELECT *, truncate(coalesce(right_answers / nullif(questions,0),0) * 100, 0) as calification FROM (
                     SELECT 
                             A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', 
                             A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
