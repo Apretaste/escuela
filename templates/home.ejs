@@ -1,5 +1,7 @@
 <div class="row">
-    <% if(Object.keys(data).length > 0){ %>
+
+    <!-- && false: oculto para cuando se quiera poner la opcion de buscar -->
+    <% if(Object.keys(data).length > 0 && false){ %>
         <div class="col s12">
             <div class="tags">
                 <div class="chip tiny"><%= categories[data.category] %></div>
@@ -8,11 +10,13 @@
             </div>
         </div>
     <% } %>
+
     <% if (courses.length == 0){ %>
         <div class="col s12 center">
             <p class="middle-center grey-text">¡Wow! No te queda ningún curso por leer. Espera unos días mientras ponemos más cursos</p>
         </div>
     <% } %>
+
     <% courses.forEach(function(e, i) { %>
         <div class="col s12 m6">
             <div class="card">

@@ -433,7 +433,7 @@ class Service
 				return $response->setTemplate('text.ejs', [
 						'header' => 'Desaprobado',
 						'icon' => 'sentiment_very_dissatisfied',
-						'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$course->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
+						'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$courseAfter->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
 						'button' => ['href' => 'ESCUELA CURSO', 'query' => $course->id, 'caption' => 'Ir al curso']]);
 			}
 
