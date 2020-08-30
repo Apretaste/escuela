@@ -427,6 +427,7 @@ class Service
 
 			if ($courseAfter->calification < 80) {
 				$request->input->data->query = $course->id;
+
 				$this->_repetir($request, $response);
 
 				return $response->setTemplate('text.ejs', [
@@ -640,22 +641,22 @@ class Service
 
 		// get the most popular courses
 		$courses = Database::query("
-		  SELECT *, coalesce(right_answers / nullif(questions,0),0) * 100 as calification FROM (
-				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
-				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
-				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = '$id') as viewed,
-				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
-				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answers_choosen,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course
-					AND _escuela_answer_choosen.person_id = '$id'
-					AND (SELECT count(*) as right_choose FROM _escuela_question WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers
-				FROM _escuela_course A
-				JOIN _escuela_teacher B
-				ON A.teacher = B.id
-				WHERE A.active = 1
+		        SELECT *, coalesce(right_answers / nullif(questions,0),0) * 100 as calification FROM (
+                    SELECT 
+                            A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
+                            A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
+                            (select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = $id) as viewed,
+                            (select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
+                            (select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+                            (select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
+                            (select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
+                            (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answers_choosen,
+                            (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course
+                                AND _escuela_answer_choosen.person_id = $id
+                                AND (SELECT count(*) as right_choose FROM _escuela_question 
+                                        WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers
+                    FROM _escuela_course A JOIN _escuela_teacher B ON A.teacher = B.id
+                    WHERE A.active = 1
 				) subq
 				WHERE viewed >= (chapters - tests) and answers_choosen >= questions
 				ORDER BY calification DESC;");
@@ -785,22 +786,34 @@ class Service
 	 */
 	private function getCourse($id, $person_id = '')
 	{
-		$res = Database::query("	SELECT *,
-				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
-				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title,
-				((SELECT count(*) FROM _escuela_stars WHERE _escuela_stars.person_id = (SELECT id FROM person WHERE person.id = '$person_id') AND _escuela_stars.course = _escuela_course.id) > 0) as rated
-			FROM _escuela_course
-			WHERE id= '$id'
-			AND active=1");
+		$res = Database::queryFirst(" SELECT *, coalesce(right_answers / nullif(questions,0),0) * 100 as calification FROM (
+                    SELECT 
+                            A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', 
+                            A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
+                           ((SELECT count(*) FROM _escuela_stars WHERE _escuela_stars.person_id = (SELECT id FROM person WHERE person.id = '$person_id') AND _escuela_stars.course = A.id) > 0) as rated,
+                          	(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = A.teacher) AS teacher_name,
+				            (SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = A.teacher) AS teacher_title,
+                            (select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = $id) as viewed,
+                            (select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
+                            (select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+                            (select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
+                            (select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
+                            (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answers_choosen,
+                            (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course
+                                AND _escuela_answer_choosen.person_id = $id
+                                AND (SELECT count(*) as right_choose FROM _escuela_question 
+                                        WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers
+                    FROM _escuela_course A JOIN _escuela_teacher B ON A.teacher = B.id
+                    WHERE A.active = 1
+				) subq
+				WHERE id = $id;");
 
-		if (!isset($res[0])) {
+		if ($res === null) {
 			return false;
 		}
 
 		$course = $res[0];
 		$course->chapters = $this->getChapters($id, $person_id);
-
-		$calification = 0;
 		$course->total_tests = 0;
 		$course->total_seen = 0;
 		$course->total_answered = 0;
@@ -825,22 +838,12 @@ class Service
 			}
 			$course->total_right += $chapter->total_right;
 			$course->total_questions += $chapter->total_questions;
-			$calification += $chapter->calification;
 		}
 
 		$course->total_chapters = $course->total_childs - $course->total_tests;
 		$course->terminated = $course->total_terminated == $course->total_childs;
-
-		$course->calification = 0;
-
-		// 100% por responder bien
-		if ($course->total_questions > 0) {
-			$course->calification += $course->total_right / $course->total_questions * 100;
-		}
-
-		$course->calification = intval($course->calification);
-
 		$course->progress = 0;
+
 		if ($course->total_childs > 0) {
 			$course->progress = number_format($course->total_terminated / $course->total_childs * 100, 2) * 1;
 		}
