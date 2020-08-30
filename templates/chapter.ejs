@@ -14,32 +14,39 @@
                     <b>Terminada con <%= chapter.calification %> puntos de 100</b>
                 </p>
             <% } %>
-
-            <% chapter.questions.forEach(function(question) { %>
-                <%= question.title %><br/>
-                <% question.answers.forEach(function(answer){ %>
-                    <% if (question.terminated) { %>
-                        <% if (question.answer_choosen == answer.id) { %>
-                            -&nbsp;<b><%= answer.title %></b>
-                        <% } else { %>
-                            -&nbsp;<%= answer.title %>
-                        <% } %>
-                        <% if (question.answer == answer.id) { %>
-                            <span style="color:gray;">&#10004;</span>
-                        <% } %> <br/>
-                    <% } else { %>
-                        <% var checked = answer.choosen ? 'checked' : '' %>
-                        <label style="display: table-row;">
-                            <input class="with-gap answer" name="<%= question.id %>"
-                                   value="<%= answer.id %>" <%= checked %> type="radio"/>
-                            <span><%= answer.title %></span>
-                        </label>
-                    <% } %>
-                <% }); %>
-            <% }); %>
         </div>
     </div>
 
+    <% chapter.questions.forEach(function(question) { %>
+        <div class="row">
+            <div class="col s12">
+                <h2><%= question.title %></h2>
+                <table>
+                <% question.answers.forEach(function(answer){ %>
+                    <tr><td>
+                        <% if (question.terminated) { %>
+                            <% if (question.answer_choosen == answer.id) { %>
+                                -&nbsp;<b><%= answer.title %></b>
+                            <% } else { %>
+                                -&nbsp;<%= answer.title %>
+                            <% } %>
+                            <% if (question.answer == answer.id) { %>
+                                <span style="color:gray;">&#10004;</span>
+                            <% } %> <br/>
+                        <% } else { %>
+                            <% var checked = answer.choosen ? 'checked' : '' %>
+                            <label style="display: table-row;">
+                                <input class="with-gap answer" name="<%= question.id %>"
+                                       value="<%= answer.id %>" <%= checked %> type="radio"/>
+                                <span><%= answer.title %></span>
+                            </label>
+                        <% } %>
+                    </td></tr>
+                <% }); %>
+                </table>
+            </div>
+        </div>
+    <% }); %>
 
 <% } %>
 
