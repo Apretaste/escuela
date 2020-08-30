@@ -793,14 +793,14 @@ class Service
                            ((SELECT count(*) FROM _escuela_stars WHERE _escuela_stars.person_id = (SELECT id FROM person WHERE person.id = '$person_id') AND _escuela_stars.course = A.id) > 0) as rated,
                           	(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = A.teacher) AS teacher_name,
 				            (SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = A.teacher) AS teacher_title,
-                            (select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = $id) as viewed,
+                            (select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = $person_id) as viewed,
                             (select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
                             (select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
                             (select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
                             (select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-                            (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answers_choosen,
+                            (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = $person_id) as answers_choosen,
                             (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course
-                                AND _escuela_answer_choosen.person_id = $id
+                                AND _escuela_answer_choosen.person_id = $person_id
                                 AND (SELECT count(*) as right_choose FROM _escuela_question 
                                         WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers
                     FROM _escuela_course A JOIN _escuela_teacher B ON A.teacher = B.id
