@@ -338,7 +338,7 @@ class Service
 		} else {
 			if ($viewedChapters < $totalChapters) {
 				return $response->setTemplate('text.ejs', [
-					'header' => 'Termina de estudiar!',
+					'header' => 'Termina de estudiar',
 					'icon' => 'sentiment_very_dissatisfied',
 					'text' => 'Le faltan por leer '.($totalChapters - $viewedChapters).' cap&iacute;tulos. Cuando termines de leer todos los cap&iacute;tulos es que podr&aacute;s hacer el examen.',
 					'button' => ['href' => 'ESCUELA CURSO', 'query' => $chapter->course, 'caption' => 'Volver']]);
@@ -791,7 +791,7 @@ class Service
 	{
 		$course = Database::queryFirst("SELECT *, truncate(coalesce(right_answers / nullif(questions,0),0) * 100, 0) as calification FROM (
                     SELECT 
-                            A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', 
+                            A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.medal,
                             A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
                            ((SELECT count(*) FROM _escuela_stars WHERE _escuela_stars.person_id = (SELECT id FROM person WHERE person.id = '$person_id') AND _escuela_stars.course = A.id) > 0) as rated,
                           	(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = A.teacher) AS teacher_name,

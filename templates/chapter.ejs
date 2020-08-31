@@ -61,11 +61,9 @@
     <% var showCheck = false; %>
 
     <% function secondButton() { %>
-        <% if (chapter.xtype != 'PRUEBA') { %>
-            <a class="btn-floating waves-effect waves-light grey second" href="#!" onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: '<%= chapter.course %>'}})">
-                <i class="material-icons">format_list_numbered</i>
-            </a>
-        <% } %>
+        <a class="btn-floating waves-effect waves-light grey second" href="#!" onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: '<%= chapter.course %>'}})">
+            <i class="material-icons">format_list_numbered</i>
+        </a>
     <% } %>
 
     <% if (chapter.xtype != 'PRUEBA') { %>
