@@ -35,7 +35,7 @@
             <% course.chapters.forEach(function(chapter){ %>
                 <tr>
                     <td>
-                        <a href="#!" onclick="showChapter(<%= chapter.xtype %>, <%= chapter.id %>);" <% if (course.nextChapter.id == chapter.id) { %> class="next-chapter" <% } %>>
+                        <a href="#!" onclick="showChapter('<%= chapter.xtype %>', <%= chapter.id %>);" <% if (course.nextChapter.id == chapter.id) { %> class="next-chapter" <% } %>>
                             <%= chapter.title %>
                         </a>
                     </td>
@@ -64,7 +64,7 @@
         <i class="material-icons">arrow_back</i>
     </a>
     <a class="btn-floating waves-effect waves-light btn-large green"
-       href="#!" onclick="showChapter(<%= course.nextChapter.xtype %>, <%= course.nextChapter.id %>);">
+       href="#!" onclick="showChapter('<%= course.nextChapter.xtype %>', <%= course.nextChapter.id %>);">
         <i class="material-icons">play_arrow</i>
     </a>
 </div>
