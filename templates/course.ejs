@@ -60,13 +60,14 @@
 
 <!-- BUTTON -->
 <div id="btn" class="fixed-action-btn">
-    <a class="btn-floating waves-effect waves-light btn-large grey third" href="#!" onclick="apretaste.send({command:'ESCUELA'});">
+
+    <a class="btn-floating waves-effect waves-light grey third modal-trigger" href="#!" onclick="apretaste.send({command:'ESCUELA'});">
         <i class="material-icons">school</i>
     </a>
-    <a class="btn-floating waves-effect waves-light btn-large grey second" href="#!" onclick="apretaste.back();">
+    <a class="btn-floating waves-effect waves-light grey second modal-trigger" href="#!" onclick="apretaste.back();">
         <i class="material-icons">arrow_back</i>
     </a>
-    <a class="btn-floating waves-effect waves-light btn-large green"
+    <a class="btn-floating btn-large waves-effect waves-light modal-trigger green"
        href="#!" onclick="showChapter('<%= course.nextChapter.xtype %>', <%= course.nextChapter.id %>);">
         <i class="material-icons">play_arrow</i>
     </a>
