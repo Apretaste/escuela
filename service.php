@@ -825,10 +825,23 @@ class Service
 		$course->total_right = 0;
 		$course->repeated = false;
 
+		$course->nextChapter = null;
 		foreach ($course->chapters as $chapter) {
+
+			// get first by default
+			if ($course->nextChapter === null) {
+				$course->nextChapter = $chapter;
+			}
+
+			// if current is seen, get next
+			if ($course->nextChapter->seen) {
+				$course->nextChapter = $chapter; // if all are seen, nextChapter is the last (course's test)
+			}
+
 			if ($chapter->seen) {
 				$course->total_seen++;
 			}
+
 			if ($chapter->answered) {
 				$course->total_answered++;
 			}

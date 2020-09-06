@@ -35,7 +35,7 @@
             <% course.chapters.forEach(function(chapter){ %>
                 <tr>
                     <td>
-                        <a href="#!" onclick="apretaste.send({command: 'ESCUELA <%= chapter.xtype %>', data: {query: '<%= chapter.id %>'}});">
+                        <a href="#!" onclick="showChapter(<%= chapter.xtype %>, <%= chapter.id %>);" <% if (course.nextChapter.id == chapter.id) { %> class="next-chapter" <% } %>>
                             <%= chapter.title %>
                         </a>
                     </td>
@@ -60,7 +60,11 @@
 
 <!-- BUTTON -->
 <div id="btn" class="fixed-action-btn">
-    <a class="btn-floating waves-effect waves-light btn-large green" href="#!" onclick="apretaste.send({command: 'ESCUELA', data: {}})">
+    <a class="btn-floating waves-effect waves-light btn-large gray second" href="#!" onclick="apretaste.back();">
+        <i class="material-icons">arrow_back</i>
+    </a>
+    <a class="btn-floating waves-effect waves-light btn-large green"
+       href="#!" onclick="showChapter(<%= course.nextChapter.xtype %>, <%= course.nextChapter.id %>);">
         <i class="material-icons">arrow_back</i>
     </a>
 </div>

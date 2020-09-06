@@ -260,6 +260,15 @@ if (!Object.keys) {
 	}();
 }
 
+function showChapter(xtype, id) {
+	apretaste.send({
+		command: 'ESCUELA ' + xtype,
+		data: {
+			query: id
+		}
+	});
+}
+
 function showCourse(id){
 	apretaste.send({
 		command: 'ESCUELA CURSO',
