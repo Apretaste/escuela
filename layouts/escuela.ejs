@@ -1,32 +1,31 @@
-<!-- MENU -->
+<%
+var menu = [
+    {link: '', caption: 'Cursos'},
+    {link: 'terminados', caption: 'Terminados'}];
+%>
 
-<nav class="nav-center hide-on-unique" role="navigation">
-    <div class="nav-wrapper container white">
-        <!--notifications & profile-->
-        <ul class="center">
-            <li>
-                <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA'})">
-                    <i class="material-icons">school</i>
-                </a>
-            </li>
-            <li>
-                <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA PERFIL'})">
-                    <i class="material-icons">person</i>
-                </a>
-            </li>
-            <li>
-                <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA BUSCAR'})">
-                    <i class="material-icons">search</i>
-                </a>
-            </li>
-            <li>
-                <a class="black-text" href="#!" onclick="apretaste.send({'command':'ESCUELA TERMINADOS'})">
-                    <i class="material-icons">check</i>
-                </a>
-            </li>
+<!-- TABS -->
+<div class="row">
+    <div class="col s12">
+        <ul class="tabs tabs-fixed-width">
+            <% menu.forEach(function(e) { %>
+                <% var active = typeof title != "undefined" && title == e.caption ? 'active' : '' %>
+                <li class="tab">
+                    <a href="#" class="<%= active %>"
+                       onclick="apretaste.send({'command':'escuela <%= e.link %>'})"
+                    >
+                        <%= e.caption %>
+                    </a>
+                </li>
+            <% }); %>
         </ul>
     </div>
-</nav>
+</div>
+
+<div class="row">
+    {{APP_TEMPLATE_CODE}}
+</div>
+
 <div id="modalText" class="modal">
     <div class="modal-content">
 
@@ -35,5 +34,3 @@
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cerrar</a>
     </div>
 </div>
-
-{{APP_TEMPLATE_CODE}}

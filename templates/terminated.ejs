@@ -1,24 +1,31 @@
 <div class="row">
-        <div class="col s12"><h1>Terminados</h1></div>
-        <% courses.forEach(function(e, i) { %>
-		<div class="col s12 m6">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title"><%= e.title %></span>
-                    <p class="space5">
-                        <% for(var k = 0; k < e.stars; k++) {%>
-                        <i class="material-icons">star</i>
-                        <% } %>
-                        <% for(var k = 0; k < max_stars - e.stars; k++) {%>
-                        <i class="material-icons">star_border</i>
-                        <% } %>
-                    </p>
-                    <p class="space5"><%= parseInt(e.calification) %> puntos obtenidos</p>
-                </div>
-                <div class="card-action">
-                    <a href="#!" class="link link-simple" data-command="ESCUELA CURSO" data-query="<%= e.id %>">Ir al curso</a>
-                </div>
+    <% if (courses.length == 0){ %>
+        <div class="col s12 center">
+            <p class="middle-center grey-text">Aún no ha terminado ningún curso. Escoja un curso, páselo y se mostrará acá". Haz que luzca como la pantalla</p>
+        </div>
+    <% } %>
+
+    <% courses.forEach(function(e, i) { %>
+    <div class="col s12 m6">
+        <div class="card">
+            <div class="card-person grey lighten-5">
+                <span class="chip tiny clear" style="margin-right:5px;">
+                    <i class="fa fa-user"></i>
+                    <%= e.professor %>
+                </span>
+                <span class="chip tiny clear">
+                            <i class="fa fa-tag"></i>
+                    <% if (e.category != null){ %>
+                        <%= jsUcfirst(e.category.toLowerCase()) %>
+                    <% } %>
+                </span>
             </div>
-		</div>
-        <% }); %>
+            <div class="card-content">
+                <span class="card-title"><%= e.title %></span>
+                <% if (typeof e.calification  == 'undefined' || e.calification == null) e.calification = 0;%>
+                <p class="blue-grey-text">Aprobado con <%= parseInt(e.calification) %> puntos</p>
+            </div>
+        </div>
+    </div>
+    <% }); %>
 </div>

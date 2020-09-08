@@ -29,8 +29,56 @@ class Service
 		$person = Person::find($person_id);
 		$this->setLevel($request);
 
-		// get the most popular courses
-		$courses = Database::query("
+		$where = '';
+		$data = [];
+		if (isset($request->input->data->query)) {
+			$data = $request->input->data->query;
+			if (isset($data->category)
+				|| isset($data->author)
+				|| isset($data->raiting)
+				|| isset($data->title)
+			) {
+				$where = ' ';
+				if (isset($data->category)) {
+					if ($data->category !== 'ALL') {
+						$where .= " AND category = '{$data->category}'";
+					}
+				}
+				if (isset($data->author)) {
+					if ($data->author !== 'ALL') {
+						$where .= " AND teacher = '{$data->author}'";
+					}
+				}
+				if (isset($data->raiting)) {
+					if ($data->raiting !== '0') {
+						$where .= " AND stars >= '{$data->raiting}'";
+					}
+				}
+				if (isset($data->title)) {
+					if ($data->title !== '') {
+						$where .= " AND title LIKE '%{$data->title}%'";
+					}
+				}
+			}
+		}
+
+		$courses = [];
+		if (!empty(trim($where))) {
+			$courses = Database::query("
+				SELECT * FROM (
+				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
+				COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
+				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '{$request->person->id}') as answers_choosen
+				FROM _escuela_course A
+				JOIN _escuela_teacher B
+				ON A.teacher = B.id
+				WHERE A.active = 1) subq
+				WHERE 1 $where ORDER BY popularity DESC LIMIT 10");
+		} else {
+			// get the most popular courses
+			$courses = Database::query("
 			SELECT * FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
 				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
@@ -48,6 +96,7 @@ class Service
 				WHERE viewed < chapters - tests or answers_choosen < questions -- no se han visto todos, no se ha respondido todas
 				ORDER BY viewed/nullif(chapters,0) desc,  answers_choosen/nullif(answers,0) desc, popularity DESC
 			LIMIT 10");
+		}
 
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
@@ -71,11 +120,30 @@ class Service
 
 		// create content for the view
 		$content = [
-			'max_stars' => 5,
 			'courses' => $courses,
 			'name' => $person->firstName ? $person->firstName : '',
 			'level' => $level,
-			'completed' => $this->getTotalCompletedCourses($person_id)
+			'completed' => $this->getTotalCompletedCourses($person_id),
+
+			'categories' => [
+				'ALL' => 'Todas',
+				'SOCIEDAD' => 'Sociedad',
+				'NEGOCIOS' => 'Negocios',
+				'MEDICINA' => 'Medicina',
+				'INFORMATICA' => html_entity_decode('Inform&aacute;tica'),
+				'INGENIERIA' => html_entity_decode('Ingenier&iacute;a'),
+				'LETRAS' => 'Letras',
+				'ARTES' => 'Artes',
+				'FILOSOFIA' => html_entity_decode('Filosof&iacute;a'),
+				'SALUD' => 'Salud',
+				'POLITICA' => html_entity_decode('Pol&iacute;tica'),
+				'TECNICA' => html_entity_decode('T&eacute;cnica'),
+				'OTRO' => 'Otros',
+			],
+			'authors' => $this->getTeachers(),
+			'data' => $data,
+			'max_stars' => 5,
+			'title' => 'Cursos'
 		];
 
 		// setup response
@@ -223,7 +291,7 @@ class Service
 		$this->setFontFiles();
 
 		// display the course
-		$response->setLayout('escuela.ejs');
+		//$response->setLayout('escuela.ejs');
 		$response->setTemplate('course.ejs', ['course' => $course], [], $this->files);
 	}
 
@@ -257,9 +325,24 @@ class Service
 		$course = $this->getCourse($chapter->course, $request->person->id);
 		$terminated = $course->terminated;
 
+		$r = Database::queryFirst("select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and course = '{$chapter->course}') as viewed,
+                                    (select count(id) as total from apretaste._escuela_chapter WHERE course = '{$chapter->course}' and xtype = 'CAPITULO') as total;");
+
+		$totalChapters = (int) $r->total;
+		$viewedChapters = (int) $r->viewed;
+
 		// Log the visit to this chapter
 		if ($chapter->xtype === 'CAPITULO') {
-			Database::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
+			Database::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) 
+                VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
+		} else {
+			if ($viewedChapters < $totalChapters) {
+				return $response->setTemplate('text.ejs', [
+					'header' => 'Termina de estudiar',
+					'icon' => 'sentiment_very_dissatisfied',
+					'text' => 'Le faltan por leer '.($totalChapters - $viewedChapters).' cap&iacute;tulos. Cuando termines de leer todos los cap&iacute;tulos es que podr&aacute;s hacer el examen.',
+					'button' => ['href' => 'ESCUELA CURSO', 'query' => $chapter->course, 'caption' => 'Volver']]);
+			}
 		}
 
 		// get the code inside the <body> tag
@@ -272,23 +355,10 @@ class Service
 		// check if the course is terminated
 		$course = $this->getCourse($chapter->course, $request->person->id);
 
-		if (!$terminated && $course->terminated) { // si el status terminated del curso cambio de false a true
-
-			$times = (int) Database::query("select count(*) as t from  _escuela_completed_course where person = {$request->person->id} and course = {$chapter->course}")[0]->t;
-
-			if ($times === 0) { // si nunca lo ha terminado
-				Challenges::complete('complete-course', $request->person->id);
-
-				// add the experience if profile is completed
-				Level::setExperience('FINISH_COURSE', $request->person->id);
-			}
-
-			// marca el curso como terminado
-			Database::query("INSERT INTO _escuela_completed_course (person, course) VALUES ({$request->person->id}, {$chapter->course});");
-		}
-
 		// create content for the view
 		$content = [
+			'totalChapters' => $totalChapters,
+			'viewedChapters' => $viewedChapters,
 			'chapter' => $chapter,
 			'course' => $course,
 			'before' => $beforeAfter['before'],
@@ -296,7 +366,7 @@ class Service
 		];
 
 		// send response to the view
-		$response->setLayout('escuela.ejs');
+		//$response->setLayout('escuela.ejs');
 		$response->setTemplate('chapter.ejs', $content, $images, $this->files);
 	}
 
@@ -333,7 +403,6 @@ class Service
 		foreach ($answers as $id) {
 			$res = Database::query("SELECT * FROM _escuela_answer WHERE id = $id");
 
-
 			// do not let pass invalid answers
 			if (empty($res)) {
 				continue;
@@ -342,7 +411,7 @@ class Service
 			}
 
 			if ($course === null) {
-				$course = $this->getCourse($answer->course);
+				$course = $this->getCourse($answer->course, $request->person->id);
 			}
 
 			// save the answer in the database
@@ -354,18 +423,42 @@ class Service
 		}
 
 		if ($course !== null) {
-			$courseAfter = $this->getCourse($course->id);
+			$courseAfter = $this->getCourse($course->id, $request->person->id);
 
-			// si esta terminado el curso y fue terminado ahora
-			if (!$course->terminated && $courseAfter->terminated /*&& $affectedRows === count($answers)*/) {
-				Challenges::complete('complete-course', $request->person->id);
+			if ($courseAfter->calification < 80) {
+				$request->input->data->query = $course->id;
 
-				// add the experience if profile is completed
-				Level::setExperience('FINISH_COURSE', $request->person->id);
+				$this->_repetir($request, $response);
+
+				return $response->setTemplate('text.ejs', [
+						'header' => 'Desaprobado',
+						'icon' => 'sentiment_very_dissatisfied',
+						'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$courseAfter->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
+						'button' => ['href' => 'ESCUELA CURSO', 'query' => $course->id, 'caption' => 'Ir al curso']]);
 			}
+
+			Challenges::complete('complete-course', $request->person->id);
+
+			// add the experience if profile is completed
+			Level::setExperience('FINISH_COURSE', $request->person->id);
+
+			// marca el curso como terminado
+			Database::query("INSERT IGNORE INTO _escuela_completed_course (person, course, calification) VALUES ({$request->person->id}, {$course->id}, {$courseAfter->calification});");
+
+			// TODO: como informar el nivel actual en el mensaje de felicitacion?
+			$this->setLevel($request);
+
+			return $response->setTemplate('text.ejs', [
+					'header' => 'Aprobado',
+					'icon' => 'sentiment_very_satisfied',
+					'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. ',
+					'subtext' => 'Aprobado con '.$courseAfter->calification.' puntos. ',
+					'showRate' => true,
+					'courseId' => $course->id,
+					'button' => ['href' => 'ESCUELA', 'query' => $course->id, 'caption' => 'Cursos']]);
 		}
 
-		$this->setLevel($request);
+		return null;
 	}
 
 	/**
@@ -536,91 +629,12 @@ class Service
 	}
 
 	/**
-	 * Perfil de escuela
+	 * Cursos terminados
 	 *
 	 * @param Request $request
 	 * @param Response $response
-	 *
 	 * @throws Alert
-	 */
-	public function _perfil(Request $request, Response &$response)
-	{
-
-		// save profile
-		if (isset($request->input->data->save)) {
-			$fields = [
-				'first_name',
-				'last_name',
-				'date_of_birth',
-				'gender',
-				'province',
-				'city',
-				'highest_school_level',
-				'occupation',
-				'country',
-				'usstate',
-			];
-
-			// get the JSON with the bulk
-			$pieces = [];
-			foreach ($request->input->data->query as $key => $value) {
-				if ($key === 'date_of_birth') {
-					$value = DateTime::createFromFormat('d/m/Y', $value)->format('Y-m-d');
-				}
-
-				if (in_array($key, $fields, true)) {
-					$pieces[] = "$key='$value'";
-				}
-			}
-
-			// save changes on the database
-			if (!empty($pieces)) {
-				Database::query('UPDATE person SET ' . implode(',', $pieces) . " WHERE id={$request->person->id}");
-			}
-
-
-			Database::query("UPDATE person SET year_of_birth = YEAR(date_of_birth), month_of_birth = MONTH(date_of_birth), day_of_birth = DAY(date_of_birth) + 1 WHERE id={$request->person->id}");
-
-			return;
-		}
-
-		// show profile
-		$resume = $this->getResume($request->person->id);
-
-		$profile = Person::find($request->person->id);
-
-		if ($profile) {
-			$person = Database::query("SELECT date_of_birth FROM person WHERE id = {$request->person->id}")[0];
-			$profile->date_of_birth = $person->date_of_birth;
-		}
-
-		$profile->level = 'PRINCIPIANTE';
-		$r = Database::query("SELECT * FROM _escuela_profile WHERE person_id = '{$request->person->id}'");
-		if (!isset($r[0])) {
-			Database::query("INSERT INTO _escuela_profile (person_id, level) VALUES ('{$request->person->id}','PRINCIPIANTE');");
-		} else {
-			$profile->level = $r[0]->level;
-		}
-
-		$r = Database::query("SELECT COLUMN_TYPE AS result
-				FROM information_schema.COLUMNS
-				WHERE TABLE_NAME = '_escuela_profile'
-							AND COLUMN_NAME = 'level';");
-
-		$this->setFontFiles();
-
-		$levels = explode(',', str_replace(["'", 'enum(', ')'], '', $r[0]->result));
-		$response->setLayout('escuela.ejs');
-		$response->setTemplate('profile.ejs', [
-			'resume' => $resume,
-			'profile' => $profile,
-			'levels' => $levels,
-		], [], $this->files);
-	}
-
-	/**
-	 * Cursos terminados
-	 *
+	 * @throws Exception
 	 */
 	public function _terminados(Request $request, Response &$response)
 	{
@@ -630,22 +644,22 @@ class Service
 
 		// get the most popular courses
 		$courses = Database::query("
-		  SELECT *, right_answers / nullif(questions,0) * 100 as calification FROM (
-				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
-				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
-				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = '$id') as viewed,
-				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
-				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answers_choosen,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course
-					AND _escuela_answer_choosen.person_id = '$id'
-					AND (SELECT count(*) as right_choose FROM _escuela_question WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers
-				FROM _escuela_course A
-				JOIN _escuela_teacher B
-				ON A.teacher = B.id
-				WHERE A.active = 1
+		        SELECT *, coalesce(right_answers / nullif(questions,0),0) * 100 as calification FROM (
+                    SELECT 
+                            A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
+                            A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
+                            (select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = $id) as viewed,
+                            (select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
+                            (select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+                            (select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
+                            (select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
+                            (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$id') as answers_choosen,
+                            (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course
+                                AND _escuela_answer_choosen.person_id = $id
+                                AND (SELECT count(*) as right_choose FROM _escuela_question 
+                                        WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers
+                    FROM _escuela_course A JOIN _escuela_teacher B ON A.teacher = B.id
+                    WHERE A.active = 1
 				) subq
 				WHERE viewed >= (chapters - tests) and answers_choosen >= questions
 				ORDER BY calification DESC;");
@@ -666,6 +680,7 @@ class Service
 
 		$response->setLayout('escuela.ejs');
 		$response->setTemplate('terminated.ejs', [
+			'title' => 'Terminados',
 			'courses' => is_array($courses) ? $courses : [],
 			'profile' => $person,
 			'max_stars' => 5,
@@ -772,24 +787,35 @@ class Service
 	 * @return object|bool
 	 * @throws Exception
 	 */
-	private function getCourse($id, $person_id = '')
+	private function getCourse($id, $person_id)
 	{
-		$res = Database::query("	SELECT *,
-				(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_name,
-				(SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = _escuela_course.teacher) AS teacher_title,
-				((SELECT count(*) FROM _escuela_stars WHERE _escuela_stars.person_id = (SELECT id FROM person WHERE person.id = '$person_id') AND _escuela_stars.course = _escuela_course.id) > 0) as rated
-			FROM _escuela_course
-			WHERE id= '$id'
-			AND active=1");
+		$course = Database::queryFirst("SELECT *, truncate(coalesce(right_answers / nullif(questions,0),0) * 100, 0) as calification FROM (
+                    SELECT 
+                            A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.medal,
+                            A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
+                           ((SELECT count(*) FROM _escuela_stars WHERE _escuela_stars.person_id = (SELECT id FROM person WHERE person.id = '$person_id') AND _escuela_stars.course = A.id) > 0) as rated,
+                          	(SELECT name FROM _escuela_teacher WHERE _escuela_teacher.id = A.teacher) AS teacher_name,
+				            (SELECT title FROM _escuela_teacher WHERE _escuela_teacher.id = A.teacher) AS teacher_title,
+                            (select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = $person_id) as viewed,
+                            (select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
+                            (select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
+                            (select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
+                            (select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
+                            (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = $person_id) as answers_choosen,
+                            (select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course
+                                AND _escuela_answer_choosen.person_id = $person_id
+                                AND (SELECT count(*) as right_choose FROM _escuela_question 
+                                        WHERE _escuela_question.answer = _escuela_answer_choosen.answer) > 0) as right_answers
+                    FROM _escuela_course A JOIN _escuela_teacher B ON A.teacher = B.id
+                    WHERE A.active = 1
+				) subq
+				WHERE id = $id;");
 
-		if (!isset($res[0])) {
+		if ($course === null) {
 			return false;
 		}
 
-		$course = $res[0];
 		$course->chapters = $this->getChapters($id, $person_id);
-
-		$calification = 0;
 		$course->total_tests = 0;
 		$course->total_seen = 0;
 		$course->total_answered = 0;
@@ -799,10 +825,23 @@ class Service
 		$course->total_right = 0;
 		$course->repeated = false;
 
+		$course->nextChapter = null;
 		foreach ($course->chapters as $chapter) {
+
+			// get first by default
+			if ($course->nextChapter === null) {
+				$course->nextChapter = $chapter;
+			}
+
+			// if current is seen, get next
+			if ($course->nextChapter->seen) {
+				$course->nextChapter = $chapter; // if all are seen, nextChapter is the last (course's test)
+			}
+
 			if ($chapter->seen) {
 				$course->total_seen++;
 			}
+
 			if ($chapter->answered) {
 				$course->total_answered++;
 			}
@@ -814,22 +853,12 @@ class Service
 			}
 			$course->total_right += $chapter->total_right;
 			$course->total_questions += $chapter->total_questions;
-			$calification += $chapter->calification;
 		}
 
 		$course->total_chapters = $course->total_childs - $course->total_tests;
 		$course->terminated = $course->total_terminated == $course->total_childs;
-
-		$course->calification = 0;
-
-		// 100% por responder bien
-		if ($course->total_questions > 0) {
-			$course->calification += $course->total_right / $course->total_questions * 100;
-		}
-
-		$course->calification = intval($course->calification);
-
 		$course->progress = 0;
+
 		if ($course->total_childs > 0) {
 			$course->progress = number_format($course->total_terminated / $course->total_childs * 100, 2) * 1;
 		}
@@ -1185,20 +1214,20 @@ class Service
 	public function _example(Request $request, Response $response)
 	{
 		$response->setTemplate('chapter2.ejs', [
-		  'chapter' => (object) [
-			'title' => 'Ejemplo de capitulo',
-			'content' => [
-			  (object) [
-				'template' => '<p id="<%= id %>"><%= text %></p>',
-				'script' => '$("#<%= id %>").click(function() {alert(1);});',
-				'style' => '#<%= id %> {background: red;}',
-				'data' => (object) [
-				  'id' => 'parrafo1',
-				  'text' => 'tremendo texto'
+			'chapter' => (object) [
+				'title' => 'Ejemplo de capitulo',
+				'content' => [
+					(object) [
+						'template' => '<p id="<%= id %>"><%= text %></p>',
+						'script' => '$("#<%= id %>").click(function() {alert(1);});',
+						'style' => '#<%= id %> {background: red;}',
+						'data' => (object) [
+							'id' => 'parrafo1',
+							'text' => 'tremendo texto'
+						]
+					]
 				]
-			  ]
 			]
-		  ]
 		]);
 	}
 }

@@ -1,49 +1,116 @@
-<div class="row" style="margin-bottom: 6px;">
-	<div class="col s12">
-		<h1>Bienvenido <%= name %></h1>
-        <% if (completed == 0) {%> <!-- si no esta registrado en ningun curso debe decir ... -->
-        <p>Escoja un curso para empezar a estudiar, ganar niveles y medallas.</p>
-        <% } else { %>
-		<p>Usted ha completado <%= completed %> cursos y tiene <b><%= level %></b></p>
-		<p>A continuaci&oacute;n sus cursos empezados.</p>
-        <% }%>
-	</div>
-</div>
 <div class="row">
-<% courses.forEach(function(e, i) { %>
-	<div class="col s12 m6">
-		<div class="card">
-			<div class="card-content">
-				<span class="card-title"><%= e.title %></span>
-				<div class="progress">
-					<div class="determinate" style="width: <%= e.progress %>%"></div>
-				</div>
-				<p>
-					Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{author: courses[<%= i %>].teacher}"><%= e.professor %></a>
-					<%if (e.category != null){%> ● 
-					<a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{category: courses[<%= i %>].category}"><%= jsUcfirst(e.category.toLowerCase()) %></a>
-					<%}%>
-				</p>
- 				<p class="space5">
-					<% for(var k = 0; k < e.stars; k++) {%>
-					<i class="material-icons">star</i>
-					<% } %>
-                    <% for(var k = 0; k < max_stars - e.stars; k++) {%>
-					<i class="material-icons">star_border</i>
-					<% } %>
-				</p>
-			</div>
-			<div class="card-reveal">
-				<span class="card-title grey-text text-darken-4">
-					<i class="material-icons right">close</i>
-				</span>
-				<p><%= e.content %></p>
-			</div>
-			<div class="card-action">
-				<a href="#!" class="link link-simple" data-command="ESCUELA CURSO" data-query="<%= e.id %>">Ir al curso</a>
-				<i class="material-icons card-title right activator">more_horiz</i>
-			</div>
-		</div>
-	</div>
-<% }); %>
+
+    <!-- && false: oculto para cuando se quiera poner la opcion de buscar -->
+    <% if(Object.keys(data).length > 0 && false){ %>
+        <div class="col s12">
+            <div class="tags">
+                <div class="chip tiny"><%= categories[data.category] %></div>
+                <div class="chip tiny" id="authorChip"></div>
+                <div class="chip tiny"><%= data.raiting + '+' %></div>
+            </div>
+        </div>
+    <% } %>
+
+    <% if (courses.length == 0){ %>
+        <div class="col s12 center">
+            <p class="middle-center grey-text">¡Wow! No te queda ningún curso por leer. Espera unos días mientras ponemos más cursos</p>
+        </div>
+    <% } %>
+
+    <% courses.forEach(function(e, i) { %>
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-person grey lighten-5">
+                    <span class="chip tiny clear" style="margin-right:5px;">
+                        <i class="fa fa-user"></i>
+                        <%= e.professor %>
+                    </span>
+                    <span class="chip tiny clear">
+                            <i class="fa fa-tag"></i>
+                        <% if (e.category != null){ %>
+                            <%= jsUcfirst(e.category.toLowerCase()) %>
+                        <% } %>
+                    </span>
+                </div>
+                <div class="card-content">
+                    <span class="card-title"><%= e.title %></span>
+                    <div class="progress">
+                        <div class="determinate" style="width: <%= e.progress %>%"></div>
+                    </div>
+
+                    <p class="space5">
+                        <% for(var k = 0; k < e.stars; k++) { %>
+                            <i class="material-icons">star</i>
+                        <% } %>
+                        <% for(var k = 0; k < max_stars - e.stars; k++) { %>
+                            <i class="material-icons">star_border</i>
+                        <% } %>
+                    </p>
+                </div>
+
+                <div class="card-reveal">
+                    <span class="card-title grey-text text-darken-4">
+                        <i class="material-icons right">close</i>
+                    </span>
+                    <p><%= e.content %></p>
+                </div>
+
+                <div class="card-action grey lighten-4">
+                    <a href="#!" class="green-text" onclick="showCourse(<%= e.id %>);">
+                        Ir al curso</a>
+                    <i class="material-icons card-title right activator">more_horiz</i>
+                </div>
+            </div>
+        </div>
+    <% }); %>
+    <% if (false) { %>
+    <div class="fixed-action-btn">
+        <a href="#search-modal" class="btn-floating btn-large modal-trigger">
+            <i class="material-icons">search</i>
+        </a>
+    </div>
+    <% } %>
+</div>
+
+<div class="modal bottom-sheet" id="search-modal" style="max-height: none; height: 70vh;">
+    <div class="modal-content" style="margin-bottom: 3rem">
+        <h1>Buscar</h1>
+        <form class="row" style="margin-bottom: 0;">
+            <div class="input-field col s12">
+                <select id="category" class="input">
+                    <% for (var value in categories) { %>
+                        <option value="<%= value %>"><%= categories[value] %></option>
+                    <% } %>
+                </select>
+                <label for="category">Categor&iacute;a</label>
+            </div>
+
+            <div class="input-field col s12">
+                <select id="author">
+                    <option value="ALL">Todos</option>
+                    <% authors.forEach(function(author){ %>
+                        <option value="<%= author.id %>"><%= author.name %></option>
+                    <% }); %>
+                </select>
+                <label for="author">Autor:</label>
+            </div>
+            <div class="input-field col s12">
+                <select id="raiting">
+                    <option value="0">Todos</option>
+                    <option value="1">1+</option>
+                    <option value="2">2+</option>
+                    <option value="3">3+</option>
+                    <option value="4">4+</option>
+                    <option value="5">5</option>
+                </select>
+                <label for="raiting">Popularidad:</label>
+            </div>
+        </form>
+    </div>
+
+    <% if (false) { %>
+    <div class="fixed-action-btn">
+        <a id="btnSearch" class="btn-floating btn-large"><i class="material-icons">search</i></a>
+    </div>
+    <% } %>
 </div>

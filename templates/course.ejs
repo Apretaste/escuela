@@ -1,87 +1,74 @@
-<div class="row">
-    <div class="col s12">
-        <% if (course.repeated) { %>
-        <table width="100%" class="stripped highlight">
-            <tr>
-                <td align="center" bgcolor="#F6CED8">
-                    <p>
-                        <small>Hemos creado nuevas pruebas para que retomes este curso. Pasa todas las
-                            pruebas nuevamente; puedes leerte de nuevo el contenido de ser necesario.
-                        </small>
-                    </p>
-                </td>
-            </tr>
-        </table>
-        <% } %>
+<% if (course.repeated) { %>
+    <div class="row">
+        <div class="col s12">
+            <table width="100%" class="stripped highlight">
+                <tr>
+                    <td align="center" bgcolor="#F6CED8">
+                        <p>
+                            <small>Hemos creado nuevas pruebas para que retomes este curso. Pasa todas las
+                                pruebas nuevamente; puedes leerte de nuevo el contenido de ser necesario.
+                            </small>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
-</div>
-<% if (course.progress == 100 && course.calification >= 80) { %>
-<div class="row">
-    <div class="col s12 center-align">
-		<h1><b>¡Felicidades!</b></h1>
-		<p>Usted ha concluido el curso "<%= course.title %>" con <b><%= course.calification %></b> puntos y ha ganado esta medalla.</p>
-        <i class="material-icons large"><%= course.medal %></i>
-        <% if (course.rated === "0") {%>
-            <div id="rate-stars">
-            Valore este curso:<br/>
-            <% for(var k = 0; k < 5; k++) {%>
-                <a href="#!" class="star-link" data-query="{course: <%= course.id %>, stars: <%= k %>}"><i class="material-icons">star_border</i></a>
-            <% } %></div>
-        <% } %>
-    </div>
-</div>
 <% } %>
+
 <div class="row">
     <div class="col s12">
         <h1><%= course.title %></h1>
-            <div class="progress">
-                <div class="determinate" style="width: <%= course.progress %>%"></div>
-            </div>
-            <div class="row">
-                <div class="col s2 l1">
-                     <i class="material-icons medium" id="medal-icon"><%= course.medal %></i>
-                </div>
-                <div class="col s10 l11">
-                    <%= course.content %>
-                </div>
-            </div>
+        <div class="progress">
+            <div class="determinate" style="width: <%= course.progress %>%"></div>
+        </div>
     </div>
-</div>
-
-<div class="row">
+    <div class="col s2 l1">
+        <i class="material-icons medium" id="medal-icon"><%= course.medal %></i>
+    </div>
+    <div class="col s10 l11">
+        <%= course.content %>
+    </div>
     <div class="col s12">
-
         <h2>&Iacute;ndice del curso</h2>
-
         <table width="100%">
             <% course.chapters.forEach(function(chapter){ %>
-            <tr>
-                <td>
-                    <a href="#!" class="link link-simple" data-command="ESCUELA <%= chapter.xtype %>"
-                       data-query="<%= chapter.id %>"><%= chapter.title %></a>
-                </td>
-                <td align="right" style="text-align:right; white-space: nowrap;">
-                    <% if (chapter.xtype == 'CAPITULO') { %>
-                    <% if (chapter.terminated) { %>
-                    <i class="material-icons">check_box</i>
-                    <% } else { %>
-                    <i class="material-icons">check_box_outline_blank</i>
-                    <% } %>
-                    <% } else { %>
-                    <%= chapter.calification %>/100 puntos
-                    <% } %>
-                </td>
-            </tr>
+                <tr>
+                    <td>
+                        <a href="#!" onclick="showChapter('<%= chapter.xtype %>', <%= chapter.id %>);" <% if (course.nextChapter.id == chapter.id) { %> class="next-chapter" <% } %>>
+                            <%= chapter.title %>
+                        </a>
+                    </td>
+                    <td align="right" style="text-align:right; white-space: nowrap;">
+                        <% if (chapter.xtype == 'CAPITULO') { %>
+                            <% if (chapter.terminated) { %>
+                                <i class="material-icons">check_box</i>
+                            <% } else { %>
+                                <i class="material-icons">check_box_outline_blank</i>
+                            <% } %>
+                        <% } else { %>
+                            <%= chapter.calification %>/100 puntos
+                        <% } %>
+                    </td>
+                </tr>
             <% }) %>
         </table>
     </div>
 </div>
-<br>
-<br>
-<% if (course.calification < 80) { %>
-	<% if (course.all_chapters_finished) { %>
-		<div class="fixed-action-btn">
-        	<a href="#!" class="btn-floating btn-large waves-effect waves-light link link-simple" data-command="ESCUELA REPETIR" data-query="<%= course.id %>"><i class="material-icons">replay</i></a>
-		</div>
-	<% } %>
-<% } %>
+
+<div class="bottom-space"></div>
+
+<!-- BUTTON -->
+<div id="btn" class="fixed-action-btn">
+
+    <a class="btn-floating waves-effect waves-light grey third modal-trigger" href="#!" onclick="apretaste.send({command:'ESCUELA'});">
+        <i class="material-icons">school</i>
+    </a>
+    <a class="btn-floating waves-effect waves-light grey second modal-trigger" href="#!" onclick="apretaste.back();">
+        <i class="material-icons">arrow_back</i>
+    </a>
+    <a class="btn-floating btn-large waves-effect waves-light modal-trigger green"
+       href="#!" onclick="showChapter('<%= course.nextChapter.xtype %>', <%= course.nextChapter.id %>);">
+        <i class="material-icons">play_arrow</i>
+    </a>
+</div>

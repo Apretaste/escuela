@@ -1,40 +1,42 @@
 "use strict";
 
 var education = {
-	'PRIMARIO': 'Primario',
-	'SECUNDARIO': 'Secundario',
-	'TECNICO': 'Técnico',
-	'UNIVERSITARIO': 'Universitario',
-	'POSTGRADUADO': 'Postgraduado',
-	'DOCTORADO': 'Doctorado',
-	'OTRO': 'Otro'
+	PRIMARIO: 'Primario',
+	SECUNDARIO: 'Secundario',
+	TECNICO: 'Técnico',
+	UNIVERSITARIO: 'Universitario',
+	POSTGRADUADO: 'Postgraduado',
+	DOCTORADO: 'Doctorado',
+	OTRO: 'Otro'
 };
+
 var occupation = {
-	'AMA_DE_CASA': 'Ama de casa',
-	'ESTUDIANTE': 'Estudiante',
-	'EMPLEADO_PRIVADO': 'Empleado Privado',
-	'EMPLEADO_ESTATAL': 'Empleado Estatal',
-	'INDEPENDIENTE': 'Trabajador Independiente',
-	'JUBILADO': 'Jubilado',
-	'DESEMPLEADO': 'Desempleado'
+	AMA_DE_CASA: 'Ama de casa',
+	ESTUDIANTE: 'Estudiante',
+	EMPLEADO_PRIVADO: 'Empleado Privado',
+	EMPLEADO_ESTATAL: 'Empleado Estatal',
+	INDEPENDIENTE: 'Trabajador Independiente',
+	JUBILADO: 'Jubilado',
+	DESEMPLEADO: 'Desempleado'
 };
+
 var provinces = {
-	'PINAR_DEL_RIO': 'Pinar del Río',
-	'LA_HABANA': 'La Habana',
-	'ARTEMISA': 'Artemisa',
-	'MAYABEQUE': 'Mayabeque',
-	'MATANZAS': 'Matanzas',
-	'VILLA_CLARA': 'Villa Clara',
-	'CIENFUEGOS': 'Cienfuegos',
-	'SANCTI_SPIRITUS': 'Sancti Spiritus',
-	'CIEGO_DE_AVILA': 'Ciego de Ávila',
-	'CAMAGUEY': 'Camagüey',
-	'LAS_TUNAS': 'Las Tunas',
-	'HOLGUIN': 'Holguín',
-	'GRANMA': 'Granma',
-	'SANTIAGO_DE_CUBA': 'Santiago de Cuba',
-	'GUANTANAMO': 'Guantánamo',
-	'ISLA_DE_LA_JUVENTUD': 'Isla de la Juventud'
+	PINAR_DEL_RIO: 'Pinar del Río',
+	LA_HABANA: 'La Habana',
+	ARTEMISA: 'Artemisa',
+	MAYABEQUE: 'Mayabeque',
+	MATANZAS: 'Matanzas',
+	VILLA_CLARA: 'Villa Clara',
+	CIENFUEGOS: 'Cienfuegos',
+	SANCTI_SPIRITUS: 'Sancti Spiritus',
+	CIEGO_DE_AVILA: 'Ciego de Ávila',
+	CAMAGUEY: 'Camagüey',
+	LAS_TUNAS: 'Las Tunas',
+	HOLGUIN: 'Holguín',
+	GRANMA: 'Granma',
+	SANTIAGO_DE_CUBA: 'Santiago de Cuba',
+	GUANTANAMO: 'Guantánamo',
+	ISLA_DE_LA_JUVENTUD: 'Isla de la Juventud'
 };
 
 function formatDate(dateStr) {
@@ -64,25 +66,18 @@ function jsUcfirst(string) {
 }
 
 $(function () {
-	// after render
-	$(".link").attr('href', '#!');
-	$(".link-simple").click(function () {
-		var q = null;
-		eval('q = ' + $(this).attr('data-query'));
-		apretaste.send({
-			command: $(this).attr('data-command'),
-			data: {query: q}
-		});
-	});
-
+	$('.modal').modal();
 	$('select').formSelect();
+	$('.tabs').tabs();
+
 	$('.fixed-action-btn').floatingActionButton({
 		direction: 'left',
 		hoverEnabled: false
 	});
+
 	$("#btnSearch").click(function () {
 		apretaste.send({
-			command: 'ESCUELA BUSCAR',
+			command: 'ESCUELA',
 			data: {
 				query: {
 					category: $("#category").val(),
@@ -94,234 +89,6 @@ $(function () {
 		});
 	});
 
-	if (typeof profile != 'undefined') {
-		var provinces = ['Pinar del Rio', 'La Habana', 'Artemisa', 'Mayabeque', 'Matanzas', 'Villa Clara', 'Cienfuegos', 'Sancti Spiritus', 'Ciego de Avila', 'Camaguey', 'Las Tunas', 'Holguin', 'Granma', 'Santiago de Cuba', 'Guantanamo', 'Isla de la Juventud'];
-		var states = [{
-			caption: 'Alabama',
-			value: 'AL'
-		}, {
-			caption: 'Alaska',
-			value: 'AK'
-		}, {
-			caption: 'Arizona',
-			value: 'AZ'
-		}, {
-			caption: 'Arkansas',
-			value: 'AR'
-		}, {
-			caption: 'California',
-			value: 'CA'
-		}, {
-			caption: 'Carolina del Norte',
-			value: 'NC'
-		}, {
-			caption: 'Carolina del Sur',
-			value: 'SC'
-		}, {
-			caption: 'Colorado',
-			value: 'CO'
-		}, {
-			caption: 'Connecticut',
-			value: 'CT'
-		}, {
-			caption: 'Dakota del Norte',
-			value: 'ND'
-		}, {
-			caption: 'Dakota del Sur',
-			value: 'SD'
-		}, {
-			caption: 'Delaware',
-			value: 'DE'
-		}, {
-			caption: 'Florida',
-			value: 'FL'
-		}, {
-			caption: 'Georgia',
-			value: 'GA'
-		}, {
-			caption: 'Hawái',
-			value: 'HI'
-		}, {
-			caption: 'Idaho',
-			value: 'ID'
-		}, {
-			caption: 'Illinois',
-			value: 'IL'
-		}, {
-			caption: 'Indiana',
-			value: 'IN'
-		}, {
-			caption: 'Iowa',
-			value: 'IA'
-		}, {
-			caption: 'Kansas',
-			value: 'KS'
-		}, {
-			caption: 'Kentucky',
-			value: 'KY'
-		}, {
-			caption: 'Luisiana',
-			value: 'LA'
-		}, {
-			caption: 'Maine',
-			value: 'ME'
-		}, {
-			caption: 'Maryland',
-			value: 'MD'
-		}, {
-			caption: 'Massachusetts',
-			value: 'MA'
-		}, {
-			caption: 'Míchigan',
-			value: 'MI'
-		}, {
-			caption: 'Minnesota',
-			value: 'MN'
-		}, {
-			caption: 'Misisipi',
-			value: 'MS'
-		}, {
-			caption: 'Misuri',
-			value: 'MO'
-		}, {
-			caption: 'Montana',
-			value: 'MT'
-		}, {
-			caption: 'Nebraska',
-			value: 'NE'
-		}, {
-			caption: 'Nevada',
-			value: 'NV'
-		}, {
-			caption: 'Nueva Jersey',
-			value: 'NJ'
-		}, {
-			caption: 'Nueva York',
-			value: 'NY'
-		}, {
-			caption: 'Nuevo Hampshire',
-			value: 'NH'
-		}, {
-			caption: 'Nuevo México',
-			value: 'NM'
-		}, {
-			caption: 'Ohio',
-			value: 'OH'
-		}, {
-			caption: 'Oklahoma',
-			value: 'OK'
-		}, {
-			caption: 'Oregón',
-			value: 'OR'
-		}, {
-			caption: 'Pensilvania',
-			value: 'PA'
-		}, {
-			caption: 'Rhode Island',
-			value: 'RI'
-		}, {
-			caption: 'Tennessee',
-			value: 'TN'
-		}, {
-			caption: 'Texas',
-			value: 'TX'
-		}, {
-			caption: 'Utah',
-			value: 'UT'
-		}, {
-			caption: 'Vermont',
-			value: 'VT'
-		}, {
-			caption: 'Virginia',
-			value: 'VA'
-		}, {
-			caption: 'Virginia Occidental',
-			value: 'WV'
-		}, {
-			caption: 'Washington',
-			value: 'WA'
-		}, {
-			caption: 'Wisconsin',
-			value: 'WI'
-		}, {
-			caption: 'Wyoming',
-			value: 'WY'
-		}];
-
-		provinces.forEach(function (province) {
-			$('#province').prepend('<option value=\'' + province.toUpperCase().replace(/\s/g, '_') + '\'>' + province + '</option>');
-		});
-
-		states.forEach(function (state) {
-			$('#usstate').append('<option value=\'' + state.value + '\'>' + state.caption + '</option>');
-		});
-
-		$('#gender option[value="' + profile.gender.substring(0, 1) + '"]').prop("selected", true);
-		$('#sexual_orientation option[value="' + profile.sexual_orientation + '"]').prop("selected", true);
-		$('#marital_status option[value="' + profile.marital_status + '"]').prop("selected", true);
-		$('#religion option[value="' + profile.religion + '"]').prop("selected", true);
-
-		if (typeof profile.country !== "undefined")
-			$('#country option[value="' + profile.country.toUpperCase() + '"]').prop("selected", true);
-
-		if (typeof province.country !== "undefined")
-			$('#province option[value="' + profile.province.toUpperCase().replace(/\s/g, '_') + '"]').prop("selected", true);
-
-		$('#usstate option[value="' + profile.usstate + '"]').prop("selected", true);
-		$('#body_type option[value="' + profile.body_type + '"]').prop("selected", true);
-		$('#eyes option[value="' + profile.eyes + '"]').prop("selected", true);
-		$('#skin option[value="' + profile.skin + '"]').prop("selected", true);
-		$('#hair option[value="' + profile.hair + '"]').prop("selected", true);
-		$('#highest_school_level option[value="' + profile.highest_school_level + '"]').prop("selected", true);
-		$('#occupation option[value="' + profile.occupation + '"]').prop("selected", true);
-
-		var date = new Date();
-		var today = '12/31/' + date.getFullYear();
-		$('.datepicker').datepicker({
-			format: 'd/mm/yyyy',
-			defaultDate: new Date(profile.date_of_birth),
-			setDefaultDate: true,
-			selectMonths: true,
-			// Creates a dropdown to control month
-			selectYears: 15,
-			// Creates a dropdown of 15 years to control year,
-			max: true,
-			today: 'Hoy',
-			clear: 'Limpiar',
-			close: 'Aceptar'
-		});
-		profile.date_of_birth = $('#date_of_birth').val();
-		$('.save').click(function () {
-			var names = ['first_name', 'last_name', 'date_of_birth', 'country', 'province', 'usstate', 'gender', 'highest_school_level', 'occupation', 'level'];
-			var data = {
-				save: true,
-				query: {
-					level: $('#level').val()
-				}
-			};
-			names.forEach(function (prop) {
-				if ($('#' + prop).val() != profile[prop] && $('#' + prop).val() != null) {
-					data.query[prop] = $('#' + prop).val();
-				}
-			});
-
-			if (!$.isEmptyObject(data)) {
-				return apretaste.send({
-					"command": "ESCUELA PERFIL",
-					"data": data,
-					"redirect": false,
-					"callback": {
-						"name": "showToast",
-						"data": "Sus cambios han sido guardados"
-					}
-				});
-			} else {
-				showToast("Usted no ha hecho ningun cambio");
-			}
-		});
-		$('select').formSelect();
-	}
-
 	if (typeof data != 'undefined' && data != null) {
 		//data = data.query;
 		if (typeof data.category != 'undefined') {
@@ -329,7 +96,9 @@ $(function () {
 		}
 
 		if (typeof data.author != 'undefined') {
-			$('#author option[value="' + data.author + '"]').prop("selected", true);
+			var element = $('#author option[value="' + data.author + '"]');
+			element.prop("selected", true);
+			$('#authorChip').html('Autor: ' + element.html());
 		}
 
 		if (typeof data.raiting != 'undefined') {
@@ -343,23 +112,26 @@ $(function () {
 		$('select').formSelect();
 	}
 
-	$(".star-link").click(function () {
-		var q = null;
-		eval('q = ' + $(this).attr('data-query'));
-		apretaste.send({
-			command: 'ESCUELA CALIFICAR',
-			data: {
-				query: q
-			},
-			redirect: false,
-			callback: {
-				name: "showToast",
-				data: "Su opinion ha sido enviada"
-			}
-		});
-		$("#rate-stars").hide();
-	});
+
 });
+
+function submitRate(courseId, stars){
+	apretaste.send({
+		command: 'ESCUELA CALIFICAR',
+		data: {
+			query: {
+				course: courseId,
+				stars: stars
+			}
+		},
+		redirect: false,
+		callback: {
+			name: "showToast",
+			data: "Su opinion ha sido enviada"
+		}
+	});
+	$("#rate-stars").hide();
+}
 
 // submit a test once completed
 function submitTest() {
@@ -389,33 +161,12 @@ function submitTest() {
 			data: {
 				answers: answers
 			},
-			redirect: false,
-			callback: {
-				name: "testSent",
-				data: '{}'
-			}
+			redirect: true
 		});
 	}
 }
 
-function testSent(data) {
-	M.toast({
-		html: 'Prueba enviada satisfactoriamente'
-	});
-
-	// display the DONE message
-	$('#list').hide();
-	$('#msg').show();
-	apretaste.send({
-		command: "ESCUELA PRUEBA",
-		data: {
-			query: chapter.id
-		}
-	});
-}
-
 // POLYFILL
-
 
 if (!String.prototype.padStart) {
 	String.prototype.padStart = function padStart(targetLength, padString) {
@@ -507,4 +258,40 @@ if (!Object.keys) {
 			return result;
 		};
 	}();
+}
+
+function showChapter(xtype, id) {
+	apretaste.send({
+		command: 'ESCUELA ' + xtype,
+		data: {
+			query: id
+		}
+	});
+}
+
+function showCourse(id){
+	apretaste.send({
+		command: 'ESCUELA CURSO',
+		data: {
+			query: id
+		}
+	});
+}
+
+function submitSearchByAuthor(author) {
+	apretaste.send({
+		command: 'ESCUELA BUSCAR',
+		data: {
+			author: author
+		}
+	});
+}
+
+function submitSearchByCategory(category) {
+	apretaste.send({
+		command: 'ESCUELA BUSCAR',
+		data: {
+			category: category
+		}
+	});
 }

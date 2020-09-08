@@ -6,79 +6,105 @@
 </div>
 
 <% if (chapter.xtype == 'PRUEBA') { %>
+
+    <% if (chapter.terminated) { %>
     <div class="row">
         <div class="col s12">
-            <% if (chapter.terminated) { %>
-                <p align="center"
-                   style="background-color:<% if ( chapter.calification >= 80) { %> green <% } else { %>#C11414<% } %>; color:white; padding:5px;">
-                    <b>Terminada con <%= chapter.calification %> puntos de 100</b>
-                </p>
-            <% } %>
+            <p align="center"
+               style="background-color:<% if ( chapter.calification >= 80) { %> green <% } else { %>#C11414<% } %>; color:white; padding:5px;">
+                <b>Terminada con <%= chapter.calification %> puntos de 100</b>
+            </p>
+        </div>
+    </div>
+    <% } %>
 
-            <% chapter.questions.forEach(function(question) { %>
-                <%= question.title %><br/>
+    <% var i = 0;%>
+    <% chapter.questions.forEach(function(question) { %>
+        <% i++;%>
+        <div class="row">
+            <div class="col s12">
+                <h4><small><%= i %>.</small> <%= question.title %></h4>
+                <table>
                 <% question.answers.forEach(function(answer){ %>
-                    <% if (question.terminated) { %>
-                        <% if (question.answer_choosen == answer.id) { %>
-                            -&nbsp;<b><%= answer.title %></b>
+                    <tr><td>
+                        <% if (question.terminated) { %>
+                            <% if (question.answer_choosen == answer.id) { %>
+                                -&nbsp;<b><%= answer.title %></b>
+                            <% } else { %>
+                                -&nbsp;<%= answer.title %>
+                            <% } %>
+                            <% if (question.answer == answer.id) { %>
+                                <span style="color:gray;">&#10004;</span>
+                            <% } %> <br/>
                         <% } else { %>
-                            -&nbsp;<%= answer.title %>
+                            <% var checked = answer.choosen ? 'checked' : '' %>
+                            <label style="display: table-row;">
+                                <input class="with-gap answer" name="<%= question.id %>"
+                                       value="<%= answer.id %>" <%= checked %> type="radio"/>
+                                <span><%= answer.title %></span>
+                            </label>
                         <% } %>
-                        <% if (question.answer == answer.id) { %>
-                            <span style="color:gray;">&#10004;</span>
-                        <% } %> <br/>
-                    <% } else { %>
-                        <% var checked = answer.choosen ? 'checked' : '' %>
-                        <label>
-                            <input class="with-gap answer" name="<%= question.id %>"
-                                   value="<%= answer.id %>" <%= checked %> type="radio"/>
-                            <span><%= answer.title %></span>
-                        </label>
-
-                        <a href="#!" class="link link-simple" data-command="ESCUELA RESPONDER"
-                           data-query="<%= answer.id %>"></a><br/>
-                    <% } %>
+                    </td></tr>
                 <% }); %>
-            <% }); %>
+                </table>
+            </div>
         </div>
-    </div>
+    <% }); %>
 
-    <% if (!chapter.terminated) { %>
-        <div class="row left-align" style="margin-bottom: 0;">
-            <!-- SAVE BUTTON -->
-            <div class="col s12"><a class="btn-floating btn-large waves-effect waves-light" href="#!"
-                                    onclick="submitTest()"><i class="material-icons">send</i></a></div>
-        </div>
-    <% } %>
 <% } %>
 
-<% if (chapter.xtype != 'PRUEBA') { %>
-    <div class="row" style="margin-bottom: 0;">
-        <div class="col s12 left-align">
-            <% if (!(chapter.xtype == 'PRUEBA' && course.all_chapters_finished)) { %>
-                <% if (after) { %>
-                    <a href="#!" class="link link-simple waves-effect waves-light btn-floating btn-large"
-                       data-command="ESCUELA <%= after.xtype %>" data-query="<%= after.id %>"><i class="material-icons">arrow_forward</i></a>
-                <% } %>
-            <% } %>
-        </div>
-    </div>
-<% } %>
-<div class="fixed-action-btn">
-    <% if (!before) { %>
-        <a class="btn-floating btn-large link link-simple grey darken-3" data-command="ESCUELA CURSO"
-           data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbered</i></a>
-    <% } else { %>
-        <a class="btn-floating btn-large grey darken-3">
-            <i class="large material-icons">menu</i>
+<div class="bottom-space"></div>
+
+<div id="btn" class="fixed-action-btn">
+    <% var showAfter = false; %>
+    <% var showBefore = false; %>
+    <% var showCheck = false; %>
+
+    <% function secondButton() { %>
+        <a class="btn-floating waves-effect waves-light grey second" href="#!" onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: '<%= chapter.course %>'}})">
+            <i class="material-icons">format_list_numbered</i>
         </a>
-        <ul>
-            <li><a href="#!" class="btn-floating btn-small link link-simple grey darken-3"
-                   data-command="ESCUELA <%= before.xtype %>" data-query="<%= before.id %>"><i class="material-icons">arrow_back</i></a>
-            </li>
-            <li><a class="btn-floating btn-small link link-simple grey darken-3" data-command="ESCUELA CURSO"
-                   data-query="<%= chapter.course %>"><i class="material-icons">format_list_numbered</i></a></li>
-        </ul>
     <% } %>
+
+    <% if (chapter.xtype != 'PRUEBA') { %>
+        <% if (!(chapter.xtype == 'PRUEBA' && course.all_chapters_finished)) { %>
+            <% if (after) { %>
+                <% showAfter = true; %>
+            <% } %>
+        <% } %>
+    <% } %>
+
+    <% if (chapter.xtype == 'PRUEBA') { %>
+        <% if (!chapter.terminated) { %>
+            <!-- SAVE BUTTON -->
+            <% showCheck = true; %>
+        <% } %>
+    <% } %>
+
+    <% if (before && chapter.xtype != 'PRUEBA') { %>
+        <% showBefore = true; %>
+    <% } %>
+
+    <% if (!showAfter && !showCheck) secondButton(); %>
+
+    <% if (showBefore) { %>
+        <a class="btn-floating waves-effect waves-light <% if (showAfter || showCheck) { %> grey third <% } else { %> green btn-large <% } %>" href="#!" onclick="apretaste.send({command: 'ESCUELA <%= before.xtype %>', data: {query: '<%= before.id %>'}});">
+            <i class="material-icons">arrow_back</i>
+        </a>
+    <% } %>
+
+    <% if (showAfter || showCheck) secondButton(); %>
+
+    <% if (showAfter) { %>
+        <a href="#!" class="btn-floating btn-large waves-effect waves-light green <% if (showCheck) { %> second <% } %>" onclick="apretaste.send({command: 'ESCUELA <%= after.xtype %>', data:{query: '<%= after.id %>'}});">
+            <i class="material-icons">arrow_forward</i>
+        </a>
+    <% } %>
+
+    <% if (showCheck) { %>
+        <a class="btn-floating btn-large waves-effect waves-light" href="#!" onclick="submitTest()">
+            <i class="material-icons">check</i>
+        </a>
+    <% } %>
+
 </div>
-<br/>

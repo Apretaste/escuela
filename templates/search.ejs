@@ -1,4 +1,3 @@
-
 <div class="row" style="margin-bottom: 0;">
     <div class="col s12">
         <h1>Buscar</h1>
@@ -41,9 +40,11 @@
     </div>
 </div>
 
+<% if (false) { %>
 <div class="fixed-action-btn">
 	<a id="btnSearch" class="btn-floating btn-large"><i class="material-icons">search</i></a>
 </div>
+<% } %>
 
 <%if (noSearch){%>
 <div class="row">
@@ -66,17 +67,17 @@
             <div class="card-content">
                 <span class="card-title"><%= e.title %></span>
                 <p>
-					Por <a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{author: courses[<%= i %>].teacher}"><%= e.professor %></a>
+					Por <a href="#" onclick="submitSearchByAuthor(courses[<%= i %>].teacher);"><%= e.professor %></a>
 					<%if (e.category != null){%> ● 
-					<a href="#" class="link link-simple" data-command = "ESCUELA BUSCAR" data-query="{category: courses[<%= i %>].category}"><%= jsUcfirst(e.category.toLowerCase()) %></a>
+					<a href="#"  onclick="submitSearchByCategory(courses[<%= i %>].category);"><%= jsUcfirst(e.category.toLowerCase()) %></a>
 					<%}%>
 				</p>
                 <p class="space5">
                     <% for(var k = 0; k < e.stars; k++) {%>
-                    <i class="material-icons">star</i>
+                        <i class="material-icons">star</i>
                     <% } %>
                     <% for(var k = 0; k < max_stars - e.stars; k++) {%>
-                    <i class="material-icons">star_border</i>
+                        <i class="material-icons">star_border</i>
                     <% } %>
                 </p>
             </div>
@@ -87,7 +88,7 @@
                 <p><%= e.content %></p>
             </div>
             <div class="card-action">
-                <a href="#!" class="link link-simple" data-command="ESCUELA CURSO" data-query="<%= e.id %>">Ir al curso</a>
+                <a href="#!" onclick="showCourse(<%= e.id %>);">Ir al curso</a>
                 <i class="material-icons card-title right activator">more_horiz</i>
             </div>
         </div>
