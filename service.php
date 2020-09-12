@@ -277,6 +277,10 @@ class Service
 		$id = intval($request->input->data->query);
 		$course = $this->getCourse($id, $request->person->id);
 
+		if ($course->total_seen == 0) {
+			Challenges::complete('start-school', $request->person->id);
+		}
+
 		// if course cannot be found
 		if (empty($course)) {
 			$response->setLayout('escuela.ejs');
