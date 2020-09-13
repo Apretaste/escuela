@@ -3,6 +3,7 @@
 use Apretaste\Challenges;
 use Apretaste\Person;
 use Framework\Alert;
+use Framework\Config;
 use Framework\Database;
 use Apretaste\Request;
 use Apretaste\Response;
@@ -442,6 +443,9 @@ class Service
 			}
 
 			Challenges::complete('complete-course', $request->person->id);
+
+			if ($course->id === Config::pick('challenges')['tutorial_id'])
+                Challenges::complete('app-tutorial', $request->person->id);
 
 			// add the experience if profile is completed
 			Level::setExperience('FINISH_COURSE', $request->person->id);
