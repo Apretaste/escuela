@@ -402,6 +402,27 @@ class Service
 		// pull the answer selected
 		$answers = $request->input->data->answers;
 
+		if (count($answers) < 1)
+			return;
+
+		// check completed course
+		$res = Database::queryFirst("SELECT * FROM _escuela_answer WHERE id = {$answers[0]}");
+		if (empty($res))
+			return;
+
+		$cnt = Database::queryFirst("select count(*) as cnt from _escuela_completed_course where person = {$request->person->id} and course = {$res->course}")->cnt;
+
+		if  ($cnt > 0) {
+			return $response->setTemplate('text.ejs', [
+				'header' => 'Aprobado',
+				'icon' => 'sentiment_very_satisfied',
+				'text' => 'Este curso ya lo has aprobado anteriormente.',
+				'subtext' => 'Ve a otros cursos para seguir aprendiendo',
+				'showRate' => true,
+				'courseId' => $res->course,
+				'button' => ['href' => 'ESCUELA', 'query' => $res->course, 'caption' => 'Cursos']]);
+		}
+
 		// check if the course is terminated
 		$affectedRows = 0;
 		$course = null;
@@ -441,6 +462,8 @@ class Service
 						'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$courseAfter->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
 						'button' => ['href' => 'ESCUELA CURSO', 'query' => $course->id, 'caption' => 'Ir al curso']]);
 			}
+
+
 
 			Challenges::complete('complete-course', $request->person->id);
 
