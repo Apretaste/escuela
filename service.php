@@ -1,14 +1,15 @@
 <?php
 
-use Apretaste\Challenges;
+use Apretaste\Level;
 use Apretaste\Person;
-use Framework\Alert;
-use Framework\Config;
-use Framework\Database;
 use Apretaste\Request;
 use Apretaste\Response;
+use Apretaste\Challenges;
+use Framework\Alert;
 use Framework\Images;
-use Apretaste\Level;
+use Framework\Config;
+use Framework\Database;
+use Framework\GoogleAnalytics;
 
 class Service
 {
@@ -305,9 +306,7 @@ class Service
 	 *
 	 * @param Request $request
 	 * @param Response $response
-	 *
 	 * @return \Apretaste\Response
-	 * @throws Alert
 	 * @example ESCUELA CAPITULO 3
 	 * @author kuma
 	 */
@@ -330,16 +329,18 @@ class Service
 		$course = $this->getCourse($chapter->course, $request->person->id);
 		$terminated = $course->terminated;
 
-		$r = Database::queryFirst("select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and course = '{$chapter->course}') as viewed,
-                                    (select count(id) as total from apretaste._escuela_chapter WHERE course = '{$chapter->course}' and xtype = 'CAPITULO') as total;");
+		$r = Database::queryFirst("
+			select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and course = '{$chapter->course}') as viewed,
+			(select count(id) as total from apretaste._escuela_chapter WHERE course = '{$chapter->course}' and xtype = 'CAPITULO') as total;");
 
 		$totalChapters = (int) $r->total;
 		$viewedChapters = (int) $r->viewed;
 
 		// Log the visit to this chapter
 		if ($chapter->xtype === 'CAPITULO') {
-			Database::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) 
-                VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
+			Database::query("
+				INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) 
+				VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
 		} else {
 			if ($viewedChapters < $totalChapters) {
 				return $response->setTemplate('text.ejs', [
@@ -442,8 +443,9 @@ class Service
 
 			// save the answer in the database
 			// INSERT IGNORE: if course already completed, affected rows will be 0
-			Database::query("INSERT IGNORE INTO _escuela_answer_choosen (person_id, email, answer, chapter, question, course)
-			                 VALUES ('{$request->person->id}','{$request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
+			Database::query("
+				INSERT IGNORE INTO _escuela_answer_choosen (person_id, email, answer, chapter, question, course)
+				VALUES ('{$request->person->id}','{$request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
 
 			$affectedRows += Database::getAffectedRows();
 		}
@@ -457,18 +459,23 @@ class Service
 				$this->_repetir($request, $response);
 
 				return $response->setTemplate('text.ejs', [
-						'header' => 'Desaprobado',
-						'icon' => 'sentiment_very_dissatisfied',
-						'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$courseAfter->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
-						'button' => ['href' => 'ESCUELA CURSO', 'query' => $course->id, 'caption' => 'Ir al curso']]);
+					'header' => 'Desaprobado',
+					'icon' => 'sentiment_very_dissatisfied',
+					'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$courseAfter->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
+					'button' => ['href' => 'ESCUELA CURSO', 'query' => $course->id, 'caption' => 'Ir al curso']
+				]);
 			}
 
-
-
+			// set challenge
 			Challenges::complete('complete-course', $request->person->id);
 
-			if ($course->id === Config::pick('challenges')['tutorial_id'])
-                Challenges::complete('app-tutorial', $request->person->id);
+			// complete tutorial challenge
+			if ($course->id === Config::pick('challenges')['tutorial_id']) {
+				Challenges::complete('app-tutorial', $request->person->id);
+			}
+
+			// submit to Google Analytics 
+			GoogleAnalytics::event('course_complete', $course->id);
 
 			// add the experience if profile is completed
 			Level::setExperience('FINISH_COURSE', $request->person->id);
