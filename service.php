@@ -950,7 +950,7 @@ class Service
 	{
 		$chapter = false;
 
-		$r = Database::query("SELECT * FROM _escuela_chapter WHERE id = '$id';", true, 'latin1');
+		$r = Database::query("SELECT * FROM _escuela_chapter WHERE id = '$id';");
 
 		if (isset($r[0])) {
 			$chapter = $r[0];
