@@ -1025,7 +1025,7 @@ class Service
 	private function getChapterQuestions($test_id, $person_id = '', $answer_order = 'rand()')
 	{
 		$questions = [];
-		$rows = Database::query("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;", true, 'latin1');
+		$rows = Database::query("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;");
 		if (!is_array($questions)) {
 			$questions = [];
 		}
@@ -1049,7 +1049,7 @@ class Service
 	 */
 	private function getQuestion($question_id, $person_id = '', $answer_order = 'rand()')
 	{
-		$row = Database::query("SELECT * FROM _escuela_question WHERE id = '$question_id';", true, 'latin1');
+		$row = Database::query("SELECT * FROM _escuela_question WHERE id = '$question_id';");
 		if (isset($row[0])) {
 			$q = $row[0];
 			$q->answers = $this->getAnswers($question_id, $answer_order);
