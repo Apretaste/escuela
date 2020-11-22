@@ -333,10 +333,11 @@ class Service
 			select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and course = '{$chapter->course}') as viewed,
 			(select count(id) as total from apretaste._escuela_chapter WHERE course = '{$chapter->course}' and xtype = 'CAPITULO') as total;");
 
-		if ($course->total_seen === 0)
+		if (($course->total_seen ?? 0) === 0)
 		{
 			GoogleAnalytics::event('education_course_started', $course->id);
 		}
+
 		$totalChapters = (int) $r->total;
 		$viewedChapters = (int) $r->viewed;
 
