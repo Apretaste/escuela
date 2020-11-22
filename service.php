@@ -333,6 +333,10 @@ class Service
 			select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and course = '{$chapter->course}') as viewed,
 			(select count(id) as total from apretaste._escuela_chapter WHERE course = '{$chapter->course}' and xtype = 'CAPITULO') as total;");
 
+		if ($course->total_seen === 0)
+		{
+			GoogleAnalytics::event('education_course_started', $course->id);
+		}
 		$totalChapters = (int) $r->total;
 		$viewedChapters = (int) $r->viewed;
 
@@ -451,12 +455,15 @@ class Service
 		}
 
 		if ($course !== null) {
+			GoogleAnalytics::event('education_course_finished', $course->id);
 			$courseAfter = $this->getCourse($course->id, $request->person->id);
 
 			if ($courseAfter->calification < 80) {
 				$request->input->data->query = $course->id;
 
 				$this->_repetir($request, $response);
+
+				GoogleAnalytics::event('education_test_failed', $course->id);
 
 				return $response->setTemplate('text.ejs', [
 					'header' => 'Desaprobado',
@@ -475,7 +482,8 @@ class Service
 			}
 
 			// submit to Google Analytics 
-			GoogleAnalytics::event('course_complete', $course->id);
+
+			GoogleAnalytics::event('education_test_passed', $course->id);
 
 			// add the experience if profile is completed
 			Level::setExperience('FINISH_COURSE', $request->person->id);
@@ -556,6 +564,8 @@ class Service
 		$course_id = $request->input->data->query->course;
 		$stars = $request->input->data->query->stars;
 		$stars = $stars > 5 ? 5 : $stars;
+
+		GoogleAnalytics::event('education_course_reviewed', $stars);
 
 		Database::query("INSERT IGNORE INTO _escuela_stars (course, person_id, stars) VALUES ('$course_id', '{$request->person->id}', '$stars');");
 		Database::query("UPDATE _escuela_stars SET stars = $stars WHERE course = $course_id AND person_id = {$request->person->id};");
