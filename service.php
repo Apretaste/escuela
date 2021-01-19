@@ -4,6 +4,7 @@ use Apretaste\Level;
 use Apretaste\Person;
 use Apretaste\Request;
 use Apretaste\Response;
+use Apretaste\Tutorial;
 use Apretaste\Challenges;
 use Framework\Alert;
 use Framework\Images;
@@ -474,16 +475,19 @@ class Service
 				]);
 			}
 
-			// set challenge
+			// complete challenge
 			Challenges::complete('complete-course', $request->person->id);
 
-			// complete tutorial challenge
+			// if it is the tutorial course ...
 			if ($course->id === Config::pick('challenges')['tutorial_id']) {
+				// complete challenge
 				Challenges::complete('app-tutorial', $request->person->id);
+
+				// complete tutorial
+				Tutorial::complete($request->person->id, 'read_tutorial');
 			}
 
 			// submit to Google Analytics 
-
 			GoogleAnalytics::event('education_test_passed', $course->id);
 
 			// add the experience if profile is completed
@@ -495,14 +499,16 @@ class Service
 			// TODO: como informar el nivel actual en el mensaje de felicitacion?
 			$this->setLevel($request);
 
+			// send data to the view
 			return $response->setTemplate('text.ejs', [
-					'header' => 'Aprobado',
-					'icon' => 'sentiment_very_satisfied',
-					'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. ',
-					'subtext' => 'Aprobado con '.$courseAfter->calification.' puntos. ',
-					'showRate' => true,
-					'courseId' => $course->id,
-					'button' => ['href' => 'ESCUELA', 'query' => $course->id, 'caption' => 'Cursos']]);
+				'header' => 'Aprobado',
+				'icon' => 'sentiment_very_satisfied',
+				'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. ',
+				'subtext' => 'Aprobado con '.$courseAfter->calification.' puntos. ',
+				'showRate' => true,
+				'courseId' => $course->id,
+				'button' => ['href' => 'ESCUELA', 'query' => $course->id, 'caption' => 'Cursos']
+			]);
 		}
 
 		return null;
