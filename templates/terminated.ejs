@@ -20,13 +20,15 @@
                     <% } %>
                 </span>
             </div>
-            <a onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: courses[i].id}});">
-                <div class="card-content">
+
+            <div class="card-content">
+                <a onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: courses[i].id}});">
                     <span class="card-title"><%= e.title %></span>
-                    <% if (typeof e.calification  == 'undefined' || e.calification == null) e.calification = 0;%>
-                    <p class="blue-grey-text">Aprobado con <%= parseInt(e.calification) %> puntos</p>
-                </div>
-            </a>
+                </a>
+                <% if (typeof e.calification  == 'undefined' || e.calification == null) e.calification = 0;%>
+                <p class="blue-grey-text">Aprobado con <%= parseInt(e.calification) %> puntos</p>
+            </div>
+
         </div>
     </div>
     <% }); %>
