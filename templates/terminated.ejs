@@ -14,17 +14,19 @@
                     <%= e.professor %>
                 </span>
                 <span class="chip tiny clear">
-                            <i class="fa fa-tag"></i>
+                    <i class="fa fa-tag"></i>
                     <% if (e.category != null){ %>
                         <%= jsUcfirst(e.category.toLowerCase()) %>
                     <% } %>
                 </span>
             </div>
-            <div class="card-content">
-                <span class="card-title"><%= e.title %></span>
-                <% if (typeof e.calification  == 'undefined' || e.calification == null) e.calification = 0;%>
-                <p class="blue-grey-text">Aprobado con <%= parseInt(e.calification) %> puntos</p>
-            </div>
+            <a onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: courses[i].id}});">
+                <div class="card-content">
+                    <span class="card-title"><%= e.title %></span>
+                    <% if (typeof e.calification  == 'undefined' || e.calification == null) e.calification = 0;%>
+                    <p class="blue-grey-text">Aprobado con <%= parseInt(e.calification) %> puntos</p>
+                </div>
+            </a>
         </div>
     </div>
     <% }); %>
