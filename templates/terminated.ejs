@@ -22,7 +22,7 @@
             </div>
 
             <div class="card-content">
-                <a onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: courses[i].id}});">
+                <a onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: courses[<%= i %>].id}});">
                     <span class="card-title"><%= e.title %></span>
                 </a>
                 <% if (typeof e.calification  == 'undefined' || e.calification == null) e.calification = 0;%>
