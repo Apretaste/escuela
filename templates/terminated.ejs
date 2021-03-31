@@ -1,35 +1,33 @@
 <div class="row">
-    <% if (courses.length == 0){ %>
-        <div class="col s12 center">
-            <p class="middle-center grey-text">Aún no ha terminado ningún curso. Escoja un curso, páselo y se mostrará acá". Haz que luzca como la pantalla</p>
-        </div>
-    <% } %>
+	<% if (courses.length == 0){ %>
+		<div class="col s12 center">
+			<p class="middle-center grey-text">Aún no ha terminado ningún curso. Escoja un curso, páselo y se mostrará acá". Haz que luzca como la pantalla</p>
+		</div>
+	<% } %>
 
-    <% courses.forEach(function(e, i) { %>
-    <div class="col s12 m6">
-        <div class="card">
-            <div class="card-person grey lighten-5">
-                <span class="chip tiny clear" style="margin-right:5px;">
-                    <i class="fa fa-user"></i>
-                    <%= e.professor %>
-                </span>
-                <span class="chip tiny clear">
-                    <i class="fa fa-tag"></i>
-                    <% if (e.category != null){ %>
-                        <%= jsUcfirst(e.category.toLowerCase()) %>
-                    <% } %>
-                </span>
-            </div>
-
-            <div class="card-content">
-                <a onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: courses[<%= i %>].id}});">
-                    <span class="card-title"><%= e.title %></span>
-                </a>
-                <% if (typeof e.calification  == 'undefined' || e.calification == null) e.calification = 0;%>
-                <p class="blue-grey-text">Aprobado con <%= parseInt(e.calification) %> puntos</p>
-            </div>
-
-        </div>
-    </div>
-    <% }); %>
+	<% courses.forEach(function(e, i) { %>
+		<div class="col s12 m6">
+			<div class="card">
+				<div class="card-person grey lighten-5">
+					<span class="chip tiny clear spacing">
+						<i class="fa fa-user"></i>
+						<%= e.professor %>
+					</span>
+					<span class="chip tiny clear">
+						<i class="fa fa-tag"></i>
+						<% if (e.category != null){ %>
+							<%= jsUcfirst(e.category.toLowerCase()) %>
+						<% } %>
+					</span>
+				</div>
+				<div class="card-content">
+					<span class="card-title"><%= e.title %></span>
+					<p class="blue-grey-text">Aprobado con <%= parseInt(e.calification) %> puntos</p>
+				</div>
+				<div class="card-action grey lighten-4">
+					<a href="#!" class="green-text" onclick="apretaste.send({command: 'ESCUELA CURSO', data: {query: courses[<%= i %>].id}})">Ir al curso</a>
+				</div>
+			</div>
+		</div>
+	<% }) %>
 </div>

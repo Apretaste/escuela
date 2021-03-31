@@ -78,6 +78,10 @@ img {
     line-height: 20px;
 }
 
+.chip.spacing {
+    margin-right: 5px !important;
+}
+
 /* GLOBAL */
 
 .middle-center {
