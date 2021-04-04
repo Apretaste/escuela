@@ -73,7 +73,8 @@ class Service
 				COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
 				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '{$request->person->id}') as answers_choosen
+				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '{$request->person->id}') as answers_choosen,
+				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = {$request->person->id}) as viewed,
 				FROM _escuela_course A
 				JOIN _escuela_teacher B
 				ON A.teacher = B.id
@@ -104,8 +105,8 @@ class Service
 
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
-			$course = $this->getCourse($c->id, $request->person->id);
-			$c->progress = $course->progress;
+			// $course = $this->getCourse($c->id, $request->person->id);
+			$c->progress = (int) ($c->viewed / $c->chapters);
 			$c->title = htmlspecialchars($c->title);
 			$c->content = htmlspecialchars($c->content);
 			$c->professor = htmlspecialchars($c->professor);
