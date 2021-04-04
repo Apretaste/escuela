@@ -69,7 +69,7 @@ class Service
 			SELECT * FROM (
 				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS professor, A.teacher, A.stars,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
-				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = {$request->person->id}) as viewed,
+				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = {$request->person->id}) as viewed
 				FROM _escuela_course A JOIN _escuela_teacher B ON A.teacher = B.id
 				WHERE A.active = 1) subq
 			WHERE 1 $where ORDER BY popularity DESC");
