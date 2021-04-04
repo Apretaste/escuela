@@ -106,7 +106,7 @@ class Service
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
 			// $course = $this->getCourse($c->id, $request->person->id);
-			$c->progress = (int) ($c->viewed / $c->chapters);
+			$c->progress = (int) ($c->viewed / $c->chapters * 100);
 			$c->title = htmlspecialchars($c->title);
 			$c->content = htmlspecialchars($c->content);
 			$c->professor = htmlspecialchars($c->professor);
