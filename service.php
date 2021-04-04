@@ -65,43 +65,15 @@ class Service
 			}
 		}
 
-		$courses = [];
-		if (!empty(trim($where))) {
-			$courses = Database::query("
-				SELECT * FROM (
-				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
-				COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
-				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '{$request->person->id}') as answers_choosen,
-				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = {$request->person->id}) as viewed,
-				FROM _escuela_course A
-				JOIN _escuela_teacher B
-				ON A.teacher = B.id
-				WHERE A.active = 1) subq
-				WHERE 1 $where ORDER BY popularity DESC 
-				-- LIMIT 10");
-		} else {
-			// get the most popular courses
-			$courses = Database::query("
+		$courses = Database::query("
 			SELECT * FROM (
-				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
-				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
-				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = '$person_id') as viewed,
-				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
+				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS professor, A.teacher, A.stars,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
-				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$person_id') as answers_choosen
-				FROM _escuela_course A
-				JOIN _escuela_teacher B
-				ON A.teacher = B.id
-				WHERE A.active = 1
-				) subq
-				WHERE viewed < chapters - tests or answers_choosen < questions -- no se han visto todos, no se ha respondido todas
-				ORDER BY viewed/nullif(chapters,0) desc,  answers_choosen/nullif(answers,0) desc, popularity DESC
-				-- LIMIT 10");
-		}
+				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = {$request->person->id}) as viewed,
+				FROM _escuela_course A JOIN _escuela_teacher B ON A.teacher = B.id
+				WHERE A.active = 1) subq
+			WHERE 1 $where ORDER BY popularity DESC");
+
 
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
