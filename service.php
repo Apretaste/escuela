@@ -74,7 +74,6 @@ class Service
 				WHERE A.active = 1) subq
 			WHERE 1 $where ORDER BY popularity DESC");
 
-
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
 			// $course = $this->getCourse($c->id, $request->person->id);
@@ -93,7 +92,7 @@ class Service
 			$level = $r[0]->level;
 		}
 
-		$this->setFontFiles();
+		//$this->setFontFiles();
 
 		// create content for the view
 		$content = [
@@ -269,7 +268,7 @@ class Service
 			Challenges::complete('start-school', $request->person->id);
 		}
 
-		$this->setFontFiles();
+		//$this->setFontFiles();
 
 		// display the course
 		//$response->setLayout('escuela.ejs');
@@ -290,7 +289,7 @@ class Service
 		$id = (int) $request->input->data->query;
 		$chapter = $this->getChapter($id, $request->person->id);
 
-		$this->setFontFiles();
+		//$this->setFontFiles();
 
 		if (empty($chapter)) {
 			$response->setLayout('escuela.ejs');
@@ -693,7 +692,7 @@ class Service
 				WHERE viewed >= (chapters - tests) and answers_choosen >= questions
 				ORDER BY calification DESC;");
 
-		$this->setFontFiles();
+		//$this->setFontFiles();
 
 		if (empty($courses)) {
 			$content = [
