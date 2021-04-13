@@ -919,7 +919,12 @@ class Service
 			if ($p !== false) {
 				$p1 = strpos($content, ')', $p);
 				$guid = substr($content, $p + 19, $p1 - $p - 19);
-				$images[$guid] = Bucket::download('escuela', $guid);
+				try {
+					$images[$guid] = Bucket::download('escuela', $guid);
+				} catch (Exception $e) {
+
+				}
+
 			}
 		} while ($p !== false);
 
