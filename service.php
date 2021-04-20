@@ -1,17 +1,17 @@
 <?php
 
-use Apretaste\Bucket;
 use Apretaste\Level;
+use Apretaste\Alert;
 use Apretaste\Person;
+use Apretaste\Images;
+use Apretaste\Config;
+use Apretaste\Bucket;
 use Apretaste\Request;
 use Apretaste\Response;
 use Apretaste\Tutorial;
+use Apretaste\Database;
 use Apretaste\Challenges;
-use Framework\Alert;
-use Framework\Images;
-use Framework\Config;
-use Framework\Database;
-use Framework\GoogleAnalytics;
+use Apretaste\GoogleAnalytics;
 
 class Service
 {
@@ -308,8 +308,7 @@ class Service
 			select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and course = '{$chapter->course}') as viewed,
 			(select count(id) as total from apretaste._escuela_chapter WHERE course = '{$chapter->course}' and xtype = 'CAPITULO') as total;");
 
-		if (($course->total_seen ?? 0) === 0)
-		{
+		if (($course->total_seen ?? 0) === 0) {
 			GoogleAnalytics::event('education_course_started', $course->id);
 		}
 
@@ -901,7 +900,6 @@ class Service
 	 * Return a list of chapter's images paths
 	 *
 	 * @param $chapter
-	 *
 	 * @return array
 	 * @throws Exception
 	 * @internal param int $chapter_id
@@ -919,12 +917,7 @@ class Service
 			if ($p !== false) {
 				$p1 = strpos($content, ')', $p);
 				$guid = substr($content, $p + 19, $p1 - $p - 19);
-				try {
-					$images[$guid] = Bucket::download('escuela', $guid);
-				} catch (Exception $e) {
-
-				}
-
+				$images[$guid] = Bucket::getPathByEnvironment('escuela', $guid);
 			}
 		} while ($p !== false);
 
