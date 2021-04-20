@@ -1,36 +1,34 @@
 <%
 var menu = [
-    {link: '', caption: 'Cursos'},
-    {link: 'terminados', caption: 'Terminados'}];
+	{link: '', caption: 'Cursos'},
+	{link: 'terminados', caption: 'Terminados'}];
 %>
 
 <!-- TABS -->
 <div class="row">
-    <div class="col s12">
-        <ul class="tabs tabs-fixed-width">
-            <% menu.forEach(function(e) { %>
-                <% var active = typeof title != "undefined" && title == e.caption ? 'active' : '' %>
-                <li class="tab">
-                    <a href="#" class="<%= active %>"
-                       onclick="apretaste.send({'command':'escuela <%= e.link %>'})"
-                    >
-                        <%= e.caption %>
-                    </a>
-                </li>
-            <% }); %>
-        </ul>
-    </div>
+	<div class="col s12">
+		<ul class="tabs tabs-fixed-width">
+			<% menu.forEach(function(e) { %>
+				<% var active = typeof title != "undefined" && title == e.caption ? 'active' : '' %>
+				<li class="tab">
+					<a href="#" class="<%= active %>" onclick="apretaste.send({'command':'escuela <%= e.link %>'})">
+						<%= e.caption %>
+					</a>
+				</li>
+			<% }); %>
+		</ul>
+	</div>
 </div>
 
 <div class="row">
-    {{APP_TEMPLATE_CODE}}
+	{{APP_TEMPLATE_CODE}}
 </div>
 
 <div id="modalText" class="modal">
-    <div class="modal-content">
+	<div class="modal-content">
 
-    </div>
-    <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cerrar</a>
-    </div>
+	</div>
+	<div class="modal-footer">
+		<a href="#!" class="modal-close waves-effect waves-green btn-flat">Cerrar</a>
+	</div>
 </div>

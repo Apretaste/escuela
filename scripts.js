@@ -111,11 +111,9 @@ $(function () {
 
 		$('select').formSelect();
 	}
-
-
 });
 
-function submitRate(courseId, stars){
+function submitRate(courseId, stars) {
 	apretaste.send({
 		command: 'ESCUELA CALIFICAR',
 		data: {

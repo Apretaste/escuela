@@ -1,13 +1,17 @@
 <?php
 
-use Apretaste\Challenges;
+use Apretaste\Level;
+use Apretaste\Alert;
 use Apretaste\Person;
-use Framework\Alert;
-use Framework\Database;
+use Apretaste\Images;
+use Apretaste\Config;
+use Apretaste\Bucket;
 use Apretaste\Request;
 use Apretaste\Response;
-use Framework\Images;
-use Apretaste\Level;
+use Apretaste\Tutorial;
+use Apretaste\Database;
+use Apretaste\Challenges;
+use Apretaste\GoogleAnalytics;
 
 class Service
 {
@@ -62,46 +66,19 @@ class Service
 			}
 		}
 
-		$courses = [];
-		if (!empty(trim($where))) {
-			$courses = Database::query("
-				SELECT * FROM (
-				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor', A.teacher,
-				COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
-				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '{$request->person->id}') as answers_choosen
-				FROM _escuela_course A
-				JOIN _escuela_teacher B
-				ON A.teacher = B.id
-				WHERE A.active = 1) subq
-				WHERE 1 $where ORDER BY popularity DESC LIMIT 10");
-		} else {
-			// get the most popular courses
-			$courses = Database::query("
+		$courses = Database::query("
 			SELECT * FROM (
-				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS 'professor',
-				A.teacher, COALESCE((SELECT AVG(stars) FROM _escuela_stars WHERE course = A.id), 0) AS stars,
-				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = '$person_id') as viewed,
-				(select count(*) from _escuela_question where A.id = _escuela_question.course) as questions,
+				SELECT A.id, A.title, A.content, A.popularity, A.category, B.name AS professor, A.teacher, A.stars,
 				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course) as chapters,
-				(select count(*) from _escuela_chapter where A.id = _escuela_chapter.course AND _escuela_chapter.xtype = 'PRUEBA') as tests,
-				(select count(*) from _escuela_answer where A.id = _escuela_answer.course) as answers,
-				(select count(*) from _escuela_answer_choosen where A.id = _escuela_answer_choosen.course AND _escuela_answer_choosen.person_id = '$person_id') as answers_choosen
-				FROM _escuela_course A
-				JOIN _escuela_teacher B
-				ON A.teacher = B.id
-				WHERE A.active = 1
-				) subq
-				WHERE viewed < chapters - tests or answers_choosen < questions -- no se han visto todos, no se ha respondido todas
-				ORDER BY viewed/nullif(chapters,0) desc,  answers_choosen/nullif(answers,0) desc, popularity DESC
-			LIMIT 10");
-		}
+				(select count(*) from _escuela_chapter_viewed where A.id = _escuela_chapter_viewed.course and person_id = {$request->person->id}) as viewed
+				FROM _escuela_course A JOIN _escuela_teacher B ON A.teacher = B.id
+				WHERE A.active = 1) subq
+			WHERE 1 $where ORDER BY popularity DESC");
 
 		// remove extrange chars
 		foreach ($courses as $k => $c) {
-			$course = $this->getCourse($c->id, $request->person->id);
-			$c->progress = $course->progress;
+			// $course = $this->getCourse($c->id, $request->person->id);
+			$c->progress = (int) ($c->viewed / $c->chapters * 100);
 			$c->title = htmlspecialchars($c->title);
 			$c->content = htmlspecialchars($c->content);
 			$c->professor = htmlspecialchars($c->professor);
@@ -116,7 +93,7 @@ class Service
 			$level = $r[0]->level;
 		}
 
-		$this->setFontFiles();
+		//$this->setFontFiles();
 
 		// create content for the view
 		$content = [
@@ -288,7 +265,11 @@ class Service
 			return;
 		}
 
-		$this->setFontFiles();
+		if ($course->total_seen == 0) {
+			Challenges::complete('start-school', $request->person->id);
+		}
+
+		//$this->setFontFiles();
 
 		// display the course
 		//$response->setLayout('escuela.ejs');
@@ -300,9 +281,7 @@ class Service
 	 *
 	 * @param Request $request
 	 * @param Response $response
-	 *
 	 * @return \Apretaste\Response
-	 * @throws Alert
 	 * @example ESCUELA CAPITULO 3
 	 * @author kuma
 	 */
@@ -311,7 +290,7 @@ class Service
 		$id = (int) $request->input->data->query;
 		$chapter = $this->getChapter($id, $request->person->id);
 
-		$this->setFontFiles();
+		//$this->setFontFiles();
 
 		if (empty($chapter)) {
 			$response->setLayout('escuela.ejs');
@@ -325,16 +304,22 @@ class Service
 		$course = $this->getCourse($chapter->course, $request->person->id);
 		$terminated = $course->terminated;
 
-		$r = Database::queryFirst("select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and course = '{$chapter->course}') as viewed,
-                                    (select count(id) as total from apretaste._escuela_chapter WHERE course = '{$chapter->course}' and xtype = 'CAPITULO') as total;");
+		$r = Database::queryFirst("
+			select (select count(*) as viewed from apretaste._escuela_chapter_viewed WHERE person_id = {$request->person->id} and course = '{$chapter->course}') as viewed,
+			(select count(id) as total from apretaste._escuela_chapter WHERE course = '{$chapter->course}' and xtype = 'CAPITULO') as total;");
+
+		if (($course->total_seen ?? 0) === 0) {
+			GoogleAnalytics::event('education_course_started', $course->id);
+		}
 
 		$totalChapters = (int) $r->total;
 		$viewedChapters = (int) $r->viewed;
 
 		// Log the visit to this chapter
 		if ($chapter->xtype === 'CAPITULO') {
-			Database::query("INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) 
-                VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
+			Database::query("
+				INSERT IGNORE INTO _escuela_chapter_viewed (person_id, email, chapter, course) 
+				VALUES ('{$request->person->id}','{$request->person->email}', '{$id}', '{$chapter->course}');");
 		} else {
 			if ($viewedChapters < $totalChapters) {
 				return $response->setTemplate('text.ejs', [
@@ -397,6 +382,27 @@ class Service
 		// pull the answer selected
 		$answers = $request->input->data->answers;
 
+		if (count($answers) < 1)
+			return;
+
+		// check completed course
+		$res = Database::queryFirst("SELECT * FROM _escuela_answer WHERE id = {$answers[0]}");
+		if (empty($res))
+			return;
+
+		$cnt = Database::queryFirst("select count(*) as cnt from _escuela_completed_course where person = {$request->person->id} and course = {$res->course}")->cnt;
+
+		if  ($cnt > 0) {
+			return $response->setTemplate('text.ejs', [
+				'header' => 'Aprobado',
+				'icon' => 'sentiment_very_satisfied',
+				'text' => 'Este curso ya lo has aprobado anteriormente.',
+				'subtext' => 'Ve a otros cursos para seguir aprendiendo',
+				'showRate' => true,
+				'courseId' => $res->course,
+				'button' => ['href' => 'ESCUELA', 'query' => $res->course, 'caption' => 'Cursos']]);
+		}
+
 		// check if the course is terminated
 		$affectedRows = 0;
 		$course = null;
@@ -416,13 +422,15 @@ class Service
 
 			// save the answer in the database
 			// INSERT IGNORE: if course already completed, affected rows will be 0
-			Database::query("INSERT IGNORE INTO _escuela_answer_choosen (person_id, email, answer, chapter, question, course)
-			                 VALUES ('{$request->person->id}','{$request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
+			Database::query("
+				INSERT IGNORE INTO _escuela_answer_choosen (person_id, email, answer, chapter, question, course)
+				VALUES ('{$request->person->id}','{$request->person->email}','$id', '{$answer->chapter}', '{$answer->question}', '{$answer->course}')");
 
 			$affectedRows += Database::getAffectedRows();
 		}
 
 		if ($course !== null) {
+			GoogleAnalytics::event('education_course_finished', $course->id);
 			$courseAfter = $this->getCourse($course->id, $request->person->id);
 
 			if ($courseAfter->calification < 80) {
@@ -430,14 +438,30 @@ class Service
 
 				$this->_repetir($request, $response);
 
+				GoogleAnalytics::event('education_test_failed', $course->id);
+
 				return $response->setTemplate('text.ejs', [
-						'header' => 'Desaprobado',
-						'icon' => 'sentiment_very_dissatisfied',
-						'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$courseAfter->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
-						'button' => ['href' => 'ESCUELA CURSO', 'query' => $course->id, 'caption' => 'Ir al curso']]);
+					'header' => 'Desaprobado',
+					'icon' => 'sentiment_very_dissatisfied',
+					'text' => 'No has podido resolver el examen satisfactoriamente. Obtuviste '.$courseAfter->calification.' puntos y necesitas al menos 80. Ahora podr&aacute; repasar el curso completo y vover a hacer el examen.',
+					'button' => ['href' => 'ESCUELA CURSO', 'query' => $course->id, 'caption' => 'Ir al curso']
+				]);
 			}
 
+			// complete challenge
 			Challenges::complete('complete-course', $request->person->id);
+
+			// if it is the tutorial course ...
+			if ($course->id === Config::pick('challenges')['tutorial_id']) {
+				// complete challenge
+				Challenges::complete('app-tutorial', $request->person->id);
+
+				// complete tutorial
+				Tutorial::complete($request->person->id, 'read_tutorial');
+			}
+
+			// submit to Google Analytics 
+			GoogleAnalytics::event('education_test_passed', $course->id);
 
 			// add the experience if profile is completed
 			Level::setExperience('FINISH_COURSE', $request->person->id);
@@ -448,14 +472,16 @@ class Service
 			// TODO: como informar el nivel actual en el mensaje de felicitacion?
 			$this->setLevel($request);
 
+			// send data to the view
 			return $response->setTemplate('text.ejs', [
-					'header' => 'Aprobado',
-					'icon' => 'sentiment_very_satisfied',
-					'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. ',
-					'subtext' => 'Aprobado con '.$courseAfter->calification.' puntos. ',
-					'showRate' => true,
-					'courseId' => $course->id,
-					'button' => ['href' => 'ESCUELA', 'query' => $course->id, 'caption' => 'Cursos']]);
+				'header' => 'Aprobado',
+				'icon' => 'sentiment_very_satisfied',
+				'text' => 'Felicidades! Has podido resolver el examen satisfactoriamente. ',
+				'subtext' => 'Aprobado con '.$courseAfter->calification.' puntos. ',
+				'showRate' => true,
+				'courseId' => $course->id,
+				'button' => ['href' => 'ESCUELA', 'query' => $course->id, 'caption' => 'Cursos']
+			]);
 		}
 
 		return null;
@@ -518,6 +544,8 @@ class Service
 		$course_id = $request->input->data->query->course;
 		$stars = $request->input->data->query->stars;
 		$stars = $stars > 5 ? 5 : $stars;
+
+		GoogleAnalytics::event('education_course_reviewed', $stars);
 
 		Database::query("INSERT IGNORE INTO _escuela_stars (course, person_id, stars) VALUES ('$course_id', '{$request->person->id}', '$stars');");
 		Database::query("UPDATE _escuela_stars SET stars = $stars WHERE course = $course_id AND person_id = {$request->person->id};");
@@ -664,7 +692,7 @@ class Service
 				WHERE viewed >= (chapters - tests) and answers_choosen >= questions
 				ORDER BY calification DESC;");
 
-		$this->setFontFiles();
+		//$this->setFontFiles();
 
 		if (empty($courses)) {
 			$content = [
@@ -872,7 +900,6 @@ class Service
 	 * Return a list of chapter's images paths
 	 *
 	 * @param $chapter
-	 *
 	 * @return array
 	 * @throws Exception
 	 * @internal param int $chapter_id
@@ -890,7 +917,7 @@ class Service
 			if ($p !== false) {
 				$p1 = strpos($content, ')', $p);
 				$guid = substr($content, $p + 19, $p1 - $p - 19);
-				$images[$guid] = SHARED_PUBLIC_PATH . "/courses/$guid";
+				$images[$guid] = Bucket::getPathByEnvironment('escuela', $guid);
 			}
 		} while ($p !== false);
 
@@ -912,7 +939,7 @@ class Service
 	{
 		$chapter = false;
 
-		$r = Database::query("SELECT * FROM _escuela_chapter WHERE id = '$id';", true, 'latin1');
+		$r = Database::query("SELECT * FROM _escuela_chapter WHERE id = '$id';");
 
 		if (isset($r[0])) {
 			$chapter = $r[0];
@@ -987,7 +1014,7 @@ class Service
 	private function getChapterQuestions($test_id, $person_id = '', $answer_order = 'rand()')
 	{
 		$questions = [];
-		$rows = Database::query("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;", true, 'latin1');
+		$rows = Database::query("SELECT id FROM _escuela_question WHERE chapter = '$test_id' ORDER BY xorder;");
 		if (!is_array($questions)) {
 			$questions = [];
 		}
@@ -1011,7 +1038,7 @@ class Service
 	 */
 	private function getQuestion($question_id, $person_id = '', $answer_order = 'rand()')
 	{
-		$row = Database::query("SELECT * FROM _escuela_question WHERE id = '$question_id';", true, 'latin1');
+		$row = Database::query("SELECT * FROM _escuela_question WHERE id = '$question_id';");
 		if (isset($row[0])) {
 			$q = $row[0];
 			$q->answers = $this->getAnswers($question_id, $answer_order);
